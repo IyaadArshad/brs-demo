@@ -41,7 +41,6 @@ export function MessageComponent({ message, onEdit }: MessageProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={`group flex items-start gap-4 px-4 py-3 hover:bg-[#2A2A2A] relative ${
       className={`group flex items-start gap-4 px-8 py-3 hover:bg-[#2A2A2A] relative ${
         message.role === 'user' ? 'flex-row-reverse' : ''
       }`}
@@ -51,7 +50,6 @@ export function MessageComponent({ message, onEdit }: MessageProps) {
           message.role === 'assistant' ? 'bg-black' : 'bg-white'
         }`}
       />
-      <div className={`flex-1 min-w-0 ${message.role === 'user' ? 'text-right' : ''}`}>
       <div className={`flex-1 min-w-0 px-4 ${message.role === 'user' ? 'text-right' : ''}`}>
         {isEditing ? (
           <input
@@ -70,7 +68,6 @@ export function MessageComponent({ message, onEdit }: MessageProps) {
         )}
       </div>
       <div className={`opacity-0 group-hover:opacity-100 transition-opacity absolute ${
-        message.role === 'user' ? 'left-4' : 'right-4'
         message.role === 'user' ? 'left-8' : 'right-8'
       }`}>
         {message.role === 'assistant' ? (
