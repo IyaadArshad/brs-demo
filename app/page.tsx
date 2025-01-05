@@ -7,8 +7,8 @@ import { Input } from "@/components/ui/input"
 import { SendHorizontal } from 'lucide-react'
 import Link from "next/link"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { MessageComponent } from './components/message'
-import { Message } from './types'
+import { MessageComponent } from '@/components/message'
+import { Message } from '@/types'
 
 export default function ChatInterface() {
   const [message, setMessage] = useState('')
