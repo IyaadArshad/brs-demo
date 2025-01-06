@@ -13,6 +13,17 @@ export async function GET(request: Request) {
     );
   }
 
+  const existingFile = await pb.collection("files").getFirstListItem(`file_name="${fileName}"`);
+
+  if (existingFile) {
+    return Response.json(
+      {
+        success: false,
+        message: "File with the same name already exists, choose another name",
+      },
+      { status: 400 }
+    );
+  }
   if (fileName.length > 500) {
     return Response.json(
       {
