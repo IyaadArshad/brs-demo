@@ -16,10 +16,10 @@ export async function GET(request: Request) {
             success: false,
             message: "File name too long, pick a shorter name"
          }, { status: 400 })
-    } else if (fileData.length > 1200000) {
+    } else if (fileData.length > 100000000) {
         return Response.json({ 
             success: false,
-            message: "File data too large, let the user"
+            message: "File data too large, let the user know the file is too large"
          }, { status: 400 })
     }
 

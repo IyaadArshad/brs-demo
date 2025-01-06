@@ -1,34 +1,39 @@
-import PocketBase from 'pocketbase';
+import PocketBase from "pocketbase";
 
-const pb = new PocketBase('http://127.0.0.1:8090');
+const pb = new PocketBase("http://127.0.0.1:8090");
 
 export async function GET(request: Request) {
-    const url = new URL(request.url);
-    const fileName = url.searchParams.get('file_name');
-    const fileData = url.searchParams.get('data');
+  const url = new URL(request.url);
+  const fileName = url.searchParams.get("file_name");
 
-    if (!fileName || !fileData) {
-        return Response.json({ error: 'Missing required parameters' }, { status: 400 })
-    }
+  if (!fileName) {
+    return Response.json(
+      { error: "Missing required parameters" },
+      { status: 400 }
+    );
+  }
 
-    if (fileName.length > 500) {
-        return Response.json({ 
-            success: false,
-            message: "File name too long, pick a shorter name"
-         }, { status: 400 })
-    } else if (fileData.length > 1200000) {
-        return Response.json({ 
-            success: false,
-            message: "File data too large, let the user"
-         }, { status: 400 })
-    }
+  if (fileName.length > 500) {
+    return Response.json(
+      {
+        success: false,
+        message: "File name too long, pick a shorter name",
+      },
+      { status: 400 }
+    );
+  }
 
-    const data = {
-        "file_name": fileName,
-        "data": fileData
-    };
-    
-    const record = await pb.collection('files').create(data);
+  const data = {
+    file_name: fileName,
+    data: "0",
+  };
 
-    return Response.json({ "hi": "ho" })
+  const record = await pb.collection("files").create(data);
+
+  return Response.json({
+    success: "true",
+    message: "File created successfully",
+    id: record.id,
+    file_name: fileName,
+  });
 }
