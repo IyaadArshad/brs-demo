@@ -12,23 +12,27 @@ export async function GET(request: Request) {
       { status: 400 }
     );
   }
+  try {
+    const existingFile = await pb
+      .collection("files")
+      .getFirstListItem(`file_name="${fileName}"`);
 
-  const existingFile = await pb.collection("files").getFirstListItem(`file_name="${fileName}"`);
-
-  if (existingFile) {
-    return Response.json(
-      {
-        success: false,
-        message: "File with the same name already exists, choose another name",
-      },
-      { status: 400 }
-    );
-  }
+    if (existingFile) {
+      return Response.json(
+        {
+          success: false,
+          message:
+            "File with the same name already exists, choose another name",
+        },
+        { status: 400 }
+      );
+    }
+  } catch (error) {}
   if (fileName.length > 500) {
     return Response.json(
       {
-      success: false,
-      message: "File name too long, pick a shorter name",
+        success: false,
+        message: "File name too long, pick a shorter name",
       },
       { status: 400 }
     );
