@@ -16,8 +16,8 @@ export async function GET(request: Request) {
   if (fileName.length > 500) {
     return Response.json(
       {
-        success: false,
-        message: "File name too long, pick a shorter name",
+      success: false,
+      message: "File name too long, pick a shorter name",
       },
       { status: 400 }
     );
