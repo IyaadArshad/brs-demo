@@ -1,0 +1,160 @@
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+});
+
+const mockFunctions = {
+    create_brs_file: () => ({ success: true }),
+    write_initial_data: () => ({ success: true }),
+    update_markdown_file: () => ({ success: true }),
+    check_init: () => ({ success: true })
+};
+
+export async function GET(request: Request) {
+    const { searchParams } = new URL(request.url)
+    const message = searchParams.get('message') ?? 'No message provided'
+      
+    const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            "role": "system",
+            "content": [
+              {
+                "type": "text",
+                "text": "DO NOT EVER DIRECTLY PUT MARKDOWN TO THE USER. ONLY USE THE FUNCTIONS. Let the user know that creating a BRS effectively cannot be done in one message and let them know that they can ask you for questions for writing out data for each screen, and you can make it detailed with their input. Creating a Business Requirements Specification (BRS) document in markdown can be done using a document title at the beginning. Start with a concise, simple H1 title (#) that uses 4-5 words (Example: MIS Control Module), next, an BRS consists of just different screens. Most BRS's have more than 10 screens - that's alot! You will only do what the user has asked you to do, if the user is vague, you must ask questions until you can accurately create the rest of the BRS, you may provide suggestions to the user on potential screens to add. Only add screens to the document if the user has instructed you to do it. Do not be afraid to ask for clarifications or further detail. If the user puts alot of screens in one message, you will remember all the user says as context and proceed slowly step by step. Think carefully about what the user has asked about, ask the user for any missing details and if you feel like you have to assume something, you must ask the user. You have to be as clear as possible in an MBR. For each screen, start with a h2 heading (##) and each screen name will be the number of screen and a short 2-6 word title of what the screen does, a screen title (Example: 1. Cluster Master File). Clearly specify the name of the screen, (Example: \"Sales Manager (New Transaction)\", \"Sales (List View)\" , \"Users (New)\",  . You can't draw diagrams of what the screen will look like, but do not say that to the user and do not decline when the user asks for it. This is an BRS, for each screen there must be one diagram of the screen. For this, you will use the following special placeholder     ```\n    brsD {\"brsDiagram\": { diagram goes here }}\n    ```\nThis special brsD line indicates that this is a diagram, the user will see an interactive box to design the screen on the output side, but for you, you will only leave the placeholder. Do not design diagrams or layouts. The third part of a screen is important. Think carefully and put as necessary optional notes, explanations or descriptions, you must put at least one. Think carefully about what the screen is, the complexity of it, and whether is needs more information. If it needs more, you may use tables as markdown is. Tables may contain sample data, database structures or any other appropriate data. Think carefully about context and place it appropriately.  If needed, you may use an \"Excel sheet\", which is not really an excel sheet, but is specially formatted to appear more like an excel sheet's data, you may use this for special purposes for something that might need excel theming. For this kind of table, you must have headers, footers, and numbered rows (numbered rows start at 1 after the header not counting the header and does not count at the footer. \"Excel sheets\" are markdown tables, but to start one, you must simply put a comment <!--EXCTBLE--!> before the table and <!--EXCTBLE--!> after the table. After all the screens, near the end of the document, you add options and showrooms, adding additional options that the client may like and showrooms to showcase additional diagrams. Never EVER do you you provide a diagram placeholder, a name of a screen and nothing else. You will always provide some form of a short 1-2 sentence description in 1 or 2 lines.\nThink critically about when additional notes or clarifications will enhance the document.\nAdhere strictly to the Markdown format and maintain consistent structure and clarity throughout the document.\nRemember that the BRS is a complicated and nuanced document that has small 3 column tables and quick sentences. It requires deep thinking, step by step, careful planning, precise vocabulary that isn't complicated, but understandable and professional, but simple. Screens with things like 'new' tags (Example: \"new user\") must have the name of the section along with the tag in brackets, (example: \"Users (New User)\"). Do not be afraid to use new lines, do not write long paragraphs, instead, write 1-2 lines, add a new line and write another 1-2 lines, and so on. Spacing feels nice for the user. Use different extra information format for each screen. If you are adding extra information, you must add information before and after the diagram. You will never provide markdown of any screens to the user directly. If you have finished a screen, you will remember that screen, but not show it to the user.  You may create a file, and keep updating the file after each screen designed if the user is designing screens one by one. You will not use bullet points to display lists with 1 item or less. Never use the word description or title with a colon to state the title or description. That is implicit with the heading, subheading, and paragraph format outlined here. If the user asks you to create a demo document, you will create a full brs in one go without any other confirmation. You will make it detailed, it will have 12 screens, and you will be as detailed as possible, showing everything you can do in this one document. Remember to use the format of the BRS markdown correctly as outlined above"
+              }
+            ]
+          }
+        ],
+        response_format: {
+          "type": "text"
+        },
+        tools: [
+          {
+            "type": "function",
+            "function": {
+              "name": "create_brs_file",
+              "description": "Creates a file for the Business Requirements Specification (BRS) document using a specified name ending with .md",
+              "parameters": {
+                "type": "object",
+                "required": [
+                  "file_name"
+                ],
+                "properties": {
+                  "file_name": {
+                    "type": "string",
+                    "description": "The name of the BRS file, which must contain only lowercase a-z characters, and uppercase a-z characters, and may include dashes, with no spaces and must end with .md"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "strict": true
+            }
+          },
+          {
+            "type": "function",
+            "function": {
+              "name": "write_initial_data",
+              "strict": true,
+              "parameters": {
+                "type": "object",
+                "required": [
+                  "file_name",
+                  "data"
+                ],
+                "properties": {
+                  "data": {
+                    "type": "string",
+                    "description": "The markdown data to be written to the file"
+                  },
+                  "file_name": {
+                    "type": "string",
+                    "description": "The name of the markdown file to write to"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "description": "Writes initial data to a markdown file, ending in .md, a brs document, after create_brs_file has been run."
+            }
+          },
+          {
+            "type": "function",
+            "function": {
+              "name": "update_markdown_file",
+              "strict": true,
+              "parameters": {
+                "type": "object",
+                "required": [
+                  "file_name",
+                  "data"
+                ],
+                "properties": {
+                  "data": {
+                    "type": "string",
+                    "description": "Markdown data to be added, completely overwriting the existing markdown file. Do not replace existing unchanged text with a note saying unchanged at all. You must rewrite everything in full as is, changing only what the user has asked, without being lazy"
+                  },
+                  "file_name": {
+                    "type": "string",
+                    "description": "The name of the markdown file to write to"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "description": "Updates a markdown file, a brs document. Requires create_brs_file to have been run and check_init to return true."
+            }
+          },
+          {
+            "type": "function",
+            "function": {
+              "name": "check_init",
+              "strict": true,
+              "parameters": {
+                "type": "object",
+                "required": [
+                  "file_name"
+                ],
+                "properties": {
+                  "file_name": {
+                    "type": "string",
+                    "description": "The name of the brs file to check for initial data."
+                  }
+                },
+                "additionalProperties": false
+              },
+              "description": "Checks if the brs file has initial data written. If true, it can be updated; if false, write_initial_data must be run first before updating the file."
+            }
+          }
+        ],
+        temperature: 1.31,
+        max_completion_tokens: 10000,
+        top_p: 0.7,
+        frequency_penalty: 0.15,
+        presence_penalty: 0
+      });
+
+    const completion = response.choices[0].message;
+    const functionCalls: any[] = [];
+
+    if (completion.tool_calls) {
+        for (const toolCall of completion.tool_calls) {
+            const functionName = toolCall.function.name;
+            const functionArgs = JSON.parse(toolCall.function.arguments);
+            
+            const result = await mockFunctions[functionName as keyof typeof mockFunctions]();
+            functionCalls.push({
+                function: functionName,
+                arguments: functionArgs,
+                result
+            });
+        }
+    }
+
+    return new Response(JSON.stringify({
+        content: completion.content,
+        functionCalls
+    }), {
+        headers: { 'Content-Type': 'application/json' }
+    });
+}
