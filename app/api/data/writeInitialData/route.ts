@@ -6,16 +6,7 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const fileName = url.searchParams.get("file_name");
   const fileData = url.searchParams.get("data");
-
-  let id;
-  let idFetch;
-  try {
-    idFetch = await fetch("/api/data/fetchRecordId?file_name=" + fileName);
-    const idFetchJson = await idFetch.json();
-    id = idFetchJson.id;
-  } catch (e) {
-    console.error(e);
-  }
+  const id = await fetch("/api/data/fetchRecordId?file_name=" + fileName);
 
   if (!fileName || !fileData) {
     return Response.json(
@@ -47,7 +38,7 @@ export async function GET(request: Request) {
     data: fileData,
   };
 
-  const record = await pb.collection("files").create(data);
+  const record = await pb.collection("files").update(String(id), data);
 
   return Response.json({ success: "true" });
 }
