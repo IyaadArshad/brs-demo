@@ -17,15 +17,25 @@ const mockFunctions = {
     if (!response.ok) {
       return {
         success: false,
-        error: response.statusText,
-        message: await response.text(),
+        error: response.statusText
       };
-    } else {
-      return { success: true, file_name: file_name };
     }
 
     const data = await response.json();
-    return { success: true, file_name };
+
+    if (data.success) {
+        return {
+            success: true,
+            file_name: data.file_name,
+            message: data.message
+        }
+    } else {
+        return {
+            success: false,
+            file_name: data.file_name,
+            message: data.message
+        }
+    }
   },
   write_initial_data: () => ({ success: true }),
   update_markdown_file: () => ({ success: true }),
