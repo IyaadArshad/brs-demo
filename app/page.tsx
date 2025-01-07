@@ -24,7 +24,7 @@ export default function ChatInterface() {
     scrollToBottom()
   }, [messages])
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!message.trim()) return
 
     const newMessage: Message = {
@@ -38,16 +38,68 @@ export default function ChatInterface() {
     setMessage('')
     setIsConversationStarted(true)
 
-    // Simulate AI response
-    setTimeout(() => {
-      const aiResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        content: 'I understand your message. How can I help further?',
-        role: 'assistant',
-        timestamp: Date.now()
+    try {
+      const response = await fetch('/api/testFetch', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          messages: [
+        ...messages.map(msg => ({
+          role: msg.role,
+          content: msg.content
+        })),
+        {
+          role: 'user',
+          content: message.trim()
+        }
+          ]
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok')
       }
-      setMessages(prev => [...prev, aiResponse])
-    }, 1000)
+
+      const reader = response.body?.getReader()
+      let aiResponseContent = ''
+
+      while (true) {
+        const { done, value } = await reader?.read() || {}
+        if (done) break
+
+        // Convert the stream to text
+        const chunk = new TextDecoder().decode(value)
+        const lines = chunk.split('\n').filter(line => line.trim() !== '')
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+        const data = line.slice(6)
+        if (data === '[DONE]') break
+
+        try {
+          const parsed = JSON.parse(data)
+          if (parsed.type === 'content') {
+            aiResponseContent += parsed.content
+            setMessages(prev => {
+          const lastMessage = prev[prev.length - 1]
+          if (lastMessage.role === 'assistant') {
+            return [...prev.slice(0, -1), { ...lastMessage, content: aiResponseContent }]
+          } else {
+            return [...prev, { id: (Date.now() + 1).toString(), content: aiResponseContent, role: 'assistant', timestamp: Date.now() }]
+          }
+            })
+          }
+        } catch (e) {
+          console.error('Error parsing JSON:', e)
+        }
+          }
+        }
+      }
+        } catch (error) {
+      console.error('Error fetching AI response:', error)
+    }
   }
 
   const handleEditMessage = (id: string, newContent: string) => {
