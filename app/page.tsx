@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SendHorizontal } from "lucide-react";
 import { Copy, Pencil, Check } from "lucide-react";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import Link from "next/link";
 import {
   Tooltip,
@@ -76,9 +78,12 @@ export function MessageComponent({ message, onEdit }: MessageProps) {
             }}
           />
         ) : (
-          <p className="text-white whitespace-pre-wrap break-words">
-            {message.content}
-          </p>
+          <Markdown
+          className="whitespace-pre-wrap"
+          remarkPlugins={[remarkGfm]}
+          >
+          {message.content}
+          </Markdown>
         )}
       </div>
       <div
