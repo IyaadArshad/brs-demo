@@ -320,39 +320,39 @@ export default function ChatInterface() {
 
           <div className="">
             <div className="max-w-3xl mx-auto p-4">
-              <div className="relative">
+                <div className="relative sticky bottom-0 bg-[#1E1E1E] p-4">
                 <Input
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey && message.trim()) {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }
+                  if (e.key === "Enter" && !e.shiftKey && message.trim()) {
+                    e.preventDefault();
+                    handleSendMessage();
+                  }
                   }}
                   className="w-full bg-[#2f2f2f] border-none text-white px-4 py-6 rounded-lg pr-12 focus-visible:ring-0 focus-visible:ring-offset-0"
                   placeholder="Message ChatGPT"
                 />
                 <TooltipProvider>
                   <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        size="icon"
-                        disabled={!message.trim()}
-                        onClick={handleSendMessage}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-white hover:text-white/50 bg-transparent hover:bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <SendHorizontal className="h-5 w-5" />
-                      </Button>
-                    </TooltipTrigger>
-                    {!message.trim() && (
-                      <TooltipContent>
-                        <p>Please enter a message</p>
-                      </TooltipContent>
-                    )}
+                  <TooltipTrigger asChild>
+                    <Button
+                    size="icon"
+                    disabled={!message.trim()}
+                    onClick={handleSendMessage}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-white hover:text-white/50 bg-transparent hover:bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                    <SendHorizontal className="h-5 w-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  {!message.trim() && (
+                    <TooltipContent>
+                    <p>Please enter a message</p>
+                    </TooltipContent>
+                  )}
                   </Tooltip>
                 </TooltipProvider>
-              </div>
+                </div>
               <p className="text-xs text-gray-500 mt-2 text-center">
                 GPT can make mistakes. It is not a bug, it is a feature.
               </p>
@@ -360,7 +360,6 @@ export default function ChatInterface() {
           </div>
         </>
       )}
-      <link href="/styles/globals.css" rel="stylesheet" />
     </div>
   );
 }

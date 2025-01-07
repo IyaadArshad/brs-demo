@@ -71,3 +71,9 @@ body {
     @apply bg-background text-foreground;  
   }  
 }
+
+.markdown-body {
+  color: #cfcfcf!important;
+  font-size: 1.2rem;
+  line-height: 2; /* Reduced vertical line spacing */
+}
