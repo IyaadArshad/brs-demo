@@ -45,6 +45,6 @@ export async function GET(request: Request) {
     data: data
   }
   const updateRecord = await pb.collection('files').update(id, pushData);
-  
-  return Response.json({ success: "true", id, file_name: file_name, updateRecord });
+
+  return Response.json({ success: "true", id, file_name: file_name, message: "data overwitten" });
 }
