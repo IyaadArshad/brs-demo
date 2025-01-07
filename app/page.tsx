@@ -1,43 +1,48 @@
-'use client'
+"use client";
 
-import { useState, useRef, useEffect } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { SendHorizontal } from 'lucide-react'
-import { Copy, Pencil, Check } from 'lucide-react'
-import Link from "next/link"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Message } from '@/types'
+import { useState, useRef, useEffect } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { SendHorizontal } from "lucide-react";
+import { Copy, Pencil, Check } from "lucide-react";
+import Link from "next/link";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Message } from "@/types";
 
 interface MessageProps {
-  message: Message
-  onEdit?: (id: string, content: string) => void
+  message: Message;
+  onEdit?: (id: string, content: string) => void;
 }
 
 export function MessageComponent({ message, onEdit }: MessageProps) {
-  const [isEditing, setIsEditing] = useState(false)
-  const [editedContent, setEditedContent] = useState(message.content)
-  const [isCopied, setIsCopied] = useState(false)
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedContent, setEditedContent] = useState(message.content);
+  const [isCopied, setIsCopied] = useState(false);
 
   useEffect(() => {
     if (isCopied) {
-      const timer = setTimeout(() => setIsCopied(false), 2000)
-      return () => clearTimeout(timer)
+      const timer = setTimeout(() => setIsCopied(false), 2000);
+      return () => clearTimeout(timer);
     }
-  }, [isCopied])
+  }, [isCopied]);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(message.content)
-    setIsCopied(true)
-  }
+    navigator.clipboard.writeText(message.content);
+    setIsCopied(true);
+  };
 
   const handleEdit = () => {
     if (isEditing) {
-      onEdit?.(message.id, editedContent)
+      onEdit?.(message.id, editedContent);
     }
-    setIsEditing(!isEditing)
-  }
+    setIsEditing(!isEditing);
+  };
 
   return (
     <motion.div
@@ -45,15 +50,19 @@ export function MessageComponent({ message, onEdit }: MessageProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
       className={`group flex items-start gap-4 px-8 py-3 hover:bg-[#2A2A2A] relative ${
-        message.role === 'user' ? 'flex-row-reverse' : ''
+        message.role === "user" ? "flex-row-reverse" : ""
       }`}
     >
-      <div 
+      <div
         className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-          message.role === 'assistant' ? 'bg-black' : 'bg-white'
+          message.role === "assistant" ? "bg-black" : "bg-white"
         }`}
       />
-      <div className={`flex-1 min-w-0 px-4 ${message.role === 'user' ? 'text-right' : ''}`}>
+      <div
+        className={`flex-1 min-w-0 px-4 ${
+          message.role === "user" ? "text-right" : ""
+        }`}
+      >
         {isEditing ? (
           <input
             type="text"
@@ -62,18 +71,22 @@ export function MessageComponent({ message, onEdit }: MessageProps) {
             className="w-full bg-[#2f2f2f] border-none text-white px-3 py-1 rounded focus-visible:ring-0 focus-visible:ring-offset-0"
             autoFocus
             onKeyDown={(e) => {
-              if (e.key === 'Enter') handleEdit()
-              if (e.key === 'Escape') setIsEditing(false)
+              if (e.key === "Enter") handleEdit();
+              if (e.key === "Escape") setIsEditing(false);
             }}
           />
         ) : (
-          <p className="text-white whitespace-pre-wrap break-words">{message.content}</p>
+          <p className="text-white whitespace-pre-wrap break-words">
+            {message.content}
+          </p>
         )}
       </div>
-      <div className={`opacity-0 group-hover:opacity-100 transition-opacity absolute ${
-        message.role === 'user' ? 'left-8' : 'right-8'
-      }`}>
-        {message.role === 'assistant' ? (
+      <div
+        className={`opacity-0 group-hover:opacity-100 transition-opacity absolute ${
+          message.role === "user" ? "left-8" : "right-8"
+        }`}
+      >
+        {message.role === "assistant" ? (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -83,10 +96,16 @@ export function MessageComponent({ message, onEdit }: MessageProps) {
                   className="h-8 w-8 text-gray-400 hover:bg-[#2f2f2f]"
                   onClick={handleCopy}
                 >
-                  {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  {isCopied ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>{isCopied ? 'Copied!' : 'Copy message'}</TooltipContent>
+              <TooltipContent>
+                {isCopied ? "Copied!" : "Copy message"}
+              </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         ) : (
@@ -99,138 +118,153 @@ export function MessageComponent({ message, onEdit }: MessageProps) {
                   className="h-8 w-8 text-gray-400 hover:bg-[#2f2f2f]"
                   onClick={handleEdit}
                 >
-                  {isEditing ? <Check className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
+                  {isEditing ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    <Pencil className="h-4 w-4" />
+                  )}
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>{isEditing ? 'Save edit' : 'Edit message'}</TooltipContent>
+              <TooltipContent>
+                {isEditing ? "Save edit" : "Edit message"}
+              </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         )}
       </div>
     </motion.div>
-  )
+  );
 }
 
 export default function ChatInterface() {
-  const [message, setMessage] = useState('')
-  const [messages, setMessages] = useState<Message[]>([])
-  const [isConversationStarted, setIsConversationStarted] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isConversationStarted, setIsConversationStarted] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages])
+    scrollToBottom();
+  }, [messages]);
 
   const handleSendMessage = async () => {
-    if (!message.trim()) return
+    if (!message.trim()) return;
 
     const newMessage: Message = {
       id: Date.now().toString(),
       content: message.trim(),
-      role: 'user',
-      timestamp: Date.now()
-    }
+      role: "user",
+      timestamp: Date.now(),
+    };
 
-    setMessages(prev => [...prev, newMessage])
-    setMessage('')
-    setIsConversationStarted(true)
+    setMessages((prev) => [...prev, newMessage]);
+    setMessage("");
+    setIsConversationStarted(true);
 
     try {
-      const response = await fetch('/api/testFetch', {
-        method: 'POST',
+      const response = await fetch("/api/testFetch", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           messages: [
-        ...messages.map(msg => ({
-          role: msg.role,
-          content: msg.content
-        })),
-        {
-          role: 'user',
-          content: message.trim()
-        }
-          ]
-        })
-      })
+            ...messages.map((msg) => ({
+              role: msg.role,
+              content: msg.content,
+            })),
+            {
+              role: "user",
+              content: message.trim(),
+            },
+          ],
+        }),
+      });
 
       if (!response.ok) {
-        throw new Error('Network response was not ok')
+        throw new Error("Network response was not ok");
       }
 
-      const reader = response.body?.getReader()
-      let aiResponseContent = ''
+      const reader = response.body?.getReader();
+      let aiResponseContent = "";
 
       while (true) {
-        const { done, value } = await reader?.read() || {}
-        if (done) break
+        const { done, value } = (await reader?.read()) || {};
+        if (done) break;
 
         // Convert the stream to text
-        const chunk = new TextDecoder().decode(value)
-        const lines = chunk.split('\n').filter(line => line.trim() !== '')
+        const chunk = new TextDecoder().decode(value);
+        const lines = chunk.split("\n").filter((line) => line.trim() !== "");
 
         for (const line of lines) {
-          if (line.startsWith('data: ')) {
-        const data = line.slice(6)
-        if (data === '[DONE]') break
+          if (line.startsWith("data: ")) {
+            const data = line.slice(6);
+            if (data === "[DONE]") break;
 
-        try {
-          const parsed = JSON.parse(data)
-          if (parsed.type === 'content') {
-            aiResponseContent += parsed.content
-            setMessages(prev => {
-          const lastMessage = prev[prev.length - 1]
-          if (lastMessage.role === 'assistant') {
-            return [...prev.slice(0, -1), { ...lastMessage, content: aiResponseContent }]
-          } else {
-            return [...prev, { id: (Date.now() + 1).toString(), content: aiResponseContent, role: 'assistant', timestamp: Date.now() }]
-          }
-            })
-          }
-        } catch (e) {
-          console.error('Error parsing JSON:', e)
-        }
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.type === "content") {
+                aiResponseContent += parsed.content;
+                setMessages((prev) => {
+                  const lastMessage = prev[prev.length - 1];
+                  if (lastMessage.role === "assistant") {
+                    return [
+                      ...prev.slice(0, -1),
+                      { ...lastMessage, content: aiResponseContent },
+                    ];
+                  } else {
+                    return [
+                      ...prev,
+                      {
+                        id: (Date.now() + 1).toString(),
+                        content: aiResponseContent,
+                        role: "assistant",
+                        timestamp: Date.now(),
+                      },
+                    ];
+                  }
+                });
+              }
+            } catch (e) {
+              console.error("Error parsing JSON:", e);
+            }
           }
         }
       }
-        } catch (error) {
-      console.error('Error fetching AI response:', error)
+    } catch (error) {
+      console.error("Error fetching AI response:", error);
     }
-  }
+  };
 
   const handleEditMessage = (id: string, newContent: string) => {
-    setMessages(prev =>
-      prev.map(msg =>
-        msg.id === id ? { ...msg, content: newContent } : msg
-      )
-    )
-  }
+    setMessages((prev) =>
+      prev.map((msg) => (msg.id === id ? { ...msg, content: newContent } : msg))
+    );
+  };
 
   return (
     <div className="min-h-screen bg-[#1E1E1E] text-white flex flex-col">
       {!isConversationStarted ? (
         <main className="flex-1 flex flex-col items-center justify-center p-4">
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-4xl mb-8"
           >
             What can I help with?
           </motion.h1>
-          
+
           <div className="w-full max-w-2xl relative">
             <Input
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey && message.trim()) {
-                  e.preventDefault()
-                  handleSendMessage()
+                if (e.key === "Enter" && !e.shiftKey && message.trim()) {
+                  e.preventDefault();
+                  handleSendMessage();
                 }
               }}
               className="w-full bg-[#2f2f2f] border-none text-white px-4 py-6 rounded-lg pr-12 focus-visible:ring-0 focus-visible:ring-offset-0"
@@ -239,7 +273,7 @@ export default function ChatInterface() {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button 
+                  <Button
                     size="icon"
                     disabled={!message.trim()}
                     onClick={handleSendMessage}
@@ -291,9 +325,9 @@ export default function ChatInterface() {
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey && message.trim()) {
-                      e.preventDefault()
-                      handleSendMessage()
+                    if (e.key === "Enter" && !e.shiftKey && message.trim()) {
+                      e.preventDefault();
+                      handleSendMessage();
                     }
                   }}
                   className="w-full bg-[#2f2f2f] border-none text-white px-4 py-6 rounded-lg pr-12 focus-visible:ring-0 focus-visible:ring-offset-0"
@@ -302,7 +336,7 @@ export default function ChatInterface() {
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button 
+                      <Button
                         size="icon"
                         disabled={!message.trim()}
                         onClick={handleSendMessage}
@@ -327,5 +361,5 @@ export default function ChatInterface() {
         </>
       )}
     </div>
-  )
+  );
 }
