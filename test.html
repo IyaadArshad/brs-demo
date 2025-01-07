@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fade-In Streaming Text</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    #text-container {
+      font-size: 2em;
+      white-space: pre-wrap; /* To allow for multiline text */
+    }
+    .fade-in {
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+  </style>
+</head>
+<body>
+  <div id="text-container"></div>
+
+  <script>
+    const text = "Welcome to the Gemini-inspired streaming text effect!";
+    const textContainer = document.getElementById('text-container');
+    let index = 0;
+
+    function streamText() {
+      if (index < text.length) {
+        const span = document.createElement('span');
+        span.textContent = text[index];
+        span.classList.add('fade-in');
+        textContainer.appendChild(span);
+
+        // Trigger fade-in effect
+        setTimeout(() => span.style.opacity = 1, 50);
+
+        index++;
+        setTimeout(streamText, 100); // Adjust speed by changing this value
+      }
+    }
+
+    streamText();
+  </script>
+</body>
+</html>
