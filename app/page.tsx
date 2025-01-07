@@ -78,12 +78,7 @@ export function MessageComponent({ message, onEdit }: MessageProps) {
             }}
           />
         ) : (
-          <Markdown
-          className="whitespace-pre-wrap"
-          remarkPlugins={[remarkGfm]}
-          >
-          {message.content}
-          </Markdown>
+          <Markdown remarkPlugins={[remarkGfm]} className="markdown-body">{message.content}</Markdown>
         )}
       </div>
       <div
@@ -365,6 +360,7 @@ export default function ChatInterface() {
           </div>
         </>
       )}
+      <link href="/styles/globals.css" rel="stylesheet" />
     </div>
   );
 }
