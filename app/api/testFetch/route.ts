@@ -67,8 +67,66 @@ const mockFunctions = {
       };
     }
   },
-  update_markdown_file: () => ({ success: true }),
-  check_init: () => ({ success: true }),
+  update_markdown_file: async (file_name: string, data: string) => {
+    const response = await fetch("/api/data/updateMarkdownFile", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ file_name, data }),
+    });
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: response.statusText
+      };
+    }
+
+    const responseData = await response.json();
+
+    if (responseData.success) {
+      return {
+        success: true,
+        message: responseData.message
+      };
+    } else {
+      return {
+        success: false,
+        message: responseData.message
+      };
+    }
+  },
+  check_init: async (file_name: string) => {
+    const response = await fetch("/api/data/checkInit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ file_name }),
+    });
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: response.statusText
+      };
+    }
+
+    const responseData = await response.json();
+
+    if (responseData.success) {
+      return {
+        success: true,
+        message: responseData.message
+      };
+    } else {
+      return {
+        success: false,
+        message: responseData.message
+      };
+    }
+  },
 };
 
 export async function POST(request: Request) {
@@ -184,28 +242,6 @@ export async function POST(request: Request) {
       const encoder = new TextEncoder();
 
       for await (const chunk of response) {
-        // Handle function calls
-        if (chunk.choices[0]?.delta?.tool_calls) {
-          const toolCall = chunk.choices[0].delta.tool_calls[0];
-          if (toolCall.function) {
-            const functionName = toolCall.function.name;
-            if (!toolCall.function.arguments) throw new Error("Missing function arguments");
-            const functionArgs = JSON.parse(toolCall.function.arguments);
-            
-            const result = await mockFunctions[
-              functionName as keyof typeof mockFunctions
-            ](functionArgs.file_name, functionArgs.data);
-
-            controller.enqueue(encoder.encode(
-              `data: ${JSON.stringify({
-                type: "function",
-                function: functionName,
-                arguments: functionArgs,
-                result,
-              })}\n\n`
-            ));
-          }
-        }
         
         // Handle regular content
         if (chunk.choices[0]?.delta?.content) {
