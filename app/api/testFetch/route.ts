@@ -37,7 +37,36 @@ const mockFunctions = {
         }
     }
   },
-  write_initial_data: () => ({ success: true }),
+  write_initial_data: async (file_name: string, data: string) => {
+    const response = await fetch("/api/data/writeInitialData", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ file_name, data }),
+    });
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: response.statusText
+      };
+    }
+
+    const responseData = await response.json();
+
+    if (responseData.success) {
+      return {
+        success: true,
+        message: responseData.message
+      };
+    } else {
+      return {
+        success: false,
+        message: responseData.message
+      };
+    }
+  },
   update_markdown_file: () => ({ success: true }),
   check_init: () => ({ success: true }),
 };
@@ -165,7 +194,7 @@ export async function POST(request: Request) {
             
             const result = await mockFunctions[
               functionName as keyof typeof mockFunctions
-            ](functionArgs.file_name);
+            ](functionArgs.file_name, functionArgs.data);
 
             controller.enqueue(encoder.encode(
               `data: ${JSON.stringify({
