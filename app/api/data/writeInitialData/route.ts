@@ -4,16 +4,16 @@ const pb = new PocketBase("http://127.0.0.1:8090");
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const fileName = url.searchParams.get("file_name");
-  const fileData = url.searchParams.get("data");
+  const file_name = url.searchParams.get("file_name");
+  const data = url.searchParams.get("data");
 
   interface FetchIdResponse {
     id: string;
   }
 
-  if (!fileName) {
+  if (!file_name) {
     return Response.json({ code: 400, message: "file_name is required" });
-  } else if (!fileData) {
+  } else if (!data) {
     return Response.json({ code: 400, message: "data is required" });
   }
 
@@ -28,7 +28,7 @@ export async function GET(request: Request) {
     }
   }
 
-  const fetchIdResponse = await FetchId(fileName);
+  const fetchIdResponse = await FetchId(file_name);
   const fetchIdData = await fetchIdResponse.json();
 
   if (fetchIdData.code === 404) {
@@ -40,6 +40,11 @@ export async function GET(request: Request) {
 
   const id = fetchIdData.id;
   
-  console.log(id);
-  return Response.json({ success: "true", id, file_name: fileName });
+  var pushData = {
+    file_name: file_name,
+    data: data
+  }
+  const updateRecord = await pb.collection('files').update(id, pushData);
+  
+  return Response.json({ success: "true", id, file_name: file_name, updateRecord });
 }
