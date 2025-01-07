@@ -2,7 +2,7 @@ import PocketBase from "pocketbase";
 
 const pb = new PocketBase("http://127.0.0.1:8090");
 
-export async function GET(request: Request) {
+export async function POST(request: Request) {
   const url = new URL(request.url);
   const file_name = url.searchParams.get("file_name");
   const data = url.searchParams.get("data");
