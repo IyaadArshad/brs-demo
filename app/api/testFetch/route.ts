@@ -7,7 +7,7 @@ const openai = new OpenAI({
 const Functions = {
   createFile: async (file_name: string) => {
     const response = await fetch("/api/data/createFile", {
-      method: "GET",
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
