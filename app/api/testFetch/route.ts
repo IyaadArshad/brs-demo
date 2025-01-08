@@ -4,7 +4,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const mockFunctions = {
+const Functions = {
   createFile: async (file_name: string) => {
     const response = await fetch("/api/data/createFile", {
       method: "GET",
@@ -68,7 +68,7 @@ const mockFunctions = {
     }
   },
   update_markdown_file: async (file_name: string, data: string) => {
-    const response = await fetch("/api/data/updateMarkdownFile", {
+    const response = await fetch("/api/data/updateFile", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

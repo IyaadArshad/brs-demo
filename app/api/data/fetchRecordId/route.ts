@@ -1,6 +1,6 @@
-import Pocketbase from "pocketbase";
+import PocketBase from "pocketbase";
 
-const pb = new Pocketbase("http://127.0.0.1:8090");
+const pb = new PocketBase(`${process.env.POCKETBASE_SERVER_URL}`);
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
