@@ -4,8 +4,10 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const Functions = {
-  createFile: async (file_name: string) => {
+export async function POST(request: Request) {
+  const { messages } = await request.json();
+
+  async function createFile (file_name: string) {
     const response = await fetch("/api/data/createFile", {
       method: "POST",
       headers: {
@@ -36,8 +38,8 @@ const Functions = {
             message: data.message
         }
     }
-  },
-  write_initial_data: async (file_name: string, data: string) => {
+  }
+  async function write_initial_data (file_name: string, data: string) {
     const response = await fetch("/api/data/writeInitialData", {
       method: "POST",
       headers: {
@@ -66,8 +68,8 @@ const Functions = {
         message: responseData.message
       };
     }
-  },
-  update_markdown_file: async (file_name: string, data: string) => {
+  }
+  async function update_markdown_file (file_name: string, data: string) {
     const response = await fetch("/api/data/updateFile", {
       method: "POST",
       headers: {
@@ -96,8 +98,8 @@ const Functions = {
         message: responseData.message
       };
     }
-  },
-  check_init: async (file_name: string) => {
+  }
+  async function check_init (file_name: string) {
     const response = await fetch("/api/data/checkInit", {
       method: "POST",
       headers: {
@@ -126,11 +128,7 @@ const Functions = {
         message: responseData.message
       };
     }
-  },
-};
-
-export async function POST(request: Request) {
-  const { messages } = await request.json();
+  }
 
   const response = await openai.chat.completions.create({
     model: "gpt-4o-mini",
