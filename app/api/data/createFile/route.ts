@@ -2,9 +2,8 @@ import PocketBase from "pocketbase";
 
 const pb = new PocketBase(`${process.env.POCKETBASE_SERVER_URL}`);
 
-export async function GET(request: Request) {
-  const url = new URL(request.url);
-  const fileName = url.searchParams.get("file_name");
+export async function POST(request: Request) {
+  const { file_name: fileName } = await request.json();
 
   if (!fileName) {
     return Response.json(
