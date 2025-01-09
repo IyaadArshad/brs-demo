@@ -1,267 +1,188 @@
+import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY!,
 });
 
+async function createFile(file_name: string) {
+  const response = await fetch("http://localhost:3000/api/data/createFile", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ file_name }),
+  });
+  if (!response.ok) return { success: false, error: response.statusText };
+  return await response.json();
+}
+
+async function write_initial_data(file_name: string, data: string) {
+  const response = await fetch("http://localhost:3000/api/data/writeInitialData", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ file_name, data }),
+  });
+  if (!response.ok) return { success: false, error: response.statusText };
+  return await response.json();
+}
+
+async function update_markdown_file(file_name: string, data: string) {
+  const response = await fetch("http://localhost:3000/api/data/updateFile", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ file_name, data }),
+  });
+  if (!response.ok) return { success: false, error: response.statusText };
+  return await response.json();
+}
+
+async function check_init(file_name: string) {
+  const response = await fetch("http://localhost:3000/api/data/checkInit", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ file_name }),
+  });
+  if (!response.ok) return { success: false, error: response.statusText };
+  return await response.json();
+}
+
+// Repeatedly call the API until there's no function call, then do a streaming call
 export async function POST(request: Request) {
-  const { messages } = await request.json();
+  try {
+    const { messages: userMessages } = await request.json();
+    type Message =
+      | { role: "system" | "user"; content: string }
+      | { role: "function"; name: string; content: string };
 
-  async function createFile (file_name: string) {
-    const response = await fetch("/api/data/createFile", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ file_name }),
-    });
+    let conversation: Message[] = [
+      { role: "system", content: "You are a helpful assistant." },
+      ...userMessages,
+    ];
 
-    if (!response.ok) {
-      return {
-        success: false,
-        error: response.statusText
-      };
-    }
+    while (true) {
+      const openAiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4",
+          messages: conversation,
+          functions: [
+            {
+              name: "create_brs_file",
+              description: "Creates a .md file for the BRS document",
+              parameters: {
+                type: "object",
+                required: ["file_name"],
+                properties: {
+                  file_name: { type: "string" },
+                },
+              },
+            },
+            {
+              name: "write_initial_data",
+              description: "Writes initial data to a .md BRS file",
+              parameters: {
+                type: "object",
+                required: ["file_name", "data"],
+                properties: {
+                  data: { type: "string" },
+                  file_name: { type: "string" },
+                },
+              },
+            },
+            {
+              name: "update_markdown_file",
+              description: "Updates a .md BRS file after check_init returns true",
+              parameters: {
+                type: "object",
+                required: ["file_name", "data"],
+                properties: {
+                  data: { type: "string" },
+                  file_name: { type: "string" },
+                },
+              },
+            },
+            {
+              name: "check_init",
+              description: "Checks if a BRS file has initial data",
+              parameters: {
+                type: "object",
+                required: ["file_name"],
+                properties: {
+                  file_name: { type: "string" },
+                },
+              },
+            },
+          ],
+          function_call: "auto",
+          temperature: 0,
+          stream: false,
+        }),
+      });
 
-    const data = await response.json();
+      if (!openAiResponse.ok)
+        throw new Error(`OpenAI error: ${await openAiResponse.text()}`);
 
-    if (data.success) {
-        return {
-            success: true,
-            file_name: data.file_name,
-            message: data.message
+      const openAiResult = await openAiResponse.json();
+      const message = openAiResult.choices[0].message;
+      conversation.push(message);
+
+      // If we got a function call, execute it and push the result back
+      if (message.function_call) {
+        const { name, arguments: args } = message.function_call;
+        const functionArgs = JSON.parse(args);
+        let functionResult;
+
+        if (name === "create_brs_file") {
+          functionResult = await createFile(functionArgs.file_name);
+        } else if (name === "write_initial_data") {
+          functionResult = await write_initial_data(
+            functionArgs.file_name,
+            functionArgs.data
+          );
+        } else if (name === "update_markdown_file") {
+          functionResult = await update_markdown_file(
+            functionArgs.file_name,
+            functionArgs.data
+          );
+        } else if (name === "check_init") {
+          functionResult = await check_init(functionArgs.file_name);
+        } else {
+          throw new Error(`Function ${name} not found.`);
         }
-    } else {
-        return {
-            success: false,
-            file_name: data.file_name,
-            message: data.message
-        }
-    }
-  }
-  async function write_initial_data (file_name: string, data: string) {
-    const response = await fetch("/api/data/writeInitialData", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ file_name, data }),
-    });
 
-    if (!response.ok) {
-      return {
-        success: false,
-        error: response.statusText
-      };
-    }
-
-    const responseData = await response.json();
-
-    if (responseData.success) {
-      return {
-        success: true,
-        message: responseData.message
-      };
-    } else {
-      return {
-        success: false,
-        message: responseData.message
-      };
-    }
-  }
-  async function update_markdown_file (file_name: string, data: string) {
-    const response = await fetch("/api/data/updateFile", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ file_name, data }),
-    });
-
-    if (!response.ok) {
-      return {
-        success: false,
-        error: response.statusText
-      };
-    }
-
-    const responseData = await response.json();
-
-    if (responseData.success) {
-      return {
-        success: true,
-        message: responseData.message
-      };
-    } else {
-      return {
-        success: false,
-        message: responseData.message
-      };
-    }
-  }
-  async function check_init (file_name: string) {
-    const response = await fetch("/api/data/checkInit", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ file_name }),
-    });
-
-    if (!response.ok) {
-      return {
-        success: false,
-        error: response.statusText
-      };
-    }
-
-    const responseData = await response.json();
-
-    if (responseData.success) {
-      return {
-        success: true,
-        message: responseData.message
-      };
-    } else {
-      return {
-        success: false,
-        message: responseData.message
-      };
-    }
-  }
-
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages,
-    stream: true,
-    tools: [
-      {
-        type: "function",
-        function: {
-          name: "create_brs_file",
-          description:
-            "Creates a file for the Business Requirements Specification (BRS) document using a specified name ending with .md",
-          parameters: {
-            type: "object",
-            required: ["file_name"],
-            properties: {
-              file_name: {
-                type: "string",
-                description:
-                  "The name of the BRS file, which must contain only lowercase a-z characters, and uppercase a-z characters, and may include dashes, with no spaces and must end with .md",
-              },
-            },
-            additionalProperties: false,
+        conversation.push({
+          role: "function",
+          name,
+          content: JSON.stringify(functionResult),
+        });
+      } else {
+        // No function call -> final text. Stream it back to client
+        const streamingResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
           },
-          strict: true,
-        },
-      },
-      {
-        type: "function",
-        function: {
-          name: "write_initial_data",
-          strict: true,
-          parameters: {
-            type: "object",
-            required: ["file_name", "data"],
-            properties: {
-              data: {
-                type: "string",
-                description: "The markdown data to be written to the file",
-              },
-              file_name: {
-                type: "string",
-                description: "The name of the markdown file to write to",
-              },
-            },
-            additionalProperties: false,
-          },
-          description:
-            "Writes initial data to a markdown file, ending in .md, a brs document, after create_brs_file has been run.",
-        },
-      },
-      {
-        type: "function",
-        function: {
-          name: "update_markdown_file",
-          strict: true,
-          parameters: {
-            type: "object",
-            required: ["file_name", "data"],
-            properties: {
-              data: {
-                type: "string",
-                description:
-                  "Markdown data to be added, completely overwriting the existing markdown file. Do not replace existing unchanged text with a note saying unchanged at all. You must rewrite everything in full as is, changing only what the user has asked, without being lazy",
-              },
-              file_name: {
-                type: "string",
-                description: "The name of the markdown file to write to",
-              },
-            },
-            additionalProperties: false,
-          },
-          description:
-            "Updates a markdown file, a brs document. Requires create_brs_file to have been run and check_init to return true.",
-        },
-      },
-      {
-        type: "function",
-        function: {
-          name: "check_init",
-          strict: true,
-          parameters: {
-            type: "object",
-            required: ["file_name"],
-            properties: {
-              file_name: {
-                type: "string",
-                description:
-                  "The name of the brs file to check for initial data.",
-              },
-            },
-            additionalProperties: false,
-          },
-          description:
-            "Checks if the brs file has initial data written. If true, it can be updated; if false, write_initial_data must be run first before updating the file.",
-        },
-      },
-    ],
-    temperature: 1.31,
-    max_tokens: 10000,
-    top_p: 0.7,
-    frequency_penalty: 0.15,
-    presence_penalty: 0,
-  });
+          body: JSON.stringify({
+            model: "gpt-4",
+            messages: conversation,
+            stream: true,
+            temperature: 0,
+          }),
+        });
 
-  // Transform the response into a ReadableStream
-  const stream = new ReadableStream({
-    async start(controller) {
-      const encoder = new TextEncoder();
+        if (!streamingResponse.body) throw new Error("No streaming body found.");
 
-      for await (const chunk of response) {
-        
-        // Handle regular content
-        if (chunk.choices[0]?.delta?.content) {
-          controller.enqueue(encoder.encode(
-            `data: ${JSON.stringify({
-              type: "content",
-              content: chunk.choices[0].delta.content,
-            })}\n\n`
-          ));
-        }
+        return new Response(streamingResponse.body, {
+          headers: { "Content-Type": "text/event-stream" },
+        });
       }
-
-      controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-      controller.close();
-    },
-  });
-
-  return new Response(stream, {
-    headers: {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache",
-      "Connection": "keep-alive",
-    },
-  });
+    }
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: err }, { status: 500 });
+  }
 }
