@@ -4,8 +4,14 @@ import { useState, useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { SendHorizontal, Trash2 } from "lucide-react";
-import { Copy, Pencil, Check } from "lucide-react";
+import {
+  SendHorizontal,
+  Trash2,
+  Copy,
+  Pencil,
+  Check,
+  FolderSyncIcon as Sync,
+} from "lucide-react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Link from "next/link";
@@ -21,9 +27,15 @@ interface MessageProps {
   message: Message;
   onEdit?: (id: string, content: string) => void;
   onDelete?: (id: string) => void;
+  onRegenerate?: (id: string) => void;
 }
 
-export function MessageComponent({ message, onEdit, onDelete }: MessageProps) {
+export function MessageComponent({
+  message,
+  onEdit,
+  onDelete,
+  onRegenerate,
+}: MessageProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(message.content);
   const [isCopied, setIsCopied] = useState(false);
@@ -91,27 +103,44 @@ export function MessageComponent({ message, onEdit, onDelete }: MessageProps) {
         }`}
       >
         {message.role === "assistant" ? (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-8 w-8 text-gray-400 hover:bg-[#2f2f2f]"
-                  onClick={handleCopy}
-                >
-                  {isCopied ? (
-                    <Check className="h-4 w-4" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                {isCopied ? "Copied!" : "Copy message"}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8 text-gray-400 hover:bg-[#2f2f2f]"
+                    onClick={handleCopy}
+                  >
+                    {isCopied ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {isCopied ? "Copied!" : "Copy message"}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8 text-gray-400 hover:bg-[#2f2f2f]"
+                    onClick={() => onRegenerate?.(message.id)}
+                  >
+                    <Sync className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Regenerate response</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </>
         ) : (
           <>
             <TooltipProvider>
@@ -185,6 +214,10 @@ export default function ChatInterface() {
     setMessage("");
     setIsConversationStarted(true);
 
+    await fetchAIResponse(newMessage);
+  };
+
+  const fetchAIResponse = async (userMessage: Message) => {
     try {
       const response = await fetch("/api/testFetch", {
         method: "POST",
@@ -198,8 +231,8 @@ export default function ChatInterface() {
               content: msg.content,
             })),
             {
-              role: "user",
-              content: message.trim(),
+              role: userMessage.role,
+              content: userMessage.content,
             },
           ],
         }),
@@ -271,6 +304,17 @@ export default function ChatInterface() {
     }
   };
 
+  const handleRegenerateMessage = async (id: string) => {
+    const index = messages.findIndex((msg) => msg.id === id);
+    if (index !== -1) {
+      const previousUserMessage = messages[index - 1];
+      if (previousUserMessage && previousUserMessage.role === "user") {
+        setMessages((prev) => prev.slice(0, index));
+        await fetchAIResponse(previousUserMessage);
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#1E1E1E] text-white flex flex-col">
       {!isConversationStarted ? (
@@ -339,6 +383,7 @@ export default function ChatInterface() {
                   message={msg}
                   onEdit={handleEditMessage}
                   onDelete={handleDeleteMessage}
+                  onRegenerate={handleRegenerateMessage}
                 />
               ))}
             </AnimatePresence>
