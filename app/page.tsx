@@ -38,6 +38,26 @@ interface Command {
   action: string;
   command: string;
 }
+const help = (): { message: string } => ({
+  message: "I can help you with the following commands:\n/help - Show available commands\n/settings - Configure options\n/assisted [filename] - Switch to Assisted View\n/create [filename] - Create new document\n/open [filename] - Open Editor Files"
+});
+
+const settings = (): { message: string } => ({
+  message: "Current settings:\n- Theme: Dark\n- Language: English\n- Notifications: On"
+});
+
+const assisted = (filename?: string): { message: string } => ({
+  message: `Switching to assisted view for ${filename || '[no filename provided]'}`
+});
+
+const create = (filename?: string): { message: string } => ({
+  message: `Creating new document: ${filename || '[no filename provided]'}`
+});
+
+const open = (filename?: string): { message: string } => ({
+  message: `Opening file: ${filename || '[no filename provided]'}`
+});
+
 
 const commands: Command[] = [
   {
@@ -358,7 +378,41 @@ export default function ChatInterface() {
     setMessage("");
     setIsConversationStarted(true);
 
-    await fetchAIResponse(newMessage);
+    if (newMessage.content.startsWith("/help") || newMessage.content === "/") { // if running help command
+      // print help message to chat
+      const helpMessage = "I can help you with the following commands:\n\n **/help** - Show available commands\n\n/**settings** - Configure options\n\n/**assisted** [filename] - Switch to Assisted View\n\n**/create** [filename] - Create new document\n\n**/open** [filename] - Open Editor Files";
+      // 1.5 second delay
+      await new Promise((resolve) => setTimeout(resolve, 1700));
+      let currentMessage = "";
+      const words = helpMessage.split(' ');
+      for (let i = 0; i < words.length; i++) {
+        await new Promise((resolve) => setTimeout(resolve, 20));
+        currentMessage += (i === 0 ? "" : " ") + words[i];
+        setMessages((prev) => {
+          const lastMessage = prev[prev.length - 1];
+          if (lastMessage && lastMessage.role === "assistant") {
+        return [
+          ...prev.slice(0, -1),
+          { ...lastMessage, content: currentMessage },
+        ];
+          } else {
+        return [
+          ...prev,
+          {
+            id: (Date.now() + 1).toString(),
+            content: currentMessage,
+            role: "assistant",
+            timestamp: Date.now(),
+          },
+        ];
+          }
+        });
+      }
+    } else if (newMessage.content.startsWith("/create")) {
+      
+    } else {
+      await fetchAIResponse(newMessage);
+    }
   };
 
   const fetchAIResponse = async (userMessage: Message) => {
