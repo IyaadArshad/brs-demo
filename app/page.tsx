@@ -78,11 +78,46 @@ interface CommandMenuProps {
 }
 
 export function CommandMenu({ isOpen, onSelect, filter }: CommandMenuProps) {
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const filteredCommands = commands.filter(
     (command) =>
       command.title.toLowerCase().includes(filter.toLowerCase()) ||
       command.description.toLowerCase().includes(filter.toLowerCase())
   );
+
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [filter]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isOpen) return;
+
+      switch (e.key) {
+        case 'ArrowUp':
+          e.preventDefault();
+          setSelectedIndex(prev => 
+            prev > 0 ? prev - 1 : filteredCommands.length - 1
+          );
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          setSelectedIndex(prev => 
+            prev < filteredCommands.length - 1 ? prev + 1 : 0
+          );
+          break;
+        case 'Enter':
+          e.preventDefault();
+          if (filteredCommands[selectedIndex]) {
+            onSelect(filteredCommands[selectedIndex].action);
+          }
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, filteredCommands, selectedIndex, onSelect]);
 
   return (
     <AnimatePresence>
@@ -95,11 +130,14 @@ export function CommandMenu({ isOpen, onSelect, filter }: CommandMenuProps) {
           className="absolute bottom-full left-0 w-full mb-2 bg-[#1E1E1E] border border-gray-800 rounded-lg shadow-lg overflow-hidden"
         >
           <div className="max-h-[300px] overflow-y-auto">
-            {filteredCommands.map((command) => (
+            {filteredCommands.map((command, index) => (
               <button
                 key={command.action}
                 onClick={() => onSelect(command.action)}
-                className="w-full px-4 py-3 flex items-start gap-3 hover:bg-gray-800/50 transition-colors text-left"
+                onMouseEnter={() => setSelectedIndex(index)}
+                className={`w-full px-4 py-3 flex items-start gap-3 transition-colors text-left ${
+                  index === selectedIndex ? 'bg-gray-800/50' : 'hover:bg-gray-800/50'
+                }`}
               >
                 <div className="flex-shrink-0 w-6 h-6 rounded bg-gray-800 flex items-center justify-center text-gray-400">
                   {command.icon}
