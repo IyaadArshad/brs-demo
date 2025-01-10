@@ -195,19 +195,17 @@ export default function ChatInterface() {
         const { done, value } = (await reader?.read()) || {};
         if (done) break;
 
-        // Convert the stream to text
         const chunk = new TextDecoder().decode(value);
         const lines = chunk.split("\n").filter((line) => line.trim() !== "");
-
         for (const line of lines) {
           if (line.startsWith("data: ")) {
             const data = line.slice(6);
             if (data === "[DONE]") break;
-
             try {
               const parsed = JSON.parse(data);
-              if (parsed.type === "content") {
-                aiResponseContent += parsed.content;
+              const content = parsed?.choices?.[0]?.delta?.content;
+              if (content) {
+                aiResponseContent += content;
                 setMessages((prev) => {
                   const lastMessage = prev[prev.length - 1];
                   if (lastMessage.role === "assistant") {

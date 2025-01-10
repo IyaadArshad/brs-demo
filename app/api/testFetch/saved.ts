@@ -86,7 +86,7 @@ export async function POST(request: Request) {
           Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
         },
         body: JSON.stringify({
-          model: "gpt-4o",
+          model: "gpt-4",
           messages: conversation,
           functions: [
             {
@@ -195,7 +195,7 @@ export async function POST(request: Request) {
             Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
           },
           body: JSON.stringify({
-            model: "gpt-4o",
+            model: "gpt-4",
             messages: conversation,
             stream: true,
             temperature: 0,
