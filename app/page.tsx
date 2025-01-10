@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { SendHorizontal } from "lucide-react";
+import { SendHorizontal, Trash2 } from "lucide-react";
 import { Copy, Pencil, Check } from "lucide-react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -20,9 +20,10 @@ import { Message } from "@/types";
 interface MessageProps {
   message: Message;
   onEdit?: (id: string, content: string) => void;
+  onDelete?: (id: string) => void;
 }
 
-export function MessageComponent({ message, onEdit }: MessageProps) {
+export function MessageComponent({ message, onEdit, onDelete }: MessageProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(message.content);
   const [isCopied, setIsCopied] = useState(false);
@@ -50,6 +51,7 @@ export function MessageComponent({ message, onEdit }: MessageProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
       transition={{ duration: 0.3 }}
       className={`group flex items-start gap-4 px-8 py-3 hover:bg-[#2A2A2A] relative ${
         message.role === "user" ? "flex-row-reverse" : ""
@@ -78,7 +80,9 @@ export function MessageComponent({ message, onEdit }: MessageProps) {
             }}
           />
         ) : (
-          <Markdown remarkPlugins={[remarkGfm]} className="markdown-body">{message.content}</Markdown>
+          <Markdown remarkPlugins={[remarkGfm]} className="markdown-body">
+            {message.content}
+          </Markdown>
         )}
       </div>
       <div
@@ -109,27 +113,44 @@ export function MessageComponent({ message, onEdit }: MessageProps) {
             </Tooltip>
           </TooltipProvider>
         ) : (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-8 w-8 text-gray-400 hover:bg-[#2f2f2f]"
-                  onClick={handleEdit}
-                >
-                  {isEditing ? (
-                    <Check className="h-4 w-4" />
-                  ) : (
-                    <Pencil className="h-4 w-4" />
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                {isEditing ? "Save edit" : "Edit message"}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8 text-gray-400 hover:bg-[#2f2f2f]"
+                    onClick={handleEdit}
+                  >
+                    {isEditing ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <Pencil className="h-4 w-4" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {isEditing ? "Save edit" : "Edit message"}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8 text-gray-400 hover:bg-[#2f2f2f]"
+                    onClick={() => onDelete?.(message.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Delete message</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </>
         )}
       </div>
     </motion.div>
@@ -243,6 +264,13 @@ export default function ChatInterface() {
     );
   };
 
+  const handleDeleteMessage = (id: string) => {
+    const index = messages.findIndex((msg) => msg.id === id);
+    if (index !== -1) {
+      setMessages((prev) => prev.slice(0, index));
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#1E1E1E] text-white flex flex-col">
       {!isConversationStarted ? (
@@ -310,6 +338,7 @@ export default function ChatInterface() {
                   key={msg.id}
                   message={msg}
                   onEdit={handleEditMessage}
+                  onDelete={handleDeleteMessage}
                 />
               ))}
             </AnimatePresence>
@@ -318,39 +347,39 @@ export default function ChatInterface() {
 
           <div className="">
             <div className="max-w-3xl mx-auto p-4">
-                <div className="relative sticky bottom-0 bg-[#1E1E1E] p-4">
+              <div className="relative sticky bottom-0 bg-[#1E1E1E] p-4">
                 <Input
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey && message.trim()) {
-                    e.preventDefault();
-                    handleSendMessage();
-                  }
+                    if (e.key === "Enter" && !e.shiftKey && message.trim()) {
+                      e.preventDefault();
+                      handleSendMessage();
+                    }
                   }}
                   className="w-full bg-[#2f2f2f] border-none text-white px-4 py-6 rounded-lg pr-12 focus-visible:ring-0 focus-visible:ring-offset-0"
                   placeholder="Message ChatGPT"
                 />
                 <TooltipProvider>
                   <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                    size="icon"
-                    disabled={!message.trim()}
-                    onClick={handleSendMessage}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-white hover:text-white/50 bg-transparent hover:bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                    <SendHorizontal className="h-5 w-5" />
-                    </Button>
-                  </TooltipTrigger>
-                  {!message.trim() && (
-                    <TooltipContent>
-                    <p>Please enter a message</p>
-                    </TooltipContent>
-                  )}
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="icon"
+                        disabled={!message.trim()}
+                        onClick={handleSendMessage}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-white hover:text-white/50 bg-transparent hover:bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <SendHorizontal className="h-5 w-5" />
+                      </Button>
+                    </TooltipTrigger>
+                    {!message.trim() && (
+                      <TooltipContent>
+                        <p>Please enter a message</p>
+                      </TooltipContent>
+                    )}
                   </Tooltip>
                 </TooltipProvider>
-                </div>
+              </div>
               <p className="text-xs text-gray-500 mt-2 text-center">
                 GPT can make mistakes. It is not a bug, it is a feature.
               </p>
