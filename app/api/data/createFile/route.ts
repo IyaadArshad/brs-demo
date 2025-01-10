@@ -8,7 +8,7 @@ export async function POST(request: Request) {
   if (!fileName) {
     return Response.json(
       { error: "Missing required parameters" },
-      { status: 400 }
+      { status: 422 }
     );
   }
   try {
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
           message:
             "File with the same name already exists, choose another name",
         },
-        { status: 400 }
+        { status: 403 }
       );
     }
   } catch (error) {}
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
         success: false,
         message: "File name too long, pick a shorter name",
       },
-      { status: 400 }
+      { status: 413 }
     );
   }
 
