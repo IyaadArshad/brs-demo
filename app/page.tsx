@@ -22,12 +22,93 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Message } from "@/types";
+import { MessageSquare, Eye, FileText, HelpCircle } from 'lucide-react';
 
 interface MessageProps {
   message: Message;
   onEdit?: (id: string, content: string) => void;
   onDelete?: (id: string) => void;
   onRegenerate?: (id: string) => void;
+}
+
+interface Command {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  action: string;
+}
+
+const commands: Command[] = [
+  {
+    icon: <HelpCircle className="w-4 h-4" />,
+    title: "Show available commands",
+    description: "/help",
+    action: "help",
+  },
+  {
+    icon: <HelpCircle className="w-4 h-4" />,
+    title: "Configure options",
+    description: "/settings",
+    action: "settings",
+  },
+  {
+    icon: <Eye className="w-4 h-4" />,
+    title: "Switch To Assisted View",
+    description: "/assisted [filename]",
+    action: "assisted",
+  },
+  {
+    icon: <FileText className="w-4 h-4" />,
+    title: "Open Editor Files",
+    description: "/open [filename]",
+    action: "open",
+  },
+];
+
+interface CommandMenuProps {
+  isOpen: boolean;
+  onSelect: (action: string) => void;
+  filter: string;
+}
+
+export function CommandMenu({ isOpen, onSelect, filter }: CommandMenuProps) {
+  const filteredCommands = commands.filter(
+    (command) =>
+      command.title.toLowerCase().includes(filter.toLowerCase()) ||
+      command.description.toLowerCase().includes(filter.toLowerCase())
+  );
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.15 }}
+          className="absolute bottom-full left-0 w-full mb-2 bg-[#1E1E1E] border border-gray-800 rounded-lg shadow-lg overflow-hidden"
+        >
+          <div className="max-h-[300px] overflow-y-auto">
+            {filteredCommands.map((command) => (
+              <button
+                key={command.action}
+                onClick={() => onSelect(command.action)}
+                className="w-full px-4 py-3 flex items-start gap-3 hover:bg-gray-800/50 transition-colors text-left"
+              >
+                <div className="flex-shrink-0 w-6 h-6 rounded bg-gray-800 flex items-center justify-center text-gray-400">
+                  {command.icon}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-gray-200">{command.title}</div>
+                  <div className="text-sm text-gray-400">{command.description}</div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 }
 
 export function MessageComponent({
@@ -188,6 +269,12 @@ export function MessageComponent({
 
 export default function ChatInterface() {
   const [message, setMessage] = useState("");
+  const [commandFilter, setCommandFilter] = useState("");
+  
+  const handleCommandSelect = (action: string) => {
+    // Implement the action handling logic here
+    console.log(`Selected action: ${action}`);
+  };
   const [messages, setMessages] = useState<Message[]>([]);
   const [isConversationStarted, setIsConversationStarted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -338,7 +425,7 @@ export default function ChatInterface() {
                 }
               }}
               className="w-full bg-[#2f2f2f] border-none text-white px-4 py-6 rounded-lg pr-12 focus-visible:ring-0 focus-visible:ring-offset-0"
-              placeholder="Message ChatGPT"
+              placeholder="Message HatGPT"
             />
             <TooltipProvider>
               <Tooltip>
@@ -392,39 +479,53 @@ export default function ChatInterface() {
 
           <div className="">
             <div className="max-w-3xl mx-auto p-4">
-              <div className="relative sticky bottom-0 bg-[#1E1E1E] p-4">
+                <div className="relative sticky bottom-0 bg-[#1E1E1E] p-4">
                 <Input
                   value={message}
-                  onChange={(e) => setMessage(e.target.value)}
+                  onChange={(e) => {
+                  setMessage(e.target.value);
+                  if (e.target.value.startsWith("/")) {
+                    setCommandFilter(e.target.value.slice(1));
+                  } else {
+                    setCommandFilter("");
+                  }
+                  }}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey && message.trim()) {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }
+                  if (e.key === "Enter" && !e.shiftKey && message.trim()) {
+                    e.preventDefault();
+                    handleSendMessage();
+                  }
                   }}
                   className="w-full bg-[#2f2f2f] border-none text-white px-4 py-6 rounded-lg pr-12 focus-visible:ring-0 focus-visible:ring-offset-0"
                   placeholder="Message ChatGPT"
                 />
+                {message.startsWith("/") && (
+                  <CommandMenu
+                  isOpen={true}
+                  onSelect={handleCommandSelect}
+                  filter={commandFilter}
+                  />
+                )}
                 <TooltipProvider>
                   <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        size="icon"
-                        disabled={!message.trim()}
-                        onClick={handleSendMessage}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-white hover:text-white/50 bg-transparent hover:bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <SendHorizontal className="h-5 w-5" />
-                      </Button>
-                    </TooltipTrigger>
-                    {!message.trim() && (
-                      <TooltipContent>
-                        <p>Please enter a message</p>
-                      </TooltipContent>
-                    )}
+                  <TooltipTrigger asChild>
+                    <Button
+                    size="icon"
+                    disabled={!message.trim()}
+                    onClick={handleSendMessage}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-white hover:text-white/50 bg-transparent hover:bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                    <SendHorizontal className="h-5 w-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  {!message.trim() && (
+                    <TooltipContent>
+                    <p>Please enter a message</p>
+                    </TooltipContent>
+                  )}
                   </Tooltip>
                 </TooltipProvider>
-              </div>
+                </div>
               <p className="text-xs text-gray-500 mt-2 text-center">
                 GPT can make mistakes. It is not a bug, it is a feature.
               </p>
