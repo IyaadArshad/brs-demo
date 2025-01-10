@@ -58,6 +58,12 @@ const commands: Command[] = [
     action: "assisted",
   },
   {
+    icon: <Eye className="w-4 h-4" />,
+    title: "Create new document",
+    description: "/create [filename]",
+    action: "create",
+  },
+  {
     icon: <FileText className="w-4 h-4" />,
     title: "Open Editor Files",
     description: "/open [filename]",
