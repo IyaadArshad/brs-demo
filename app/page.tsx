@@ -36,6 +36,7 @@ interface Command {
   title: string;
   description: string;
   action: string;
+  command: string;
 }
 
 const commands: Command[] = [
@@ -44,30 +45,35 @@ const commands: Command[] = [
     title: "Show available commands",
     description: "/help",
     action: "help",
+    command: "help",
   },
   {
     icon: <HelpCircle className="w-4 h-4" />,
     title: "Configure options",
     description: "/settings",
     action: "settings",
+    command: "settings",
   },
   {
     icon: <Eye className="w-4 h-4" />,
     title: "Switch To Assisted View",
     description: "/assisted [filename]",
     action: "assisted",
+    command: "assisted",
   },
   {
     icon: <Eye className="w-4 h-4" />,
     title: "Create new document",
     description: "/create [filename]",
     action: "create",
+    command: "create",
   },
   {
     icon: <FileText className="w-4 h-4" />,
     title: "Open Editor Files",
     description: "/open [filename]",
     action: "open",
+    command: "open",
   },
 ];
 
@@ -107,9 +113,11 @@ export function CommandMenu({ isOpen, onSelect, filter }: CommandMenuProps) {
           );
           break;
         case 'Enter':
+        case 'Tab':
           e.preventDefault();
+          e.stopPropagation(); // Prevent form submission
           if (filteredCommands[selectedIndex]) {
-            onSelect(filteredCommands[selectedIndex].action);
+            onSelect(`/${filteredCommands[selectedIndex].command}`);
           }
           break;
       }
@@ -128,15 +136,20 @@ export function CommandMenu({ isOpen, onSelect, filter }: CommandMenuProps) {
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.15 }}
           className="absolute bottom-full left-0 w-full mb-2 bg-[#1E1E1E] border border-gray-800 rounded-lg shadow-lg overflow-hidden"
+          onKeyDown={(e) => e.stopPropagation()} // Prevent event bubbling
         >
           <div className="max-h-[300px] overflow-y-auto">
             {filteredCommands.map((command, index) => (
               <button
                 key={command.action}
-                onClick={() => onSelect(command.action)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  onSelect(`/${command.command}`);
+                }}
                 onMouseEnter={() => setSelectedIndex(index)}
+                onMouseLeave={() => setSelectedIndex(-1)}
                 className={`w-full px-4 py-3 flex items-start gap-3 transition-colors text-left ${
-                  index === selectedIndex ? 'bg-gray-800/50' : 'hover:bg-gray-800/50'
+                  index === selectedIndex ? 'bg-gray-800/50' : ''
                 }`}
               >
                 <div className="flex-shrink-0 w-6 h-6 rounded bg-gray-800 flex items-center justify-center text-gray-400">
