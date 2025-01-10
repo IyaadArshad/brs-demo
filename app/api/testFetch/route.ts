@@ -17,7 +17,7 @@ async function createFile(file_name: string) {
     console.error(`Failed to create file: ${response.statusText}`);
     return { success: false, error: responseData.message };
   }
-  return await response.json();
+  return responseData;
 }
 
 async function write_initial_data(file_name: string, data: string) {
@@ -32,7 +32,7 @@ async function write_initial_data(file_name: string, data: string) {
     console.error(`Failed to write initial data: ${response.statusText}`);
     return { success: false, error: responseData.message };
   }
-  return await response.json();
+  return responseData;
 }
 
 async function update_markdown_file(file_name: string, data: string) {
@@ -47,7 +47,7 @@ async function update_markdown_file(file_name: string, data: string) {
     console.error(`Failed to update markdown file: ${response.statusText}`);
     return { success: false, error: responseData.message };
   }
-  return await response.json();
+  return responseData;
 }
 
 async function check_init(file_name: string) {
@@ -62,7 +62,7 @@ async function check_init(file_name: string) {
     console.error(`Failed to check init: ${response.statusText}`);
     return { success: false, error: responseData.message };
   }
-  return await response.json();
+  return responseData;
 }
 
 // Repeatedly call the API until there's no function call, then do a streaming call
