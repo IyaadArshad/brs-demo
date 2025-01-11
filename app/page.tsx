@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CraftEditor, JSONContent } from "@sergeysova/craft";
 import {
   SendHorizontal,
   Trash2,
@@ -369,6 +370,7 @@ export function MessageComponent({
 }
 
 export default function ChatInterface() {
+  const [content, setContent] = useState<JSONContent>({})
   const [message, setMessage] = useState("");
   const [commandFilter, setCommandFilter] = useState("");
   const [splitView, setSplitView] = useState(false); // New state
@@ -618,17 +620,23 @@ export default function ChatInterface() {
 
   return (
     splitView ? (
-      <div className="flex min-h-screen">
-        {/* 1) Lorem Ipsum on the left */}
-        <div className="w-1/2 p-4">
-          <Markdown>
-            {`# Lorem Ipsum
-Lorem ipsum dolor sit amet...
-`}
-          </Markdown>
+      <div className="flex h-screen overflow-hidden">
+        {/* 1) editor */}
+        <div className="w-1/2 p-4 border-r border-black overflow-y-auto" style={{ backgroundColor: '#1e1e1e' }} >
+        <div className="">
+          <CraftEditor 
+            content={content} 
+            onUpdate={(editor: { getJSON: () => JSONContent }) => {
+              const newContent = editor.getJSON();
+              console.log('Editor content updated:', newContent);
+              setContent(newContent);
+            }}
+            className="white-text"
+          />
+        </div>
         </div>
         {/* 2) Chat interface on the right */}
-        <div className="w-1/2 flex flex-col bg-[#1E1E1E] text-white">
+        <div className="w-1/2 flex flex-col bg-[#1E1E1E] text-white overflow-y-auto">
           {/* The entire chat interface goes here */}
           {!isConversationStarted ? (
             <main className="flex-1 flex flex-col items-center justify-center p-4">
@@ -763,7 +771,7 @@ Lorem ipsum dolor sit amet...
         </div>
       </div>
     ) : (
-      <div className="min-h-screen bg-[#1E1E1E] text-white flex flex-col">
+      <div className="h-screen bg-[#1E1E1E] text-white flex flex-col">
         {!isConversationStarted ? (
           <main className="flex-1 flex flex-col items-center justify-center p-4">
             <motion.h1
