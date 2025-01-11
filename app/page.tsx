@@ -21,7 +21,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Message } from "@/types";
 import { MessageSquare, Eye, FileText, HelpCircle } from 'lucide-react';
 
 interface MessageProps {
@@ -29,6 +28,13 @@ interface MessageProps {
   onEdit?: (id: string, content: string) => void;
   onDelete?: (id: string) => void;
   onRegenerate?: (id: string) => void;
+}
+
+export interface Message {
+  id: string
+  content: string
+  role: 'user' | 'assistant'
+  timestamp: number
 }
 
 interface Command {
