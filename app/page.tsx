@@ -66,7 +66,7 @@ const open = (filename?: string): { message: string } => ({
 });
 
 
-const commands: Command[] = [
+const baseCommands: Command[] = [
   {
     icon: <HelpCircle className="w-4 h-4" />,
     title: "Show available commands",
@@ -104,14 +104,31 @@ const commands: Command[] = [
   },
 ];
 
+function getCommands(splitView: boolean): Command[] {
+  return splitView
+    ? [
+        ...baseCommands,
+        {
+          icon: <Eye className="w-4 h-4" />,
+          title: "Exit Split Screen View",
+          description: "/exit",
+          action: "exit",
+          command: "exit",
+        },
+      ]
+    : baseCommands;
+}
+
 interface CommandMenuProps {
   isOpen: boolean;
   onSelect: (action: string) => void;
   filter: string;
+  splitView: boolean; // add this prop
 }
 
-export function CommandMenu({ isOpen, onSelect, filter }: CommandMenuProps) {
+export function CommandMenu({ isOpen, onSelect, filter, splitView }: CommandMenuProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const commands = getCommands(splitView);
   const filteredCommands = commands.filter(
     (command) =>
       command.title.toLowerCase().includes(filter.toLowerCase()) ||
@@ -490,6 +507,12 @@ export default function ChatInterface() {
           });
         }
       }
+    } else if (newMessage.content.startsWith("/open")) {
+      setSplitView(true);
+      return;
+    } else if (newMessage.content.startsWith("/exit")) {
+      setSplitView(false);
+      return;
     } else {
       await fetchAIResponse(newMessage);
     }
@@ -707,6 +730,7 @@ Lorem ipsum dolor sit amet...
                       isOpen={true}
                       onSelect={handleCommandSelect}
                       filter={commandFilter}
+                      splitView={splitView} // pass splitView
                       />
                     )}
                     <TooltipProvider>
@@ -728,13 +752,6 @@ Lorem ipsum dolor sit amet...
                       )}
                       </Tooltip>
                     </TooltipProvider>
-                    <Button
-                      size="icon"
-                      onClick={() => setSplitView(!splitView)}
-                      className="text-white hover:text-white/50 bg-transparent hover:bg-transparent"
-                    >
-                      <Layout className="h-5 w-5" />
-                    </Button>
                     </div>
                   <p className="text-xs text-gray-500 mt-2 text-center">
                     GPT can make mistakes. It is not a bug, it is a feature.
@@ -847,6 +864,7 @@ Lorem ipsum dolor sit amet...
                     isOpen={true}
                     onSelect={handleCommandSelect}
                     filter={commandFilter}
+                    splitView={splitView} // pass splitView
                     />
                   )}
                   <TooltipProvider>
@@ -868,13 +886,6 @@ Lorem ipsum dolor sit amet...
                     )}
                     </Tooltip>
                   </TooltipProvider>
-                  <Button
-                    size="icon"
-                    onClick={() => setSplitView(!splitView)}
-                    className="text-white hover:text-white/50 bg-transparent hover:bg-transparent"
-                  >
-                    <Layout className="h-5 w-5" />
-                  </Button>
                   </div>
                 <p className="text-xs text-gray-500 mt-2 text-center">
                   GPT can make mistakes. It is not a bug, it is a feature.
