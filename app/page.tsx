@@ -457,9 +457,9 @@ export default function ChatInterface() {
         const response = await createFile(parts[1]);
         let currentMessage = "";
         const words = response.split(' ');
-        await new Promise((resolve) => setTimeout(resolve, 45));
+        await new Promise((resolve) => setTimeout(resolve, 650));
         for (let i = 0; i < words.length; i++) {
-          await new Promise((resolve) => setTimeout(resolve, 45));
+          await new Promise((resolve) => setTimeout(resolve, 95));
           currentMessage += (i === 0 ? "" : " ") + words[i];
           setMessages((prev) => {
             const lastMessage = prev[prev.length - 1];

@@ -20,10 +20,8 @@ export async function POST(request: Request) {
       return Response.json(
         {
           success: false,
-          message:
-            "File with the same name already exists, choose another name",
-        },
-        { status: 403 }
+          message: `A file with the name **${fileName}** already exists, choose another name`,
+        }
       );
     }
   } catch (error) {}
@@ -31,9 +29,8 @@ export async function POST(request: Request) {
     return Response.json(
       {
         success: false,
-        message: "File name too long, pick a shorter name",
-      },
-      { status: 413 }
+        message: `**'${fileName}'** is too long, pick a shorter name under 500 characters`,
+      }
     );
   }
 
@@ -46,7 +43,7 @@ export async function POST(request: Request) {
 
   return Response.json({
     success: "true",
-    message: "File created successfully",
+    message: `**${fileName}** has been successfully created`,
     id: record.id,
     file_name: fileName,
   });
