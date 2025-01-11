@@ -409,7 +409,79 @@ export default function ChatInterface() {
         });
       }
     } else if (newMessage.content.startsWith("/create")) {
-      
+
+      async function createFile(file_name: string) {
+        console.log(`Creating file: ${file_name}`);
+        const response = await fetch("http://localhost:3000/api/data/createFile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ file_name }),
+        });
+        const responseData = await response.json();
+        console.log(responseData)
+        if (!response.ok) {
+          return { message: responseData.message };
+        }
+        return responseData.message;
+      }
+
+      const parts = newMessage.content.split(' ');
+      if (parts.length !== 2 || !parts[1].endsWith('.md')) {
+        await new Promise((resolve) => setTimeout(resolve, 950));
+        let currentMessage = "";
+        const words = "Invalid format: \n\n\ Please provide a single name for a file. \n\n\ -It must end in '.md' \n\n\ -Use dashes, underscores, and characters only \n\n\ -The file name cannot have spaces".split(' ');
+        for (let i = 0; i < words.length; i++) {
+          await new Promise((resolve) => setTimeout(resolve, 45));
+          currentMessage += (i === 0 ? "" : " ") + words[i];
+          setMessages((prev) => {
+            const lastMessage = prev[prev.length - 1];
+            if (lastMessage && lastMessage.role === "assistant") {
+              return [
+          ...prev.slice(0, -1),
+          { ...lastMessage, content: currentMessage },
+              ];
+            } else {
+              return [
+          ...prev,
+          {
+            id: (Date.now() + 1).toString(),
+            content: currentMessage,
+            role: "assistant",
+            timestamp: Date.now(),
+          },
+              ];
+            }
+          });
+        }
+      } else { // create file and return output
+        const response = await createFile(parts[1]);
+        let currentMessage = "";
+        const words = response.split(' ');
+        await new Promise((resolve) => setTimeout(resolve, 45));
+        for (let i = 0; i < words.length; i++) {
+          await new Promise((resolve) => setTimeout(resolve, 45));
+          currentMessage += (i === 0 ? "" : " ") + words[i];
+          setMessages((prev) => {
+            const lastMessage = prev[prev.length - 1];
+            if (lastMessage && lastMessage.role === "assistant") {
+              return [
+          ...prev.slice(0, -1),
+          { ...lastMessage, content: currentMessage },
+              ];
+            } else {
+              return [
+          ...prev,
+          {
+            id: (Date.now() + 1).toString(),
+            content: currentMessage,
+            role: "assistant",
+            timestamp: Date.now(),
+          },
+              ];
+            }
+          });
+        }
+      }
     } else {
       await fetchAIResponse(newMessage);
     }
