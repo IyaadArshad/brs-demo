@@ -5,5 +5,8 @@ import { CraftEditor, JSONContent } from "@sergeysova/craft";
 export default function App() {
   const [content, setContent] = useState<JSONContent>({})
 
-  return <CraftEditor content={content} onUpdate={(editor) => setContent(editor.getJSON())} />;
+  return <CraftEditor 
+    content={content} 
+    onUpdate={(editor: { getJSON: () => JSONContent }) => setContent(editor.getJSON())} 
+  />;
 }
