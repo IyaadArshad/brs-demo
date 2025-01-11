@@ -596,6 +596,15 @@ export default function ChatInterface() {
   return (
     splitView ? (
       <div className="flex min-h-screen">
+        {/* 1) Lorem Ipsum on the left */}
+        <div className="w-1/2 p-4">
+          <Markdown>
+            {`# Lorem Ipsum
+Lorem ipsum dolor sit amet...
+`}
+          </Markdown>
+        </div>
+        {/* 2) Chat interface on the right */}
         <div className="w-1/2 flex flex-col bg-[#1E1E1E] text-white">
           {/* The entire chat interface goes here */}
           {!isConversationStarted ? (
@@ -734,14 +743,6 @@ export default function ChatInterface() {
               </div>
             </>
           )}
-        </div>
-        <div className="w-1/2 p-4">
-          <Markdown>
-            {`# Lorem Ipsum
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-Mauris vel nulla nibh. Quisque non interdum libero, quis scelerisque arcu.
-`}
-          </Markdown>
         </div>
       </div>
     ) : (
