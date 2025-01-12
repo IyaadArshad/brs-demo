@@ -4,7 +4,7 @@
 
 body {
   font-family: Arial, Helvetica, sans-serif;
-  color: blue!important;  
+  background: #07090f;  
 }
 
 @layer base {
@@ -80,4 +80,14 @@ body {
 
 .tiptap {
   color: #fff!important;
+}
+
+.screen {
+  margin: 0.5px;
+  margin-bottom: 3px;
+  margin-top: 3px;
+  margin-right: 2px; 
+  margin-left: 2px;
+  border-radius: 4px;
+  border-style: none;
 }

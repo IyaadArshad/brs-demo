@@ -374,6 +374,34 @@ export default function ChatInterface() {
   const [message, setMessage] = useState("");
   const [commandFilter, setCommandFilter] = useState("");
   const [splitView, setSplitView] = useState(false); // New state
+  const [editorWidth, setEditorWidth] = useState(50);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (isDragging) {
+      let newWidth = (e.clientX / window.innerWidth) * 100;
+      if (newWidth < 25) newWidth = 25;
+      if (newWidth > 75) newWidth = 75;
+      setEditorWidth(newWidth);
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseDown = () => {
+    setIsDragging(true);
+  };
+
+  useEffect(() => {
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isDragging]);
   
   const handleCommandSelect = (action: string) => {
     // Implement the action handling logic here
@@ -621,22 +649,32 @@ export default function ChatInterface() {
   return (
     splitView ? (
       <div className="flex h-screen overflow-hidden">
-        {/* 1) editor */}
-        <div className="w-1/2 p-4 border-r border-black overflow-y-auto" style={{ backgroundColor: '#1e1e1e' }} >
-        <div className="">
-          <CraftEditor 
-            content={content} 
-            onUpdate={(editor: { getJSON: () => JSONContent }) => {
-              const newContent = editor.getJSON();
-              console.log('Editor content updated:', newContent);
-              setContent(newContent);
-            }}
-            className="white-text"
-          />
+        {/* Left pane */}
+        <div
+          className="border-r screen border-black overflow-y-auto"
+          style={{ flexBasis: `${editorWidth}%`, backgroundColor: '#1e1e1e' }}
+        >
+          <div className="">
+            <CraftEditor 
+              content={content} 
+              onUpdate={(editor: { getJSON: () => JSONContent }) => {
+                const newContent = editor.getJSON();
+                console.log('Editor content updated:', newContent);
+                setContent(newContent);
+              }}
+              className="white-text"
+            />
+          </div>
         </div>
-        </div>
-        {/* 2) Chat interface on the right */}
-        <div className="w-1/2 flex flex-col bg-[#1E1E1E] text-white overflow-y-auto">
+        <div
+          className="w-[3px] bg-black cursor-col-resize"
+          onMouseDown={handleMouseDown}
+        />
+        {/* Right pane */}
+        <div
+          className="flex screen flex-col bg-[#1E1E1E] text-white overflow-y-auto"
+          style={{ flexBasis: `${100 - editorWidth}%` }}
+        >
           {/* The entire chat interface goes here */}
           {!isConversationStarted ? (
             <main className="flex-1 flex flex-col items-center justify-center p-4">
