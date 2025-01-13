@@ -42,6 +42,8 @@ type Component = {
   id: string;
   type: string;
   position: { x: number; y: number };
+  content?: string;       // New field for text content
+  isEditing?: boolean;    // New field to track editing state
 }
 
 type Shape = {
@@ -601,10 +603,27 @@ export default function DiagramGenerator() {
       const x = e.clientX - canvasRect.left
       const y = e.clientY - canvasRect.top
       
+      let defaultContent = ''
+      switch (componentType) {
+        case 'heading':
+          defaultContent = 'Heading Text'
+          break
+        case 'subheading':
+          defaultContent = 'Subheading Text'
+          break
+        case 'paragraph':
+          defaultContent = 'This is a sample paragraph text.'
+          break
+        default:
+          defaultContent = ''
+      }
+      
       const newComponent: Component = {
         id: `${componentType}-${shapeIdRef.current++}`,
         type: componentType,
         position: { x, y },
+        content: defaultContent,    // Initialize content
+        isEditing: false,          // Initialize editing state
       }
       
       setDiagramComponents(prev => [...prev, newComponent])
@@ -658,6 +677,43 @@ export default function DiagramGenerator() {
   
     document.addEventListener('mousemove', handleMouseMove)
     document.addEventListener('mouseup', handleMouseUp)
+  }
+
+  // Add handler to update component content
+  const updateComponentContent = (componentId: string, newContent: string) => {
+    setDiagramComponents(prev =>
+      prev.map(comp =>
+        comp.id === componentId
+          ? { ...comp, content: newContent }
+          : comp
+      )
+    )
+  }
+
+  // Add helper functions for editing
+  const startEditing = (componentId: string) => {
+    setDiagramComponents(prev =>
+      prev.map(comp =>
+        comp.id === componentId
+          ? { ...comp, isEditing: true }
+          : comp
+      )
+    )
+  }
+
+  const stopEditing = (componentId: string, save: boolean, newContent?: string) => {
+    setDiagramComponents(prev =>
+      prev.map(comp => {
+        if (comp.id === componentId) {
+          return {
+            ...comp,
+            isEditing: false,
+            content: save && newContent !== undefined ? newContent : comp.content,
+          }
+        }
+        return comp
+      })
+    )
   }
 
   return (
@@ -752,8 +808,27 @@ export default function DiagramGenerator() {
                           top: `${component.position.y}px`,
                         }}
                         onMouseDown={(e) => startDrag(e, component.id)}
+                        onDoubleClick={() => startEditing(component.id)}  // Enable double-click to edit
                       >
-                        <h1 className="text-2xl font-bold">Heading Text</h1>
+                        {component.isEditing ? (
+                          <input
+                            type="text"
+                            value={component.content}
+                            autoFocus
+                            onChange={(e) => updateComponentContent(component.id, e.target.value)}
+                            onBlur={() => stopEditing(component.id, true)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                stopEditing(component.id, true)
+                              } else if (e.key === 'Escape') {
+                                stopEditing(component.id, false)
+                              }
+                            }}
+                            className="w-full border-b focus:outline-none"
+                          />
+                        ) : (
+                          <h1 className="text-2xl font-bold">{component.content}</h1>
+                        )}
                       </div>
                     )
                     break;
@@ -766,8 +841,27 @@ export default function DiagramGenerator() {
                           top: `${component.position.y}px`,
                         }}
                         onMouseDown={(e) => startDrag(e, component.id)}
+                        onDoubleClick={() => startEditing(component.id)}  // Enable double-click to edit
                       >
-                        <h2 className="text-xl font-semibold">Subheading Text</h2>
+                        {component.isEditing ? (
+                          <input
+                            type="text"
+                            value={component.content}
+                            autoFocus
+                            onChange={(e) => updateComponentContent(component.id, e.target.value)}
+                            onBlur={() => stopEditing(component.id, true)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                stopEditing(component.id, true)
+                              } else if (e.key === 'Escape') {
+                                stopEditing(component.id, false)
+                              }
+                            }}
+                            className="w-full border-b focus:outline-none"
+                          />
+                        ) : (
+                          <h2 className="text-xl font-semibold">{component.content}</h2>
+                        )}
                       </div>
                     )
                     break;
@@ -780,8 +874,27 @@ export default function DiagramGenerator() {
                           top: `${component.position.y}px`,
                         }}
                         onMouseDown={(e) => startDrag(e, component.id)}
+                        onDoubleClick={() => startEditing(component.id)}  // Enable double-click to edit
                       >
-                        <p className="text-base">This is a sample paragraph text.</p>
+                        {component.isEditing ? (
+                          <input
+                            type="text"
+                            value={component.content}
+                            autoFocus
+                            onChange={(e) => updateComponentContent(component.id, e.target.value)}
+                            onBlur={() => stopEditing(component.id, true)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                stopEditing(component.id, true)
+                              } else if (e.key === 'Escape') {
+                                stopEditing(component.id, false)
+                              }
+                            }}
+                            className="w-full border-b focus:outline-none"
+                          />
+                        ) : (
+                          <p className="text-base">{component.content}</p>
+                        )}
                       </div>
                     )
                     break;
