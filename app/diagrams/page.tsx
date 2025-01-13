@@ -409,6 +409,51 @@ function TabsWindow({ className, style, onError }: TabsWindowProps) {
     setShapes(prev => [...prev, newShape])
   }
 
+  const startDrag = (
+    e: React.MouseEvent,
+    componentId: string
+  ) => {
+    e.stopPropagation()
+    let startX = e.clientX
+    let startY = e.clientY
+  
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const dx = moveEvent.clientX - startX
+      const dy = moveEvent.clientY - startY
+  
+      setShapes(prev =>
+        prev.map(shape =>
+          shape.id === componentId
+            ? {
+                ...shape,
+                position: {
+                  x: Math.max(0, Math.min(shape.position.x + dx, innerCanvasWidth - shapeWidth)),
+                  y: Math.max(0, Math.min(shape.position.y + dy, innerCanvasHeight - shapeHeight)),
+                },
+              }
+            : shape
+        )
+      )
+  
+      startX = moveEvent.clientX
+      startY = moveEvent.clientY
+    }
+  
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+  
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+  }
+  
+  // Define inner canvas dimensions and component sizes
+  const innerCanvasWidth = 800 // Adjust based on actual size
+  const innerCanvasHeight = 600 // Adjust based on actual size
+  const shapeWidth = 80         // Adjust based on actual shape size
+  const shapeHeight = 80        // Adjust based on actual shape size
+
   return (
     <>
       <div 
@@ -480,6 +525,7 @@ function TabsWindow({ className, style, onError }: TabsWindowProps) {
                     left: `${shape.position.x}px`,
                     top: `${shape.position.y}px`,
                   }}
+                  onMouseDown={(e) => startDrag(e, shape.id)}
                 >
                   <svg width="80" height="80" viewBox="0 0 100 100">
                     {renderShape(shape.type)}
@@ -653,17 +699,36 @@ export default function DiagramGenerator() {
       const dy = moveEvent.clientY - startY
   
       setDiagramComponents(prev =>
-        prev.map(comp =>
-          comp.id === componentId
-            ? {
-                ...comp,
-                position: {
-                  x: comp.position.x + dx,
-                  y: comp.position.y + dy,
-                },
-              }
-            : comp
-        )
+        prev.map(comp => {
+          if (comp.id === componentId) {
+            let newX = comp.position.x + dx
+            let newY = comp.position.y + dy
+  
+            // Get canvas dimensions
+            const canvas = canvasRef.current
+            if (canvas) {
+              const canvasWidth = canvas.clientWidth
+              const canvasHeight = canvas.clientHeight
+  
+              // Define component dimensions (adjust as needed)
+              const componentWidth = 100
+              const componentHeight = 100
+  
+              // Constrain within canvas
+              newX = Math.max(0, Math.min(newX, canvasWidth - componentWidth))
+              newY = Math.max(0, Math.min(newY, canvasHeight - componentHeight))
+            }
+  
+            return {
+              ...comp,
+              position: {
+                x: newX,
+                y: newY,
+              },
+            }
+          }
+          return comp
+        })
       )
   
       startX = moveEvent.clientX
