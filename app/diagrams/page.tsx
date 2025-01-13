@@ -83,7 +83,13 @@ const componentData = {
     { id: 'cone', name: 'Cone', icon: ShapesIcon },
     { id: 'pyramid', name: 'Pyramid', icon: ShapesIcon },
   ],
-  text: [{ id: 'text1', name: 'Text 1' }, { id: 'text2', name: 'Text 2' }],
+  text: [
+    { id: 'text1', name: 'Text 1' },
+    { id: 'text2', name: 'Text 2' },
+    { id: 'heading', name: 'Heading', icon: TypeIcon },       // New component
+    { id: 'subheading', name: 'Subheading', icon: TypeIcon }, // New component
+    { id: 'paragraph', name: 'Paragraph', icon: TypeIcon },   // New component
+  ],
   forms: {
     fields: [
       { id: 'text-input', name: 'Text Input', icon: FormInputIcon },
@@ -94,6 +100,7 @@ const componentData = {
       { id: 'checkbox', name: 'Checkbox', icon: FormInputIcon },
       { id: 'radio', name: 'Radio', icon: FormInputIcon },
       { id: 'select', name: 'Select', icon: FormInputIcon },
+      { id: 'blank-form', name: 'Blank Form', icon: FormInputIcon }, // New component
     ],
     pinned: [
       { id: 'pinned-form1', name: 'Pinned Form 1', icon: PinIcon },
@@ -613,6 +620,46 @@ export default function DiagramGenerator() {
     })
   }
 
+  // Add helper functions for dragging
+  const startDrag = (
+    e: React.MouseEvent,
+    componentId: string
+  ) => {
+    e.stopPropagation()
+    let startX = e.clientX
+    let startY = e.clientY
+  
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const dx = moveEvent.clientX - startX
+      const dy = moveEvent.clientY - startY
+  
+      setDiagramComponents(prev =>
+        prev.map(comp =>
+          comp.id === componentId
+            ? {
+                ...comp,
+                position: {
+                  x: comp.position.x + dx,
+                  y: comp.position.y + dy,
+                },
+              }
+            : comp
+        )
+      )
+  
+      startX = moveEvent.clientX
+      startY = moveEvent.clientY
+    }
+  
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+  
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+  }
+
   return (
     <div className="min-h-screen bg-black flex items-center justify-center">
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -680,6 +727,64 @@ export default function DiagramGenerator() {
                       />
                     );
                     break;
+                  case 'blank-form':
+                    ComponentToRender = (
+                      <div
+                        className="absolute p-4 border rounded bg-white"
+                        style={{
+                          left: `${component.position.x}px`,
+                          top: `${component.position.y}px`,
+                        }}
+                      >
+                        <h3 className="text-lg font-bold mb-2">Form Heading</h3>
+                        {/* Add fields here */}
+                        <Input placeholder="Field 1" className="mb-2" />
+                        <Input placeholder="Field 2" className="mb-2" />
+                      </div>
+                    )
+                    break;
+                  case 'heading':
+                    ComponentToRender = (
+                      <div
+                        className="absolute p-2 border rounded bg-white cursor-move"
+                        style={{
+                          left: `${component.position.x}px`,
+                          top: `${component.position.y}px`,
+                        }}
+                        onMouseDown={(e) => startDrag(e, component.id)}
+                      >
+                        <h1 className="text-2xl font-bold">Heading Text</h1>
+                      </div>
+                    )
+                    break;
+                  case 'subheading':
+                    ComponentToRender = (
+                      <div
+                        className="absolute p-2 border rounded bg-white cursor-move"
+                        style={{
+                          left: `${component.position.x}px`,
+                          top: `${component.position.y}px`,
+                        }}
+                        onMouseDown={(e) => startDrag(e, component.id)}
+                      >
+                        <h2 className="text-xl font-semibold">Subheading Text</h2>
+                      </div>
+                    )
+                    break;
+                  case 'paragraph':
+                    ComponentToRender = (
+                      <div
+                        className="absolute p-2 border rounded bg-white cursor-move"
+                        style={{
+                          left: `${component.position.x}px`,
+                          top: `${component.position.y}px`,
+                        }}
+                        onMouseDown={(e) => startDrag(e, component.id)}
+                      >
+                        <p className="text-base">This is a sample paragraph text.</p>
+                      </div>
+                    )
+                    break;
                   default:
                     if (componentData.shapes.some(shape => shape.id === component.type)) {
                       return (
@@ -698,7 +803,7 @@ export default function DiagramGenerator() {
                     }
                     ComponentToRender = (
                       <div
-                        className="absolute bg-white border rounded p-2"
+                        className="absolute bg-white border rounded p-2 cursor-move"
                         style={{
                           left: `${component.position.x}px`,
                           top: `${component.position.y}px`,
