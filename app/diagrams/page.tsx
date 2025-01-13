@@ -51,7 +51,7 @@ type Shape = {
 }
 
 // Component data
-const components = {
+const componentData = {
   pinned: [{ id: 'pinned1', name: 'Pinned 1' }, { id: 'pinned2', name: 'Pinned 2' }],
   windows: [
     { 
@@ -209,7 +209,7 @@ function ComponentsDialog({
 }: { 
   open: boolean; 
   onOpenChange: (open: boolean) => void;
-  triggerRef: React.RefObject<HTMLButtonElement>;
+  triggerRef: React.RefObject<HTMLButtonElement | null>;
   className?: string;
 }) {
   const [selectedCategory, setSelectedCategory] = useState('pinned')
@@ -234,12 +234,14 @@ function ComponentsDialog({
   if (!open) return null
 
   const filteredComponents = selectedCategory === 'forms'
-    ? components.forms[selectedFormCategory as keyof typeof components.forms].filter(
-        component => component.name.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : components[selectedCategory as keyof typeof components].filter(
-        component => component.name.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+      ? componentData.forms[selectedFormCategory as keyof typeof componentData.forms].filter(
+          component => component.name.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      : Array.isArray(componentData[selectedCategory as keyof typeof componentData])
+        ? (componentData[selectedCategory as keyof typeof componentData] as Array<{ id: string; name: string; icon?: any }>).filter(
+            component => component.name.toLowerCase().includes(searchTerm.toLowerCase())
+          )
+        : []
 
   return (
     <div 
@@ -272,14 +274,16 @@ function ComponentsDialog({
       </div>
       <div className="w-2/3 flex flex-col">
         <div className="p-4 border-b">
-          <Input
-            type="text"
-            placeholder="Search components..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full"
-            icon={Search}
-          />
+          <div className="relative">
+            <Input
+              type="text"
+              placeholder="Search components..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-8"
+            />
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+          </div>
         </div>
         {selectedCategory === 'forms' && (
           <div className="flex flex-wrap gap-2 p-4 border-b">
@@ -379,7 +383,7 @@ function TabsWindow({ className, style, onError }: TabsWindowProps) {
     e.preventDefault()
     const shapeType = e.dataTransfer.getData('application/reactflow')
     
-    if (!shapeType || !components.shapes.some(shape => shape.id === shapeType)) {
+    if (!shapeType || !componentData.shapes.some(shape => shape.id === shapeType)) {
       return
     }
     
@@ -507,13 +511,15 @@ export default function DiagramGenerator() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isComponentsDialogOpen, setIsComponentsDialogOpen] = useState(false)
   const [canvasSize, setCanvasSize] = useState({ width: 600, height: 400 })
-  const [components, setComponents] = useState<Component[]>([])
+  const [diagramComponents, setDiagramComponents] = useState<Component[]>([])
   const canvasRef = useRef<HTMLDivElement>(null)
   const componentsButtonRef = useRef<HTMLButtonElement>(null)
   const resizingRef = useRef<boolean>(false)
   const startPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
   const dialogContentRef = useRef<HTMLDivElement>(null)
   const { toast } = useToast()
+  const tabIdRef = useRef(2)
+  const shapeIdRef = useRef(1)
 
   const handleClickOutside = (event: React.MouseEvent<HTMLDivElement>) => {
     if (
@@ -589,12 +595,12 @@ export default function DiagramGenerator() {
       const y = e.clientY - canvasRect.top
       
       const newComponent: Component = {
-        id: `${componentType}-${Date.now()}`,
+        id: `${componentType}-${shapeIdRef.current++}`,
         type: componentType,
         position: { x, y },
       }
       
-      setComponents(prev => [...prev, newComponent])
+      setDiagramComponents(prev => [...prev, newComponent])
       setIsComponentsDialogOpen(false)
     }
   }
@@ -620,6 +626,9 @@ export default function DiagramGenerator() {
           </Button>
         </DialogTrigger>
         <DialogContent className="w-11/12 max-w-5xl h-5/6 bg-white p-6" ref={dialogContentRef} onClick={handleClickOutside}>
+          <DialogHeader>
+            <DialogTitle>Generate New Screen</DialogTitle>
+          </DialogHeader>
           <div className="flex gap-2 mb-4">
             <Button 
               ref={componentsButtonRef}
@@ -637,7 +646,7 @@ export default function DiagramGenerator() {
               variant="destructive" 
               size="sm" 
               className="flex items-center"
-              onClick={() => setComponents([])}
+              onClick={() => setDiagramComponents([])}
             >
               <X className="mr-1 h-4 w-4" /> Clear
             </Button>
@@ -660,7 +669,7 @@ export default function DiagramGenerator() {
               onDragOver={handleDragOver}
               onDrop={handleDrop}
             >
-              {components.map((component) => {
+              {diagramComponents.map((component) => {
                 let ComponentToRender;
                 
                 switch (component.type) {
@@ -673,6 +682,21 @@ export default function DiagramGenerator() {
                     );
                     break;
                   default:
+                    if (componentData.shapes.some(shape => shape.id === component.type)) {
+                      return (
+                        <div
+                          className="absolute"
+                          style={{
+                            left: `${component.position.x}px`,
+                            top: `${component.position.y}px`,
+                          }}
+                        >
+                          <svg width="80" height="80" viewBox="0 0 100 100">
+                            {renderShape(component.type)}
+                          </svg>
+                        </div>
+                      )
+                    }
                     ComponentToRender = (
                       <div
                         className="absolute bg-white border rounded p-2"
@@ -700,4 +724,3 @@ export default function DiagramGenerator() {
     </div>
   )
 }
-
