@@ -716,6 +716,11 @@ export default function DiagramGenerator() {
     )
   }
 
+  // Add handler to remove a component
+  const removeComponent = (componentId: string) => {
+    setDiagramComponents(prev => prev.filter(comp => comp.id !== componentId))
+  }
+
   return (
     <div className="min-h-screen bg-black flex items-center justify-center">
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -800,131 +805,107 @@ export default function DiagramGenerator() {
                     )
                     break;
                   case 'heading':
-                    ComponentToRender = (
-                      <div
-                        className="absolute p-2 border rounded bg-white cursor-move"
-                        style={{
-                          left: `${component.position.x}px`,
-                          top: `${component.position.y}px`,
-                        }}
-                        onMouseDown={(e) => startDrag(e, component.id)}
-                        onDoubleClick={() => startEditing(component.id)}  // Enable double-click to edit
-                      >
-                        {component.isEditing ? (
-                          <input
-                            type="text"
-                            value={component.content}
-                            autoFocus
-                            onChange={(e) => updateComponentContent(component.id, e.target.value)}
-                            onBlur={() => stopEditing(component.id, true)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                stopEditing(component.id, true)
-                              } else if (e.key === 'Escape') {
-                                stopEditing(component.id, false)
-                              }
-                            }}
-                            className="w-full border-b focus:outline-none"
-                          />
-                        ) : (
-                          <h1 className="text-2xl font-bold">{component.content}</h1>
-                        )}
-                      </div>
-                    )
-                    break;
                   case 'subheading':
-                    ComponentToRender = (
-                      <div
-                        className="absolute p-2 border rounded bg-white cursor-move"
-                        style={{
-                          left: `${component.position.x}px`,
-                          top: `${component.position.y}px`,
-                        }}
-                        onMouseDown={(e) => startDrag(e, component.id)}
-                        onDoubleClick={() => startEditing(component.id)}  // Enable double-click to edit
-                      >
-                        {component.isEditing ? (
-                          <input
-                            type="text"
-                            value={component.content}
-                            autoFocus
-                            onChange={(e) => updateComponentContent(component.id, e.target.value)}
-                            onBlur={() => stopEditing(component.id, true)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                stopEditing(component.id, true)
-                              } else if (e.key === 'Escape') {
-                                stopEditing(component.id, false)
-                              }
-                            }}
-                            className="w-full border-b focus:outline-none"
-                          />
-                        ) : (
-                          <h2 className="text-xl font-semibold">{component.content}</h2>
-                        )}
-                      </div>
-                    )
-                    break;
                   case 'paragraph':
                     ComponentToRender = (
-                      <div
-                        className="absolute p-2 border rounded bg-white cursor-move"
-                        style={{
-                          left: `${component.position.x}px`,
-                          top: `${component.position.y}px`,
-                        }}
-                        onMouseDown={(e) => startDrag(e, component.id)}
-                        onDoubleClick={() => startEditing(component.id)}  // Enable double-click to edit
-                      >
-                        {component.isEditing ? (
-                          <input
-                            type="text"
-                            value={component.content}
-                            autoFocus
-                            onChange={(e) => updateComponentContent(component.id, e.target.value)}
-                            onBlur={() => stopEditing(component.id, true)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                stopEditing(component.id, true)
-                              } else if (e.key === 'Escape') {
-                                stopEditing(component.id, false)
-                              }
+                      <ContextMenu>
+                        <ContextMenuTrigger>
+                          <div
+                            className="absolute p-2 border rounded bg-white cursor-move"
+                            style={{
+                              left: `${component.position.x}px`,
+                              top: `${component.position.y}px`,
                             }}
-                            className="w-full border-b focus:outline-none"
-                          />
-                        ) : (
-                          <p className="text-base">{component.content}</p>
-                        )}
-                      </div>
+                            onMouseDown={(e) => startDrag(e, component.id)}
+                            onDoubleClick={() => startEditing(component.id)}  // Enable double-click to edit
+                          >
+                            {component.isEditing ? (
+                              <input
+                                type="text"
+                                value={component.content}
+                                autoFocus
+                                onChange={(e) => updateComponentContent(component.id, e.target.value)}
+                                onBlur={() => stopEditing(component.id, true)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    stopEditing(component.id, true)
+                                  } else if (e.key === 'Escape') {
+                                    stopEditing(component.id, false)
+                                  }
+                                }}
+                                className="w-full border-b focus:outline-none"
+                              />
+                            ) : (
+                              component.type === 'heading' ? (
+                                <h1 className="text-2xl font-bold">{component.content}</h1>
+                              ) : component.type === 'subheading' ? (
+                                <h2 className="text-xl font-semibold">{component.content}</h2>
+                              ) : (
+                                <p className="text-base">{component.content}</p>
+                              )
+                            )}
+                          </div>
+                        </ContextMenuTrigger>
+                        <ContextMenuContent>
+                          {['heading', 'subheading', 'paragraph'].includes(component.type) && (
+                            <ContextMenuItem onClick={() => startEditing(component.id)}>
+                              Edit
+                            </ContextMenuItem>
+                          )}
+                          <ContextMenuItem onClick={() => removeComponent(component.id)}>
+                            Delete
+                          </ContextMenuItem>
+                        </ContextMenuContent>
+                      </ContextMenu>
                     )
                     break;
                   default:
                     if (componentData.shapes.some(shape => shape.id === component.type)) {
-                      return (
-                        <div
-                          className="absolute"
-                          style={{
-                            left: `${component.position.x}px`,
-                            top: `${component.position.y}px`,
-                          }}
-                        >
-                          <svg width="80" height="80" viewBox="0 0 100 100">
-                            {renderShape(component.type)}
-                          </svg>
-                        </div>
+                      ComponentToRender = (
+                        <ContextMenu>
+                          <ContextMenuTrigger>
+                            <div
+                              className="absolute"
+                              style={{
+                                left: `${component.position.x}px`,
+                                top: `${component.position.y}px`,
+                              }}
+                            >
+                              <svg width="80" height="80" viewBox="0 0 100 100">
+                                {renderShape(component.type)}
+                              </svg>
+                            </div>
+                          </ContextMenuTrigger>
+                          <ContextMenuContent>
+                            <ContextMenuItem onClick={() => removeComponent(component.id)}>
+                              Delete
+                            </ContextMenuItem>
+                          </ContextMenuContent>
+                        </ContextMenu>
+                      )
+                    } else {
+                      ComponentToRender = (
+                        <ContextMenu>
+                          <ContextMenuTrigger>
+                            <div
+                              className="absolute bg-white border rounded p-2 cursor-move"
+                              style={{
+                                left: `${component.position.x}px`,
+                                top: `${component.position.y}px`,
+                              }}
+                              onMouseDown={(e) => startDrag(e, component.id)}
+                            >
+                              {component.type}
+                            </div>
+                          </ContextMenuTrigger>
+                          <ContextMenuContent>
+                            <ContextMenuItem onClick={() => removeComponent(component.id)}>
+                              Delete
+                            </ContextMenuItem>
+                          </ContextMenuContent>
+                        </ContextMenu>
                       )
                     }
-                    ComponentToRender = (
-                      <div
-                        className="absolute bg-white border rounded p-2 cursor-move"
-                        style={{
-                          left: `${component.position.x}px`,
-                          top: `${component.position.y}px`,
-                        }}
-                      >
-                        {component.type}
-                      </div>
-                    );
                 }
                 
                 return (
