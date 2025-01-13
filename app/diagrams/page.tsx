@@ -627,8 +627,6 @@ export default function DiagramGenerator() {
         </DialogTrigger>
         <DialogContent className="w-11/12 max-w-5xl h-5/6 bg-white p-6" ref={dialogContentRef} onClick={handleClickOutside}>
           <DialogHeader>
-            <DialogTitle>Generate New Screen</DialogTitle>
-          </DialogHeader>
           <div className="flex gap-2 mb-4">
             <Button 
               ref={componentsButtonRef}
@@ -651,6 +649,7 @@ export default function DiagramGenerator() {
               <X className="mr-1 h-4 w-4" /> Clear
             </Button>
           </div>
+          </DialogHeader>
           <ComponentsDialog 
             open={isComponentsDialogOpen} 
             onOpenChange={setIsComponentsDialogOpen}
