@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Plus, Layout, X, Search, PinIcon, LayoutIcon, ShapesIcon, TypeIcon, FormInputIcon, Pencil, Paintbrush, Trash, Download, Upload } from 'lucide-react'
+import { Plus, Layout, X, Search, PinIcon, LayoutIcon, ShapesIcon, TypeIcon, FormInputIcon, Pencil, Paintbrush, Trash, Download, Upload, XCircle } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import {
@@ -486,6 +486,8 @@ export default function DiagramGenerator() {
   const [customizeDialogOpen, setCustomizeDialogOpen] = useState(false)
   const [componentToCustomize, setComponentToCustomize] = useState<Component | null>(null)
   const [activeTabStates, setActiveTabStates] = useState<Record<string, string>>({})
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  const [showCloseConfirm, setShowCloseConfirm] = useState(false)
 
   function exportDiagram() {
     const diagramData = { canvasSize, diagramComponents }
@@ -756,6 +758,20 @@ export default function DiagramGenerator() {
     setActiveTabStates(prev => ({ ...prev, [componentId]: tabId }))
   }
 
+  const handleClose = () => {
+    if (hasUnsavedChanges) {
+      setShowCloseConfirm(true)
+    } else {
+      setIsDialogOpen(false)
+    }
+  }
+
+  useEffect(() => {
+    if (diagramComponents.length > 0) {
+      setHasUnsavedChanges(true)
+    }
+  }, [diagramComponents])
+
   return (
     <div className="min-h-screen bg-black flex items-center justify-center">
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -811,6 +827,15 @@ export default function DiagramGenerator() {
     >
       <Upload className="mr-1 h-4 w-4" />
       Export
+    </Button>
+    <Button
+      variant="destructive"
+      size="sm"
+      onClick={handleClose}
+      className="flex items-center"
+    >
+      <XCircle className="mr-1 h-4 w-4" />
+      Close
     </Button>
   </div>
 </div>
@@ -1031,6 +1056,29 @@ export default function DiagramGenerator() {
               })}
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={showCloseConfirm} onOpenChange={setShowCloseConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Unsaved Changes</DialogTitle>
+          </DialogHeader>
+          <p>You have unsaved changes. Are you sure you want to close?</p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCloseConfirm(false)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={() => {
+                setShowCloseConfirm(false)
+                setIsDialogOpen(false)
+                setHasUnsavedChanges(false)
+              }}
+            >
+              Close without saving
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
       <Toaster />
