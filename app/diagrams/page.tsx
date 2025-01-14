@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Plus, Layout, X, Search, PinIcon, LayoutIcon, ShapesIcon, TypeIcon, FormInputIcon, Pencil, Paintbrush, Trash, Download, Upload, ArrowLeft } from 'lucide-react'
+import { Plus, Layout, X, Search, PinIcon, LayoutIcon, ShapesIcon, TypeIcon, FormInputIcon, Pencil, Paintbrush, Trash, Download, Upload, ArrowLeft, Check, ChevronRight, Circle } from 'lucide-react'
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import * as ContextMenuPrimitive from "@radix-ui/react-context-menu"
@@ -193,7 +193,7 @@ const ContextMenuSubTrigger = React.forwardRef<
     ref={ref}
     className={cn(
       "flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground",
-      inset && "pl-8",
+      inset ? "pl-8" : undefined,
       className
     )}
     {...props}
@@ -246,7 +246,7 @@ const ContextMenuItem = React.forwardRef<
     ref={ref}
     className={cn(
       "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-      inset && "pl-8",
+      inset ? "pl-8" : undefined,
       className
     )}
     {...props}
@@ -310,7 +310,7 @@ const ContextMenuLabel = React.forwardRef<
     ref={ref}
     className={cn(
       "px-2 py-1.5 text-sm font-semibold text-foreground",
-      inset && "pl-8",
+      inset ? "pl-8" : undefined,
       className
     )}
     {...props}
@@ -689,7 +689,7 @@ function TabsWindow({
                     className={cn(
                       "group flex items-center h-10 px-6 border-r min-w-[120px] max-w-[200px]",
                       "hover:bg-gray-100 transition-colors",
-                      activeTab === tab.id && "bg-white"
+                      activeTab === tab.id ? "bg-white" : undefined
                     )}
                   >
                     <span className="flex-1 truncate text-sm text-gray-600">
@@ -1106,7 +1106,7 @@ export default function DiagramGenerator() {
             <ComponentsDialog 
               open={true}
               onOpenChange={() => {}}
-              triggerRef={null}
+              triggerRef={useRef<HTMLButtonElement | null>(null)}
               className="components-sidebar"
             />
             <div
