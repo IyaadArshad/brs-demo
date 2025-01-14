@@ -46,12 +46,6 @@ type Component = {
   isEditing?: boolean;    // New field to track editing state
 }
 
-type Shape = {
-  id: string;
-  type: string;
-  position: { x: number; y: number };
-}
-
 // Component data
 const componentData = {
   pinned: [{ id: 'pinned1', name: 'Pinned 1' }, { id: 'pinned2', name: 'Pinned 2' }],
@@ -339,7 +333,6 @@ function TabsWindow({ className, style, onError }: TabsWindowProps) {
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false)
   const [tabToRename, setTabToRename] = useState<Tab | null>(null)
   const [newTabName, setNewTabName] = useState('')
-  const [shapes, setShapes] = useState<Shape[]>([])
 
   const addTab = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -382,77 +375,6 @@ function TabsWindow({ className, style, onError }: TabsWindowProps) {
     ))
     setIsRenameDialogOpen(false)
   }
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.dataTransfer.dropEffect = 'move'
-  }
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    const shapeType = e.dataTransfer.getData('application/reactflow')
-    
-    if (!shapeType || !componentData.shapes.some(shape => shape.id === shapeType)) {
-      return
-    }
-    
-    const rect = e.currentTarget.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-    
-    const newShape: Shape = {
-      id: `${shapeType}-${Date.now()}`,
-      type: shapeType,
-      position: { x, y }
-    }
-    
-    setShapes(prev => [...prev, newShape])
-  }
-
-  const startDrag = (
-    e: React.MouseEvent,
-    componentId: string
-  ) => {
-    e.stopPropagation()
-    let startX = e.clientX
-    let startY = e.clientY
-  
-    const handleMouseMove = (moveEvent: MouseEvent) => {
-      const dx = moveEvent.clientX - startX
-      const dy = moveEvent.clientY - startY
-  
-      setShapes(prev =>
-        prev.map(shape =>
-          shape.id === componentId
-            ? {
-                ...shape,
-                position: {
-                  x: Math.max(0, Math.min(shape.position.x + dx, innerCanvasWidth - shapeWidth)),
-                  y: Math.max(0, Math.min(shape.position.y + dy, innerCanvasHeight - shapeHeight)),
-                },
-              }
-            : shape
-        )
-      )
-  
-      startX = moveEvent.clientX
-      startY = moveEvent.clientY
-    }
-  
-    const handleMouseUp = () => {
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
-    }
-  
-    document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseup', handleMouseUp)
-  }
-  
-  // Define inner canvas dimensions and component sizes
-  const innerCanvasWidth = 800 // Adjust based on actual size
-  const innerCanvasHeight = 600 // Adjust based on actual size
-  const shapeWidth = 80         // Adjust based on actual shape size
-  const shapeHeight = 80        // Adjust based on actual shape size
 
   return (
     <>
@@ -510,31 +432,6 @@ function TabsWindow({ className, style, onError }: TabsWindowProps) {
             </button>
           </div>
         </div>
-        <div className="flex-1 p-6 bg-gray-50 flex items-center justify-center">
-          <div 
-            className="w-full h-full max-w-3xl max-h-[calc(100%-2rem)] bg-white border-2 border-gray-200 rounded-lg overflow-hidden"
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
-          >
-            <div className="relative w-full h-full">
-              {shapes.map((shape) => (
-                <div
-                  key={shape.id}
-                  className="absolute"
-                  style={{
-                    left: `${shape.position.x}px`,
-                    top: `${shape.position.y}px`,
-                  }}
-                  onMouseDown={(e) => startDrag(e, shape.id)}
-                >
-                  <svg width="80" height="80" viewBox="0 0 100 100">
-                    {renderShape(shape.type)}
-                  </svg>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
       </div>
 
       <Dialog open={isRenameDialogOpen} onOpenChange={setIsRenameDialogOpen}>
@@ -575,6 +472,8 @@ export default function DiagramGenerator() {
   const { toast } = useToast()
   const tabIdRef = useRef(2)
   const shapeIdRef = useRef(1)
+  const [hoveredComponentId, setHoveredComponentId] = useState<string | null>(null)
+  const [draggedComponentId, setDraggedComponentId] = useState<string | null>(null)
 
   const handleClickOutside = (event: React.MouseEvent<HTMLDivElement>) => {
     if (
@@ -618,6 +517,7 @@ export default function DiagramGenerator() {
     const handleMouseUp = () => {
       resizingRef.current = false
       document.body.style.cursor = 'default'
+      setDraggedComponentId(null) // <-- reset drag state
     }
 
     document.addEventListener('mousemove', handleMouseMove)
@@ -691,6 +591,7 @@ export default function DiagramGenerator() {
     componentId: string
   ) => {
     e.stopPropagation()
+    setDraggedComponentId(componentId) // <-- mark as dragging
     let startX = e.clientX
     let startY = e.clientY
   
@@ -876,30 +777,45 @@ export default function DiagramGenerator() {
                       <ContextMenu>
                         <ContextMenuTrigger>
                           <div
-                            className="absolute p-2 border rounded bg-white cursor-move"
+                            onMouseEnter={() => setHoveredComponentId(component.id)}
+                            onMouseLeave={() => setHoveredComponentId(null)}
+                            onMouseDown={(e) => startDrag(e, component.id)}
+                            className={
+                              "absolute p-2 rounded bg-white cursor-move " +
+                              (draggedComponentId === component.id
+                                ? "border-2 border-gray-600"
+                                : hoveredComponentId === component.id
+                                ? "border border-gray-300"
+                                : "border-transparent")
+                            }
                             style={{
                               left: `${component.position.x}px`,
                               top: `${component.position.y}px`,
                             }}
-                            onMouseDown={(e) => startDrag(e, component.id)}
                             onDoubleClick={() => startEditing(component.id)}  // Enable double-click to edit
                           >
                             {component.isEditing ? (
-                              <input
-                                type="text"
-                                value={component.content}
-                                autoFocus
-                                onChange={(e) => updateComponentContent(component.id, e.target.value)}
-                                onBlur={() => stopEditing(component.id, true)}
+                              <div
+                                contentEditable
+                                suppressContentEditableWarning
+                                onBlur={(e) => stopEditing(component.id, true, e.currentTarget.textContent || '')}
                                 onKeyDown={(e) => {
                                   if (e.key === 'Enter') {
-                                    stopEditing(component.id, true)
+                                    e.preventDefault()
+                                    stopEditing(component.id, true, (e.currentTarget as HTMLElement).innerText)
                                   } else if (e.key === 'Escape') {
                                     stopEditing(component.id, false)
                                   }
                                 }}
-                                className="w-full border-b focus:outline-none"
-                              />
+                                className="w-full outline-none"
+                                // Removed the borderBottom to eliminate the form-like line
+                                style={{
+                                  minHeight: '1.5em',
+                                  // borderBottom: '1px dashed #ccc', // Removed
+                                }}
+                              >
+                                {component.content}
+                              </div>
                             ) : (
                               component.type === 'heading' ? (
                                 <h1 className="text-2xl font-bold">{component.content}</h1>
