@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Plus, Layout, X, Search, PinIcon, LayoutIcon, ShapesIcon, TypeIcon, FormInputIcon } from 'lucide-react'
+import { Plus, Layout, X, Search, PinIcon, LayoutIcon, ShapesIcon, TypeIcon, FormInputIcon, Pencil, Paintbrush, Trash } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import {
@@ -885,17 +885,21 @@ export default function DiagramGenerator() {
                         <ContextMenuContent>
                           {['heading', 'subheading', 'paragraph'].includes(component.type) && (
                             <>
-                              <ContextMenuItem onClick={() => startEditing(component.id)}>
-                                Edit
+                              <ContextMenuItem className="cursor-pointer" onClick={() => startEditing(component.id)}>
+                                <Pencil className="mr-2 h-4 w-4" /> Edit
                               </ContextMenuItem>
-                              <ContextMenuItem onClick={() => handleCustomize(component)}>
-                                Customize
+                              <ContextMenuItem className="cursor-pointer" onClick={() => handleCustomize(component)}>
+                                <Paintbrush className="mr-2 h-4 w-4" /> Customize
+                              </ContextMenuItem>
+                              <ContextMenuSeparator />
+                              <ContextMenuItem 
+                                onClick={() => removeComponent(component.id)} 
+                                className="flex items-center cursor-pointer text-red-600 hover:bg-red-500"
+                              >
+                                <Trash className="mr-2 h-4 w-4" /> Delete
                               </ContextMenuItem>
                             </>
                           )}
-                          <ContextMenuItem onClick={() => removeComponent(component.id)}>
-                            Delete
-                          </ContextMenuItem>
                         </ContextMenuContent>
                       </ContextMenu>
                     )
