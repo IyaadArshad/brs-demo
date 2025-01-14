@@ -1,28 +1,350 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Plus, Layout, X, Search, PinIcon, LayoutIcon, ShapesIcon, TypeIcon, FormInputIcon, Pencil, Paintbrush, Trash, Download, Upload, XCircle } from 'lucide-react'
-import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { useToast } from "@/hooks/use-toast"
-import { Toaster } from "@/components/ui/toaster"
-import { cn } from '@/lib/utils'
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu"
+import { Plus, Layout, X, Search, PinIcon, LayoutIcon, ShapesIcon, TypeIcon, FormInputIcon, Pencil, Paintbrush, Trash, Download, Upload, ArrowLeft } from 'lucide-react'
+import * as React from "react"
+import * as DialogPrimitive from "@radix-ui/react-dialog"
+import * as ContextMenuPrimitive from "@radix-ui/react-context-menu"
+import { cva, type VariantProps } from "class-variance-authority"
+
+// Utility function
+const cn = (...classes: (string | undefined)[]) => classes.filter(Boolean).join(' ')
+
+// Button component
+const buttonVariants = cva(
+  "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        outline: "border border-input hover:bg-accent hover:text-accent-foreground",
+        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+        link: "underline-offset-4 hover:underline text-primary",
+      },
+      size: {
+        default: "h-10 py-2 px-4",
+        sm: "h-9 px-3 rounded-md",
+        lg: "h-11 px-8 rounded-md",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
+
+interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean
+}
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? React.Fragment : "button"
+    return (
+      <Comp
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      />
+    )
+  }
+)
+Button.displayName = "Button"
+
+// Input component
+const Input = React.forwardRef<
+  HTMLInputElement,
+  React.InputHTMLAttributes<HTMLInputElement>
+>(({ className, type, ...props }, ref) => {
+  return (
+    <input
+      type={type}
+      className={cn(
+        "flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+        className
+      )}
+      ref={ref}
+      {...props}
+    />
+  )
+})
+Input.displayName = "Input"
+
+// Dialog component
+const Dialog = DialogPrimitive.Root
+const DialogTrigger = DialogPrimitive.Trigger
+const DialogPortal = DialogPrimitive.Portal
+const DialogClose = DialogPrimitive.Close
+
+const DialogOverlay = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Overlay>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Overlay
+    ref={ref}
+    className={cn(
+      "fixed inset-0 z-50 bg-black/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      className
+    )}
+    {...props}
+  />
+))
+DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
+
+const DialogContent = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
+>(({ className, children, ...props }, ref) => (
+  <DialogPortal>
+    <DialogOverlay />
+    <DialogPrimitive.Content
+      ref={ref}
+      className={cn(
+        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
+        className
+      )}
+      {...props}
+    >
+      {children}
+      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+        <X className="h-4 w-4" />
+        <span className="sr-only">Close</span>
+      </DialogPrimitive.Close>
+    </DialogPrimitive.Content>
+  </DialogPortal>
+))
+DialogContent.displayName = DialogPrimitive.Content.displayName
+
+const DialogHeader = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "flex flex-col space-y-1.5 text-center sm:text-left",
+      className
+    )}
+    {...props}
+  />
+)
+DialogHeader.displayName = "DialogHeader"
+
+const DialogFooter = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
+      className
+    )}
+    {...props}
+  />
+)
+DialogFooter.displayName = "DialogFooter"
+
+const DialogTitle = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Title>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Title
+    ref={ref}
+    className={cn(
+      "text-lg font-semibold leading-none tracking-tight",
+      className
+    )}
+    {...props}
+  />
+))
+DialogTitle.displayName = DialogPrimitive.Title.displayName
+
+const DialogDescription = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Description>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Description
+    ref={ref}
+    className={cn("text-sm text-muted-foreground", className)}
+    {...props}
+  />
+))
+DialogDescription.displayName = DialogPrimitive.Description.displayName
+
+// ContextMenu component
+const ContextMenu = ContextMenuPrimitive.Root
+const ContextMenuTrigger = ContextMenuPrimitive.Trigger
+const ContextMenuGroup = ContextMenuPrimitive.Group
+const ContextMenuPortal = ContextMenuPrimitive.Portal
+const ContextMenuSub = ContextMenuPrimitive.Sub
+const ContextMenuRadioGroup = ContextMenuPrimitive.RadioGroup
+
+const ContextMenuSubTrigger = React.forwardRef<
+  React.ElementRef<typeof ContextMenuPrimitive.SubTrigger>,
+  React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.SubTrigger> & {
+    inset?: boolean
+  }
+>(({ className, inset, children, ...props }, ref) => (
+  <ContextMenuPrimitive.SubTrigger
+    ref={ref}
+    className={cn(
+      "flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground",
+      inset && "pl-8",
+      className
+    )}
+    {...props}
+  >
+    {children}
+    <ChevronRight className="ml-auto h-4 w-4" />
+  </ContextMenuPrimitive.SubTrigger>
+))
+ContextMenuSubTrigger.displayName = ContextMenuPrimitive.SubTrigger.displayName
+
+const ContextMenuSubContent = React.forwardRef<
+  React.ElementRef<typeof ContextMenuPrimitive.SubContent>,
+  React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.SubContent>
+>(({ className, ...props }, ref) => (
+  <ContextMenuPrimitive.SubContent
+    ref={ref}
+    className={cn(
+      "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+      className
+    )}
+    {...props}
+  />
+))
+ContextMenuSubContent.displayName = ContextMenuPrimitive.SubContent.displayName
+
+const ContextMenuContent = React.forwardRef<
+  React.ElementRef<typeof ContextMenuPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Content>
+>(({ className, ...props }, ref) => (
+  <ContextMenuPrimitive.Portal>
+    <ContextMenuPrimitive.Content
+      ref={ref}
+      className={cn(
+        "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+        className
+      )}
+      {...props}
+    />
+  </ContextMenuPrimitive.Portal>
+))
+ContextMenuContent.displayName = ContextMenuPrimitive.Content.displayName
+
+const ContextMenuItem = React.forwardRef<
+  React.ElementRef<typeof ContextMenuPrimitive.Item>,
+  React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Item> & {
+    inset?: boolean
+  }
+>(({ className, inset, ...props }, ref) => (
+  <ContextMenuPrimitive.Item
+    ref={ref}
+    className={cn(
+      "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      inset && "pl-8",
+      className
+    )}
+    {...props}
+  />
+))
+ContextMenuItem.displayName = ContextMenuPrimitive.Item.displayName
+
+const ContextMenuCheckboxItem = React.forwardRef<
+  React.ElementRef<typeof ContextMenuPrimitive.CheckboxItem>,
+  React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.CheckboxItem>
+>(({ className, children, checked, ...props }, ref) => (
+  <ContextMenuPrimitive.CheckboxItem
+    ref={ref}
+    className={cn(
+      "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      className
+    )}
+    checked={checked}
+    {...props}
+  >
+    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+      <ContextMenuPrimitive.ItemIndicator>
+        <Check className="h-4 w-4" />
+      </ContextMenuPrimitive.ItemIndicator>
+    </span>
+    {children}
+  </ContextMenuPrimitive.CheckboxItem>
+))
+ContextMenuCheckboxItem.displayName =
+  ContextMenuPrimitive.CheckboxItem.displayName
+
+const ContextMenuRadioItem = React.forwardRef<
+  React.ElementRef<typeof ContextMenuPrimitive.RadioItem>,
+  React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.RadioItem>
+>(({ className, children, ...props }, ref) => (
+  <ContextMenuPrimitive.RadioItem
+    ref={ref}
+    className={cn(
+      "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      className
+    )}
+    {...props}
+  >
+    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+      <ContextMenuPrimitive.ItemIndicator>
+        <Circle className="h-2 w-2 fill-current" />
+      </ContextMenuPrimitive.ItemIndicator>
+    </span>
+    {children}
+  </ContextMenuPrimitive.RadioItem>
+))
+ContextMenuRadioItem.displayName = ContextMenuPrimitive.RadioItem.displayName
+
+const ContextMenuLabel = React.forwardRef<
+  React.ElementRef<typeof ContextMenuPrimitive.Label>,
+  React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Label> & {
+    inset?: boolean
+  }
+>(({ className, inset, ...props }, ref) => (
+  <ContextMenuPrimitive.Label
+    ref={ref}
+    className={cn(
+      "px-2 py-1.5 text-sm font-semibold text-foreground",
+      inset && "pl-8",
+      className
+    )}
+    {...props}
+  />
+))
+ContextMenuLabel.displayName = ContextMenuPrimitive.Label.displayName
+
+const ContextMenuSeparator = React.forwardRef<
+  React.ElementRef<typeof ContextMenuPrimitive.Separator>,
+  React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Separator>
+>(({ className, ...props }, ref) => (
+  <ContextMenuPrimitive.Separator
+    ref={ref}
+    className={cn("-mx-1 my-1 h-px bg-border", className)}
+    {...props}
+  />
+))
+ContextMenuSeparator.displayName = ContextMenuPrimitive.Separator.displayName
+
+const ContextMenuShortcut = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLSpanElement>) => {
+  return (
+    <span
+      className={cn(
+        "ml-auto text-xs tracking-widest text-muted-foreground",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+ContextMenuShortcut.displayName = "ContextMenuShortcut"
 
 // Types
 interface Tab {
@@ -42,11 +364,11 @@ type Component = {
   id: string;
   type: string;
   position: { x: number; y: number };
-  content?: string;       // New field for text content
-  isEditing?: boolean;    // New field to track editing state
-  fontFamily?: string; // New field for font family
-  fontSize?: number;   // New field for font size
-  color?: string;      // New field for text color
+  content?: string;
+  isEditing?: boolean;
+  fontFamily?: string;
+  fontSize?: number;
+  color?: string;
   tabs?: {
     id: string
     title: string
@@ -89,9 +411,9 @@ const componentData = {
   text: [
     { id: 'text1', name: 'Text 1' },
     { id: 'text2', name: 'Text 2' },
-    { id: 'heading', name: 'Heading', icon: TypeIcon },       // New component
-    { id: 'subheading', name: 'Subheading', icon: TypeIcon }, // New component
-    { id: 'paragraph', name: 'Paragraph', icon: TypeIcon },   // New component
+    { id: 'heading', name: 'Heading', icon: TypeIcon },
+    { id: 'subheading', name: 'Subheading', icon: TypeIcon },
+    { id: 'paragraph', name: 'Paragraph', icon: TypeIcon },
   ],
   forms: {
     fields: [
@@ -103,7 +425,7 @@ const componentData = {
       { id: 'checkbox', name: 'Checkbox', icon: FormInputIcon },
       { id: 'radio', name: 'Radio', icon: FormInputIcon },
       { id: 'select', name: 'Select', icon: FormInputIcon },
-      { id: 'blank-form', name: 'Blank Form', icon: FormInputIcon }, // New component
+      { id: 'blank-form', name: 'Blank Form', icon: FormInputIcon },
     ],
     pinned: [
       { id: 'pinned-form1', name: 'Pinned Form 1', icon: PinIcon },
@@ -212,9 +534,6 @@ const renderShape = (type: string) => {
 
 // Components Dialog Component
 function ComponentsDialog({ 
-  open, 
-  onOpenChange,
-  triggerRef,
   className
 }: { 
   open: boolean; 
@@ -222,9 +541,7 @@ function ComponentsDialog({
   triggerRef: React.RefObject<HTMLButtonElement | null>;
   className?: string;
 }) {
-  const [selectedCategory, setSelectedCategory] = useState('pinned')
-  const [selectedFormCategory, setSelectedFormCategory] = useState('fields')
-  const dialogRef = useRef<HTMLDivElement>(null)
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
 
   const handleDragStart = (e: React.DragEvent, componentId: string) => {
@@ -232,101 +549,69 @@ function ComponentsDialog({
     e.dataTransfer.effectAllowed = 'move'
   }
 
-  useEffect(() => {
-    if (open && triggerRef.current && dialogRef.current) {
-      const triggerRect = triggerRef.current.getBoundingClientRect()
-      dialogRef.current.style.position = 'fixed'
-      dialogRef.current.style.top = `${triggerRect.top - 150}px`
-      dialogRef.current.style.left = `${triggerRect.right + 8}px`
-    }
-  }, [open, triggerRef])
-
-  if (!open) return null
-
-  const filteredComponents = selectedCategory === 'forms'
-      ? componentData.forms[selectedFormCategory as keyof typeof componentData.forms].filter(
-          component => component.name.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      : Array.isArray(componentData[selectedCategory as keyof typeof componentData])
-        ? (componentData[selectedCategory as keyof typeof componentData] as Array<{ id: string; name: string; icon?: any }>).filter(
-            component => component.name.toLowerCase().includes(searchTerm.toLowerCase())
-          )
-        : []
+  const filteredComponents = selectedCategory
+    ? (selectedCategory === 'forms'
+      ? componentData.forms.fields
+      : componentData[selectedCategory as keyof typeof componentData] as Array<{ id: string; name: string; icon?: any }>
+    ).filter(component => component.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    : []
 
   return (
-    <div 
-      ref={dialogRef}
-      className={`z-50 bg-white rounded-lg shadow-lg border w-[600px] flex ${className}`}
-      onMouseDown={(e) => e.stopPropagation()}
-    >
-      <div className="w-1/3 border-r">
-        <div className="p-4 border-b">
-          <h2 className="font-semibold">Categories</h2>
+    <div className={`flex flex-col h-full ${className}`}>
+      <div className="mb-4">
+        <div className="relative">
+          <Input
+            type="text"
+            placeholder="Search components..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-8"
+          />
+          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
         </div>
-        <ScrollArea className="h-[300px]">
+      </div>
+      {selectedCategory ? (
+        <>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setSelectedCategory(null)}
+            className="mb-4"
+          >
+            Back to Categories
+          </Button>
+          <div className="flex-1 overflow-auto">
+            <div className="grid grid-cols-2 gap-4">
+              {filteredComponents.map((component) => (
+                <div
+                  key={component.id}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, component.id)}
+                  className="flex items-center justify-center p-4 rounded-lg bg-white border-2 border-gray-200 text-gray-800 cursor-move hover:border-blue-500 transition-colors"
+                >
+                  {component.icon && <component.icon className="mr-2 h-4 w-4" />}
+                  <span className="text-sm">{component.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="grid grid-cols-2 gap-4">
           {componentCategories.map((category) => (
             <Button
               key={category.id}
-              variant={selectedCategory === category.id ? "secondary" : "ghost"}
-              className="w-full justify-start"
-              onClick={() => {
-                setSelectedCategory(category.id)
-                if (category.id === 'forms') {
-                  setSelectedFormCategory('fields')
-                }
-              }}
+              variant="outline"
+              size="lg"
+              className="h-32 flex flex-col items-center justify-center"
+              onClick={() => setSelectedCategory(category.id)}
             >
-              <category.icon className="mr-2 h-4 w-4" />
-              {category.name}
+              <category.icon className="h-8 w-8 mb-2" />
+              <span>{category.name}</span>
             </Button>
           ))}
-        </ScrollArea>
-      </div>
-      <div className="w-2/3 flex flex-col">
-        <div className="p-4 border-b">
-          <div className="relative">
-            <Input
-              type="text"
-              placeholder="Search components..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-8"
-            />
-            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-          </div>
         </div>
-        {selectedCategory === 'forms' && (
-          <div className="flex flex-wrap gap-2 p-4 border-b">
-            {formCategories.map((category) => (
-              <Button
-                key={category.id}
-                variant={selectedFormCategory === category.id ? "secondary" : "outline"}
-                size="sm"
-                className="rounded-full"
-                onClick={() => setSelectedFormCategory(category.id)}
-              >
-                <category.icon className="mr-2 h-4 w-4" />
-                {category.name}
-              </Button>
-            ))}
-          </div>
-        )}
-        <ScrollArea className="flex-1">
-          <div className="grid grid-cols-2 gap-4 p-4">
-            {filteredComponents.map((component) => (
-              <div
-                key={component.id}
-                draggable
-                onDragStart={(e) => handleDragStart(e, component.id)}
-                className="flex items-center justify-center p-4 rounded-lg bg-white border-2 border-gray-200 text-gray-800 cursor-move hover:border-blue-500 transition-colors"
-              >
-                {component.icon && <component.icon className="mr-2 h-4 w-4" />}
-                <span className="text-sm">{component.name}</span>
-              </div>
-            ))}
-          </div>
-        </ScrollArea>
-      </div>
+      )}
     </div>
   )
 }
@@ -469,18 +754,12 @@ function TabsWindow({
 
 // Main Component
 export default function DiagramGenerator() {
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [isComponentsDialogOpen, setIsComponentsDialogOpen] = useState(false)
-  const [canvasSize, setCanvasSize] = useState({ width: 600, height: 400 })
+  const [isEditorOpen, setIsEditorOpen] = useState(false)
+  const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 })
   const [diagramComponents, setDiagramComponents] = useState<Component[]>([])
   const canvasRef = useRef<HTMLDivElement>(null)
-  const componentsButtonRef = useRef<HTMLButtonElement>(null)
   const resizingRef = useRef<boolean>(false)
   const startPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
-  const dialogContentRef = useRef<HTMLDivElement>(null)
-  const { toast } = useToast()
-  const tabIdRef = useRef(2)
-  const shapeIdRef = useRef(1)
   const [hoveredComponentId, setHoveredComponentId] = useState<string | null>(null)
   const [draggedComponentId, setDraggedComponentId] = useState<string | null>(null)
   const [customizeDialogOpen, setCustomizeDialogOpen] = useState(false)
@@ -488,6 +767,8 @@ export default function DiagramGenerator() {
   const [activeTabStates, setActiveTabStates] = useState<Record<string, string>>({})
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [showCloseConfirm, setShowCloseConfirm] = useState(false)
+  const shapeIdRef = useRef(0)
+  const [sidebarWidth, setSidebarWidth] = useState(320);
 
   function exportDiagram() {
     const diagramData = { canvasSize, diagramComponents }
@@ -506,18 +787,6 @@ export default function DiagramGenerator() {
     }
   }
 
-  const handleClickOutside = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (
-      isComponentsDialogOpen &&
-      componentsButtonRef.current &&
-      !componentsButtonRef.current.contains(event.target as Node) &&
-      !event.defaultPrevented &&
-      !(event.target as HTMLElement).closest('.components-dialog')
-    ) {
-      setIsComponentsDialogOpen(false);
-    }
-  };
-
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!resizingRef.current) return
@@ -529,16 +798,6 @@ export default function DiagramGenerator() {
         const newWidth = Math.max(200, prev.width + dx)
         const newHeight = Math.max(200, prev.height + dy)
         
-        if (dialogContentRef.current) {
-          const dialogRect = dialogContentRef.current.getBoundingClientRect()
-          const maxWidth = dialogRect.width - 40
-          const maxHeight = dialogRect.height - 80
-          return {
-            width: Math.min(newWidth, maxWidth),
-            height: Math.min(newHeight, maxHeight)
-          }
-        }
-        
         return { width: newWidth, height: newHeight }
       })
       
@@ -548,7 +807,7 @@ export default function DiagramGenerator() {
     const handleMouseUp = () => {
       resizingRef.current = false
       document.body.style.cursor = 'default'
-      setDraggedComponentId(null) // <-- reset drag state
+      setDraggedComponentId(null)
     }
 
     document.addEventListener('mousemove', handleMouseMove)
@@ -599,37 +858,29 @@ export default function DiagramGenerator() {
         id: `${componentType}-${shapeIdRef.current++}`,
         type: componentType,
         position: { x, y },
-        content: defaultContent,    // Initialize content
-        isEditing: false,          // Initialize editing state
+        content: defaultContent,
+        isEditing: false,
       }
       
       if (componentType === 'tabs') {
-        // Provide default tabs
         newComponent.tabs = [{ id: '1', title: 'New Tab' }]
-        // Set its active tab
         setActiveTabStates((prev) => ({ ...prev, [newComponent.id]: '1' }))
       }
       
       setDiagramComponents(prev => [...prev, newComponent])
-      setIsComponentsDialogOpen(false)
     }
   }
 
   const handleError = (message: string) => {
-    toast({
-      variant: "destructive",
-      title: "Error",
-      description: message,
-    })
+    console.error(message)
   }
 
-  // Add helper functions for dragging
   const startDrag = (
     e: React.MouseEvent,
     componentId: string
   ) => {
     e.stopPropagation()
-    setDraggedComponentId(componentId) // <-- mark as dragging
+    setDraggedComponentId(componentId)
     let startX = e.clientX
     let startY = e.clientY
   
@@ -643,17 +894,14 @@ export default function DiagramGenerator() {
             let newX = comp.position.x + dx
             let newY = comp.position.y + dy
   
-            // Get canvas dimensions
             const canvas = canvasRef.current
             if (canvas) {
               const canvasWidth = canvas.clientWidth
               const canvasHeight = canvas.clientHeight
   
-              // Define component dimensions (adjust as needed)
               const componentWidth = 100
               const componentHeight = 100
   
-              // Constrain within canvas
               newX = Math.max(0, Math.min(newX, canvasWidth - componentWidth))
               newY = Math.max(0, Math.min(newY, canvasHeight - componentHeight))
             }
@@ -683,7 +931,6 @@ export default function DiagramGenerator() {
     document.addEventListener('mouseup', handleMouseUp)
   }
 
-  // Add handler to update component content
   const updateComponentContent = (componentId: string, newContent: string) => {
     setDiagramComponents(prev =>
       prev.map(comp =>
@@ -694,7 +941,6 @@ export default function DiagramGenerator() {
     )
   }
 
-  // Add helper functions for editing
   const startEditing = (componentId: string) => {
     setDiagramComponents(prev =>
       prev.map(comp =>
@@ -720,18 +966,15 @@ export default function DiagramGenerator() {
     )
   }
 
-  // Add handler to remove a component
   const removeComponent = (componentId: string) => {
     setDiagramComponents(prev => prev.filter(comp => comp.id !== componentId))
   }
 
-  // Function to open customize dialog
   const handleCustomize = (component: Component) => {
     setComponentToCustomize(component)
     setCustomizeDialogOpen(true)
   }
 
-  // Function to apply customization
   const applyCustomization = (fontFamily: string, fontSize: number, color: string) => {
     if (componentToCustomize) {
       setDiagramComponents(prev =>
@@ -746,14 +989,12 @@ export default function DiagramGenerator() {
     }
   }
 
-  // Helper to update a tabbed component's tab array
   function updateTabs(componentId: string, newTabs: { id: string; title: string }[]) {
     setDiagramComponents(prev =>
       prev.map(c => c.id === componentId ? { ...c, tabs: newTabs } : c)
     )
   }
 
-  // Helper to update active tab
   function updateActiveTab(componentId: string, tabId: string) {
     setActiveTabStates(prev => ({ ...prev, [componentId]: tabId }))
   }
@@ -762,9 +1003,26 @@ export default function DiagramGenerator() {
     if (hasUnsavedChanges) {
       setShowCloseConfirm(true)
     } else {
-      setIsDialogOpen(false)
+      setIsEditorOpen(false)
     }
   }
+
+  const handleSidebarResize = (e: React.MouseEvent<HTMLDivElement>) => {
+    const startX = e.clientX;
+    const startWidth = sidebarWidth;
+
+    const doDrag = (e: MouseEvent) => {
+      setSidebarWidth(Math.min(Math.max(startWidth + e.clientX - startX, 200), 400));
+    };
+
+    const stopDrag = () => {
+      document.removeEventListener('mousemove', doDrag);
+      document.removeEventListener('mouseup', stopDrag);
+    };
+
+    document.addEventListener('mousemove', doDrag);
+    document.addEventListener('mouseup', stopDrag);
+  };
 
   useEffect(() => {
     if (diagramComponents.length > 0) {
@@ -774,80 +1032,86 @@ export default function DiagramGenerator() {
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center">
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogTrigger asChild>
-          <Button 
-            variant="outline" 
-            size="lg" 
-            className="bg-black text-white border-white hover:bg-white hover:text-black transition-colors"
-          >
-            <Plus className="mr-2 h-4 w-4" /> Generate New Screen
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="w-11/12 max-w-5xl h-5/6 bg-white p-6" ref={dialogContentRef} onClick={handleClickOutside}>
-          <DialogHeader>
-          <div className="flex justify-between gap-2 mb-4">
-  <div className="flex gap-2">
-    <Button 
-      ref={componentsButtonRef}
-      variant="outline" 
-      size="sm" 
-      className="flex items-center"
-      onClick={() => setIsComponentsDialogOpen(!isComponentsDialogOpen)}
-    >
-      <Plus className="mr-1 h-4 w-4" /> Components
-    </Button>
-    <Button variant="outline" size="sm" className="flex items-center">
-      <Layout className="mr-1 h-4 w-4" /> Layouts
-    </Button>
-    <Button 
-      variant="destructive" 
-      size="sm" 
-      className="flex items-center"
-      onClick={() => setDiagramComponents([])}
-    >
-      <X className="mr-1 h-4 w-4" /> Clear
-    </Button>
-  </div>
-  <div className="flex gap-2">
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={importDiagram}
-      className="flex items-center"
-    >
-      <Download className="mr-1 h-4 w-4" />
-      Import
-    </Button>
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={exportDiagram}
-      className="flex items-center"
-    >
-      <Upload className="mr-1 h-4 w-4" />
-      Export
-    </Button>
-    <Button
-      variant="destructive"
-      size="sm"
-      onClick={handleClose}
-      className="flex items-center"
-    >
-      <XCircle className="mr-1 h-4 w-4" />
-      Close
-    </Button>
-  </div>
-</div>
+      <Button 
+        variant="outline" 
+        size="lg" 
+        className="bg-black text-white border-white hover:bg-white hover:text-black transition-colors"
+        onClick={() => setIsEditorOpen(true)}
+      >
+        <Plus className="mr-2 h-4 w-4" /> Generate New Screen
+      </Button>
 
-          </DialogHeader>
-          <ComponentsDialog 
-            open={isComponentsDialogOpen} 
-            onOpenChange={setIsComponentsDialogOpen}
-            triggerRef={componentsButtonRef}
-            className="components-dialog"
-          />
-          <div className="flex items-center justify-center h-[calc(100%-3rem)]">
+      {/* Fullscreen Editor */}
+      <div 
+        className={`fixed inset-0 bg-white transform transition-transform duration-300 ease-in-out ${
+          isEditorOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        {/* Top Bar */}
+        <div className="flex justify-between items-center p-4">
+          <Button
+            variant="ghost"
+            onClick={() => setIsEditorOpen(false)}
+            className="flex items-center text-sm text-gray-500"
+          >
+            <ArrowLeft className="mr-1 h-4 w-4" />
+            Back
+          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" className="flex items-center">
+              <Layout className="mr-1 h-4 w-4" /> Layouts
+            </Button>
+            <Button 
+              variant="destructive" 
+              size="sm" 
+              className="flex items-center"
+              onClick={() => setDiagramComponents([])}
+            >
+              <X className="mr-1 h-4 w-4" /> Clear
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={importDiagram}
+              className="flex items-center"
+            >
+              <Download className="mr-1 h-4 w-4" />
+              Import
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={exportDiagram}
+              className="flex items-center"
+            >
+              <Upload className="mr-1 h-4 w-4" />
+              Export
+            </Button>
+          </div>
+        </div>
+
+        {/* Main Content Area */}
+        <div className="flex h-[calc(100vh-64px)]">
+          {/* Left Sidebar - Components */}
+          <div 
+            className="bg-white shadow-lg rounded-tr-lg rounded-br-lg p-4 flex flex-col relative"
+            style={{ width: `${sidebarWidth}px`, minWidth: '200px', maxWidth: '400px' }}
+          >
+            <h2 className="text-lg font-semibold mb-4">Components</h2>
+            <ComponentsDialog 
+              open={true}
+              onOpenChange={() => {}}
+              triggerRef={null}
+              className="components-sidebar"
+            />
+            <div
+              className="absolute top-0 right-0 w-1 h-full cursor-col-resize"
+              onMouseDown={handleSidebarResize}
+            />
+          </div>
+
+          {/* Right - Canvas */}
+          <div className="flex-1 p-4 overflow-auto flex items-center justify-center">
             <div
               ref={canvasRef}
               className="bg-gray-100 border border-gray-200 rounded-lg cursor-se-resize relative"
@@ -885,7 +1149,6 @@ export default function DiagramGenerator() {
                         }}
                       >
                         <h3 className="text-lg font-bold mb-2">Form Heading</h3>
-                        {/* Add fields here */}
                         <Input placeholder="Field 1" className="mb-2" />
                         <Input placeholder="Field 2" className="mb-2" />
                       </div>
@@ -902,12 +1165,12 @@ export default function DiagramGenerator() {
                             onMouseLeave={() => setHoveredComponentId(null)}
                             onMouseDown={(e) => startDrag(e, component.id)}
                             className={
-                              "absolute p-2 rounded bg-transparent cursor-move " + // Changed bg-white to bg-transparent
+                              "absolute p-2 rounded bg-transparent cursor-move " +
                               (draggedComponentId === component.id
-                                ? "border-2 border-gray-600 select-none" // Added select-none
+                                ? "border-2 border-gray-600 select-none"
                                 : hoveredComponentId === component.id
-                                ? "border border-gray-300 select-none"    // Added select-none
-                                : "border-transparent select-none")       // Added select-none
+                                ? "border border-gray-300 select-none"
+                                : "border-transparent select-none")
                             }
                             style={{
                               left: `${component.position.x}px`,
@@ -916,7 +1179,7 @@ export default function DiagramGenerator() {
                               fontSize: `${component.fontSize || 16}px`,
                               color: component.color || '#000000',
                             }}
-                            onDoubleClick={() => startEditing(component.id)}  // Enable double-click to edit
+                            onDoubleClick={() => startEditing(component.id)}
                           >
                             {component.isEditing ? (
                               <div
@@ -932,10 +1195,8 @@ export default function DiagramGenerator() {
                                   }
                                 }}
                                 className="w-full outline-none"
-                                // Removed the borderBottom to eliminate the form-like line
                                 style={{
                                   minHeight: '1.5em',
-                                  // borderBottom: '1px dashed #ccc', // Removed
                                 }}
                               >
                                 {component.content}
@@ -1056,8 +1317,10 @@ export default function DiagramGenerator() {
               })}
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </div>
+
+      {/* Close Confirmation Dialog */}
       <Dialog open={showCloseConfirm} onOpenChange={setShowCloseConfirm}>
         <DialogContent>
           <DialogHeader>
@@ -1072,7 +1335,7 @@ export default function DiagramGenerator() {
               variant="destructive" 
               onClick={() => {
                 setShowCloseConfirm(false)
-                setIsDialogOpen(false)
+                setIsEditorOpen(false)
                 setHasUnsavedChanges(false)
               }}
             >
@@ -1081,7 +1344,6 @@ export default function DiagramGenerator() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <Toaster />
 
       {/* Customize Dialog */}
       {componentToCustomize && (
