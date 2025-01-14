@@ -783,10 +783,10 @@ export default function DiagramGenerator() {
                             className={
                               "absolute p-2 rounded bg-white cursor-move " +
                               (draggedComponentId === component.id
-                                ? "border-2 border-gray-600"
+                                ? "border-2 border-gray-600 select-none" // Added select-none
                                 : hoveredComponentId === component.id
-                                ? "border border-gray-300"
-                                : "border-transparent")
+                                ? "border border-gray-300 select-none"    // Added select-none
+                                : "border-transparent select-none")       // Added select-none
                             }
                             style={{
                               left: `${component.position.x}px`,
