@@ -807,7 +807,7 @@ export default function DiagramGenerator() {
                             onMouseLeave={() => setHoveredComponentId(null)}
                             onMouseDown={(e) => startDrag(e, component.id)}
                             className={
-                              "absolute p-2 rounded bg-white cursor-move " +
+                              "absolute p-2 rounded bg-transparent cursor-move " + // Changed bg-white to bg-transparent
                               (draggedComponentId === component.id
                                 ? "border-2 border-gray-600 select-none" // Added select-none
                                 : hoveredComponentId === component.id
