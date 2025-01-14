@@ -7,11 +7,12 @@ export default function App() {
   const [content, setContent] = useState<JSONContent>({})
   return (
     <div style={{ backgroundColor: 'black' }}>
-      <CraftEditor 
+      {/* <CraftEditor 
         content={content} 
         onUpdate={(editor: { getJSON: () => JSONContent }) => setContent(editor.getJSON())}
         className="white-text"
       />
+      */}
     </div>
   );
 }
