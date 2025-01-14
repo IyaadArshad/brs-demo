@@ -779,9 +779,14 @@ export default function DiagramGenerator() {
     const userInput = prompt("Paste your diagram JSON here:")
     if (!userInput) return
     try {
-      const data = JSON.parse(userInput)
-      setCanvasSize(data.canvasSize)
-      setDiagramComponents(data.diagramComponents)
+      const cleaned = userInput.trim()
+      const lastBrace = cleaned.lastIndexOf('}')
+      if (lastBrace > -1) {
+        const safeJson = cleaned.substring(0, lastBrace + 1)
+        const data = JSON.parse(safeJson)
+        setCanvasSize(data.canvasSize)
+        setDiagramComponents(data.diagramComponents)
+      }
     } catch (error) {
       console.error("Invalid diagram JSON", error)
     }
