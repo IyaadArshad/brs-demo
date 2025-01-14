@@ -32,14 +32,14 @@ interface MessageProps {
   onRegenerate?: (id: string) => void;
 }
 
-export interface Message {
+interface Message {
   id: string
   content: string
   role: 'user' | 'assistant'
   timestamp: number
 }
 
-export function MessageComponent({
+function MessageComponent({
   message,
   onEdit,
   onDelete,
