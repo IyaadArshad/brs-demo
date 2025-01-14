@@ -127,7 +127,7 @@ interface CommandMenuProps {
   splitView: boolean; // add this prop
 }
 
-export function CommandMenu({ isOpen, onSelect, filter, splitView }: CommandMenuProps) {
+function CommandMenu({ isOpen, onSelect, filter, splitView }: CommandMenuProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const commands = getCommands(splitView);
   const filteredCommands = commands.filter(
