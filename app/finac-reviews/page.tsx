@@ -481,7 +481,7 @@ export default function ChatInterface() {
           style={{ flexBasis: `${editorWidth}%`, backgroundColor: '#1e1e1e' }}
         >
           <div className="">
-            <CraftEditor 
+            {/** <CraftEditor 
               content={content} 
               onUpdate={(editor: { getJSON: () => JSONContent }) => {
                 const newContent = editor.getJSON();
@@ -490,6 +490,7 @@ export default function ChatInterface() {
               }}
               className="white-text"
             />
+            **/}
           </div>
         </div>
         <div
