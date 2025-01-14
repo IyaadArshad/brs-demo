@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Plus, Layout, X, Search, PinIcon, LayoutIcon, ShapesIcon, TypeIcon, FormInputIcon, Pencil, Paintbrush, Trash } from 'lucide-react'
+import { Plus, Layout, X, Search, PinIcon, LayoutIcon, ShapesIcon, TypeIcon, FormInputIcon, Pencil, Paintbrush, Trash, Download, Upload } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import {
@@ -47,6 +47,10 @@ type Component = {
   fontFamily?: string; // New field for font family
   fontSize?: number;   // New field for font size
   color?: string;      // New field for text color
+  tabs?: {
+    id: string
+    title: string
+  }[]
 }
 
 // Component data
@@ -327,24 +331,30 @@ function ComponentsDialog({
   )
 }
 
-// Tabs Window Component
-function TabsWindow({ className, style, onError }: TabsWindowProps) {
-  const [tabs, setTabs] = useState<Tab[]>([
-    { id: '1', title: 'New Tab' }
-  ])
-  const [activeTab, setActiveTab] = useState<string>(tabs[0].id)
+// Modify TabsWindow to accept tabs and an onTabsChange callback instead of local state
+function TabsWindow({
+  className,
+  style,
+  onError,
+  tabs,
+  onTabsChange,
+  activeTab,
+  onActiveTabChange,
+}: TabsWindowProps & {
+  tabs: { id: string; title: string }[]
+  onTabsChange: (newTabs: { id: string; title: string }[]) => void
+  activeTab: string
+  onActiveTabChange: (tabId: string) => void
+}) {
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false)
-  const [tabToRename, setTabToRename] = useState<Tab | null>(null)
+  const [tabToRename, setTabToRename] = useState<{ id: string; title: string } | null>(null)
   const [newTabName, setNewTabName] = useState('')
 
   const addTab = (e: React.MouseEvent) => {
     e.stopPropagation()
-    const newTab: Tab = {
-      id: `tab-${Date.now()}`,
-      title: 'New Tab'
-    }
-    setTabs([...tabs, newTab])
-    setActiveTab(newTab.id)
+    const newTab = { id: `tab-${Date.now()}`, title: 'New Tab' }
+    onTabsChange([...tabs, newTab])
+    onActiveTabChange(newTab.id)
   }
 
   const removeTab = (tabId: string, e?: React.MouseEvent) => {
@@ -353,16 +363,14 @@ function TabsWindow({ className, style, onError }: TabsWindowProps) {
       onError?.('Cannot close the last tab')
       return
     }
-    
     const newTabs = tabs.filter(tab => tab.id !== tabId)
-    setTabs(newTabs)
-    
+    onTabsChange(newTabs)
     if (activeTab === tabId) {
-      setActiveTab(newTabs[newTabs.length - 1].id)
+      onActiveTabChange(newTabs[newTabs.length - 1].id)
     }
   }
 
-  const handleRename = (tab: Tab) => {
+  const handleRename = (tab: { id: string; title: string }) => {
     setTabToRename(tab)
     setNewTabName(tab.title)
     setIsRenameDialogOpen(true)
@@ -370,18 +378,16 @@ function TabsWindow({ className, style, onError }: TabsWindowProps) {
 
   const confirmRename = () => {
     if (!tabToRename) return
-    
-    setTabs(tabs.map(tab => 
-      tab.id === tabToRename.id 
-        ? { ...tab, title: newTabName || 'Untitled' }
-        : tab
-    ))
+    const updated = tabs.map(t =>
+      t.id === tabToRename.id ? { ...t, title: newTabName || 'Untitled' } : t
+    )
+    onTabsChange(updated)
     setIsRenameDialogOpen(false)
   }
 
   return (
     <>
-      <div 
+      <div
         className={cn(
           "absolute inset-0 flex flex-col bg-white rounded-lg overflow-hidden border",
           className
@@ -394,7 +400,7 @@ function TabsWindow({ className, style, onError }: TabsWindowProps) {
               <ContextMenu key={tab.id}>
                 <ContextMenuTrigger>
                   <button
-                    onClick={() => setActiveTab(tab.id)}
+                    onClick={() => onActiveTabChange(tab.id)}
                     className={cn(
                       "group flex items-center h-10 px-6 border-r min-w-[120px] max-w-[200px]",
                       "hover:bg-gray-100 transition-colors",
@@ -479,6 +485,24 @@ export default function DiagramGenerator() {
   const [draggedComponentId, setDraggedComponentId] = useState<string | null>(null)
   const [customizeDialogOpen, setCustomizeDialogOpen] = useState(false)
   const [componentToCustomize, setComponentToCustomize] = useState<Component | null>(null)
+  const [activeTabStates, setActiveTabStates] = useState<Record<string, string>>({})
+
+  function exportDiagram() {
+    const diagramData = { canvasSize, diagramComponents }
+    console.log(JSON.stringify(diagramData))
+  }
+
+  function importDiagram() {
+    const userInput = prompt("Paste your diagram JSON here:")
+    if (!userInput) return
+    try {
+      const data = JSON.parse(userInput)
+      setCanvasSize(data.canvasSize)
+      setDiagramComponents(data.diagramComponents)
+    } catch (error) {
+      console.error("Invalid diagram JSON", error)
+    }
+  }
 
   const handleClickOutside = (event: React.MouseEvent<HTMLDivElement>) => {
     if (
@@ -575,6 +599,13 @@ export default function DiagramGenerator() {
         position: { x, y },
         content: defaultContent,    // Initialize content
         isEditing: false,          // Initialize editing state
+      }
+      
+      if (componentType === 'tabs') {
+        // Provide default tabs
+        newComponent.tabs = [{ id: '1', title: 'New Tab' }]
+        // Set its active tab
+        setActiveTabStates((prev) => ({ ...prev, [newComponent.id]: '1' }))
       }
       
       setDiagramComponents(prev => [...prev, newComponent])
@@ -713,6 +744,18 @@ export default function DiagramGenerator() {
     }
   }
 
+  // Helper to update a tabbed component's tab array
+  function updateTabs(componentId: string, newTabs: { id: string; title: string }[]) {
+    setDiagramComponents(prev =>
+      prev.map(c => c.id === componentId ? { ...c, tabs: newTabs } : c)
+    )
+  }
+
+  // Helper to update active tab
+  function updateActiveTab(componentId: string, tabId: string) {
+    setActiveTabStates(prev => ({ ...prev, [componentId]: tabId }))
+  }
+
   return (
     <div className="min-h-screen bg-black flex items-center justify-center">
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -727,28 +770,51 @@ export default function DiagramGenerator() {
         </DialogTrigger>
         <DialogContent className="w-11/12 max-w-5xl h-5/6 bg-white p-6" ref={dialogContentRef} onClick={handleClickOutside}>
           <DialogHeader>
-          <div className="flex gap-2 mb-4">
-            <Button 
-              ref={componentsButtonRef}
-              variant="outline" 
-              size="sm" 
-              className="flex items-center"
-              onClick={() => setIsComponentsDialogOpen(!isComponentsDialogOpen)}
-            >
-              <Plus className="mr-1 h-4 w-4" /> Components
-            </Button>
-            <Button variant="outline" size="sm" className="flex items-center">
-              <Layout className="mr-1 h-4 w-4" /> Layouts
-            </Button>
-            <Button 
-              variant="destructive" 
-              size="sm" 
-              className="flex items-center"
-              onClick={() => setDiagramComponents([])}
-            >
-              <X className="mr-1 h-4 w-4" /> Clear
-            </Button>
-          </div>
+          <div className="flex justify-between gap-2 mb-4">
+  <div className="flex gap-2">
+    <Button 
+      ref={componentsButtonRef}
+      variant="outline" 
+      size="sm" 
+      className="flex items-center"
+      onClick={() => setIsComponentsDialogOpen(!isComponentsDialogOpen)}
+    >
+      <Plus className="mr-1 h-4 w-4" /> Components
+    </Button>
+    <Button variant="outline" size="sm" className="flex items-center">
+      <Layout className="mr-1 h-4 w-4" /> Layouts
+    </Button>
+    <Button 
+      variant="destructive" 
+      size="sm" 
+      className="flex items-center"
+      onClick={() => setDiagramComponents([])}
+    >
+      <X className="mr-1 h-4 w-4" /> Clear
+    </Button>
+  </div>
+  <div className="flex gap-2">
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={importDiagram}
+      className="flex items-center"
+    >
+      <Download className="mr-1 h-4 w-4" />
+      Import
+    </Button>
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={exportDiagram}
+      className="flex items-center"
+    >
+      <Upload className="mr-1 h-4 w-4" />
+      Export
+    </Button>
+  </div>
+</div>
+
           </DialogHeader>
           <ComponentsDialog 
             open={isComponentsDialogOpen} 
@@ -777,6 +843,10 @@ export default function DiagramGenerator() {
                       <TabsWindow
                         className="absolute inset-0"
                         onError={handleError}
+                        tabs={component.tabs || []}
+                        onTabsChange={(newTabs) => updateTabs(component.id, newTabs)}
+                        activeTab={activeTabStates[component.id] || '1'}
+                        onActiveTabChange={(tabId) => updateActiveTab(component.id, tabId)}
                       />
                     );
                     break;
