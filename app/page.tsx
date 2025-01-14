@@ -32,7 +32,7 @@ interface MessageProps {
   onRegenerate?: (id: string) => void;
 }
 
-export interface Message {
+interface Message {
   id: string
   content: string
   role: 'user' | 'assistant'
@@ -213,7 +213,7 @@ export function CommandMenu({ isOpen, onSelect, filter, splitView }: CommandMenu
   );
 }
 
-export function MessageComponent({
+function MessageComponent({
   message,
   onEdit,
   onDelete,
