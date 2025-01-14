@@ -44,6 +44,9 @@ type Component = {
   position: { x: number; y: number };
   content?: string;       // New field for text content
   isEditing?: boolean;    // New field to track editing state
+  fontFamily?: string; // New field for font family
+  fontSize?: number;   // New field for font size
+  color?: string;      // New field for text color
 }
 
 // Component data
@@ -474,6 +477,8 @@ export default function DiagramGenerator() {
   const shapeIdRef = useRef(1)
   const [hoveredComponentId, setHoveredComponentId] = useState<string | null>(null)
   const [draggedComponentId, setDraggedComponentId] = useState<string | null>(null)
+  const [customizeDialogOpen, setCustomizeDialogOpen] = useState(false)
+  const [componentToCustomize, setComponentToCustomize] = useState<Component | null>(null)
 
   const handleClickOutside = (event: React.MouseEvent<HTMLDivElement>) => {
     if (
@@ -687,6 +692,27 @@ export default function DiagramGenerator() {
     setDiagramComponents(prev => prev.filter(comp => comp.id !== componentId))
   }
 
+  // Function to open customize dialog
+  const handleCustomize = (component: Component) => {
+    setComponentToCustomize(component)
+    setCustomizeDialogOpen(true)
+  }
+
+  // Function to apply customization
+  const applyCustomization = (fontFamily: string, fontSize: number, color: string) => {
+    if (componentToCustomize) {
+      setDiagramComponents(prev =>
+        prev.map(comp =>
+          comp.id === componentToCustomize.id
+            ? { ...comp, fontFamily, fontSize, color }
+            : comp
+        )
+      )
+      setCustomizeDialogOpen(false)
+      setComponentToCustomize(null)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-black flex items-center justify-center">
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -791,6 +817,9 @@ export default function DiagramGenerator() {
                             style={{
                               left: `${component.position.x}px`,
                               top: `${component.position.y}px`,
+                              fontFamily: component.fontFamily || 'Arial',
+                              fontSize: `${component.fontSize || 16}px`,
+                              color: component.color || '#000000',
                             }}
                             onDoubleClick={() => startEditing(component.id)}  // Enable double-click to edit
                           >
@@ -818,20 +847,51 @@ export default function DiagramGenerator() {
                               </div>
                             ) : (
                               component.type === 'heading' ? (
-                                <h1 className="text-2xl font-bold">{component.content}</h1>
+                                <h1
+                                  style={{
+                                    fontFamily: component.fontFamily || 'Arial',
+                                    fontSize: `${component.fontSize || 24}px`,
+                                    color: component.color || '#000000',
+                                    fontWeight: 'bold',
+                                  }}
+                                >
+                                  {component.content}
+                                </h1>
                               ) : component.type === 'subheading' ? (
-                                <h2 className="text-xl font-semibold">{component.content}</h2>
+                                <h2
+                                  style={{
+                                    fontFamily: component.fontFamily || 'Arial',
+                                    fontSize: `${component.fontSize || 20}px`,
+                                    color: component.color || '#000000',
+                                    fontWeight: 'semi-bold',
+                                  }}
+                                >
+                                  {component.content}
+                                </h2>
                               ) : (
-                                <p className="text-base">{component.content}</p>
+                                <p
+                                  style={{
+                                    fontFamily: component.fontFamily || 'Arial',
+                                    fontSize: `${component.fontSize || 16}px`,
+                                    color: component.color || '#000000',
+                                  }}
+                                >
+                                  {component.content}
+                                </p>
                               )
                             )}
                           </div>
                         </ContextMenuTrigger>
                         <ContextMenuContent>
                           {['heading', 'subheading', 'paragraph'].includes(component.type) && (
-                            <ContextMenuItem onClick={() => startEditing(component.id)}>
-                              Edit
-                            </ContextMenuItem>
+                            <>
+                              <ContextMenuItem onClick={() => startEditing(component.id)}>
+                                Edit
+                              </ContextMenuItem>
+                              <ContextMenuItem onClick={() => handleCustomize(component)}>
+                                Customize
+                              </ContextMenuItem>
+                            </>
                           )}
                           <ContextMenuItem onClick={() => removeComponent(component.id)}>
                             Delete
@@ -900,6 +960,77 @@ export default function DiagramGenerator() {
         </DialogContent>
       </Dialog>
       <Toaster />
+
+      {/* Customize Dialog */}
+      {componentToCustomize && (
+        <Dialog open={customizeDialogOpen} onOpenChange={setCustomizeDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Customize Text</DialogTitle>
+            </DialogHeader>
+            <form className="flex flex-col gap-4">
+              <div className="flex flex-col">
+                <label className="mb-1 font-medium">Font Family</label>
+                <Input
+                  type="text"
+                  value={componentToCustomize.fontFamily || ''}
+                  onChange={(e) =>
+                    setComponentToCustomize({
+                      ...componentToCustomize,
+                      fontFamily: e.target.value,
+                    })
+                  }
+                  placeholder="e.g., Arial, Helvetica, sans-serif"
+                />
+              </div>
+              <div className="flex flex-col">
+                <label className="mb-1 font-medium">Font Size (px)</label>
+                <Input
+                  type="number"
+                  value={componentToCustomize.fontSize || 16}
+                  onChange={(e) =>
+                    setComponentToCustomize({
+                      ...componentToCustomize,
+                      fontSize: Number(e.target.value),
+                    })
+                  }
+                  min={8}
+                  max={72}
+                />
+              </div>
+              <div className="flex flex-col">
+                <label className="mb-1 font-medium">Color</label>
+                <Input
+                  type="color"
+                  value={componentToCustomize.color || '#000000'}
+                  onChange={(e) =>
+                    setComponentToCustomize({
+                      ...componentToCustomize,
+                      color: e.target.value,
+                    })
+                  }
+                />
+              </div>
+            </form>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setCustomizeDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() =>
+                  applyCustomization(
+                    componentToCustomize.fontFamily || 'Arial',
+                    componentToCustomize.fontSize || 16,
+                    componentToCustomize.color || '#000000'
+                  )
+                }
+              >
+                Save
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }
