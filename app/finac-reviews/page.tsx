@@ -39,13 +39,6 @@ export interface Message {
   timestamp: number
 }
 
-interface CommandMenuProps {
-  isOpen: boolean;
-  onSelect: (action: string) => void;
-  filter: string;
-  splitView: boolean; // add this prop
-}
-
 export function MessageComponent({
   message,
   onEdit,
@@ -383,7 +376,7 @@ export default function ChatInterface() {
 
   const fetchAIResponse = async (userMessage: Message) => {
     try {
-      const response = await fetch("/api/testFetch", {
+      const response = await fetch("/api/finac", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -530,7 +523,7 @@ export default function ChatInterface() {
                     }
                   }}
                   className="w-full bg-[#2f2f2f] border-none text-white px-4 py-6 rounded-lg pr-12 focus-visible:ring-0 focus-visible:ring-offset-0"
-                  placeholder="Message HatGPT"
+                  placeholder="Message ChatGPT"
                 />
                 <TooltipProvider>
                   <Tooltip>
@@ -651,7 +644,7 @@ export default function ChatInterface() {
                   }
                 }}
                 className="w-full bg-[#2f2f2f] border-none text-white px-4 py-6 rounded-lg pr-12 focus-visible:ring-0 focus-visible:ring-offset-0"
-                placeholder="Message HatGPT"
+                placeholder="Message ChatGPT"
               />
               <TooltipProvider>
                 <Tooltip>

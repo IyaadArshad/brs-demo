@@ -13,7 +13,6 @@ import {
   AIIcon,
   GlossaryIcon,
 } from "../components/icons";
-import "../styles/globals.css";
 
 export default function GitHubMarkdownEditor() {
   return (
