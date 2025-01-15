@@ -7,6 +7,7 @@ import * as DialogPrimitive from "@radix-ui/react-dialog"
 import * as ContextMenuPrimitive from "@radix-ui/react-context-menu"
 import { cva, type VariantProps } from "class-variance-authority"
 import { Input as InputComponent } from "@/components/ui/input"
+import * as SliderPrimitive from "@radix-ui/react-slider"
 // Use the existing Input component defined below
 
 // Utility function
@@ -76,6 +77,30 @@ const Input = React.forwardRef<
   )
 })
 Input.displayName = "Input"
+
+// Slider component
+const Slider = React.forwardRef<
+  React.ElementRef<typeof SliderPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root>
+>(({ className, ...props }, ref) => (
+  <SliderPrimitive.Root
+    ref={ref}
+    className={cn(
+      "relative flex w-full touch-none select-none items-center",
+      className
+    )}
+    {...props}
+  >
+    <SliderPrimitive.Track
+      className="relative h-2 w-full grow overflow-hidden rounded-full bg-secondary">
+      <SliderPrimitive.Range className="absolute h-full bg-primary" />
+    </SliderPrimitive.Track>
+    <SliderPrimitive.Thumb
+      className="block h-5 w-5 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+    />
+  </SliderPrimitive.Root>
+))
+Slider.displayName = SliderPrimitive.Root.displayName
 
 // Dialog component
 const Dialog = DialogPrimitive.Root
@@ -806,7 +831,6 @@ export default function DiagramGenerator() {
   const [newColor, setNewColor] = useState<string>('')
   const [newBorderColor, setNewBorderColor] = useState<string>('')
   const [newBorderThickness, setNewBorderThickness] = useState<number>(2)
-  const [newPlaceholderFontSize, setNewPlaceholderFontSize] = useState<number>(14)
 
   function exportDiagram() {
     const diagramData = { canvasSize, diagramComponents }
@@ -1039,7 +1063,6 @@ export default function DiagramGenerator() {
   const applyCustomization = (
     fontFamily: string, 
     fontSize: number, 
-    placeholderFontSize: number,
     color: string, 
     borderColor: string, 
     borderThickness: number
@@ -1052,7 +1075,6 @@ export default function DiagramGenerator() {
                 ...comp, 
                 fontFamily, 
                 fontSize, 
-                placeholderFontSize,
                 color,
                 borderColor,
                 borderThickness
@@ -1369,15 +1391,15 @@ export default function DiagramGenerator() {
                               placeholder={component.placeholder}
                               style={{
                                 width: component.inputLength,
-                                border: 'none', // Remove default border
-                                outline: `${component.borderThickness || 1}px solid ${component.borderColor || '#cccccc'}`, // Use outline instead
+                                border: 'none',
+                                outline: `${component.borderThickness || 1}px solid ${component.borderColor || '#cccccc'}`,
                                 padding: '4px',
                                 fontSize: component.fontSize || 14,
                                 fontFamily: component.fontFamily || 'inherit',
-                                color: component.color || 'inherit',
+                                color: component.color || 'inherit'
                               }}
                               readOnly={component.isReadOnly}
-                              className="cursor-move"
+                              className="cursor-move custom-input"
                               tabIndex={-1} // Make input unfocusable
                               onFocus={(e) => e.target.blur()} // Prevent focus
                             />
@@ -1503,21 +1525,14 @@ export default function DiagramGenerator() {
                 />
               </div>
               <div>
-                <label className="mb-1 text-sm font-medium">Font Size</label>
-                <Input
-                  type="number"
-                  placeholder="e.g., 14"
-                  value={newFontSize}
-                  onChange={(e) => setNewFontSize(parseInt(e.target.value))}
-                />
-              </div>
-              <div>
-                <label className="mb-1 text-sm font-medium">Placeholder Font Size</label>
-                <Input
-                  type="number"
-                  placeholder="e.g., 14"
-                  value={newPlaceholderFontSize}
-                  onChange={(e) => setNewPlaceholderFontSize(parseInt(e.target.value))}
+                <label className="mb-1 text-sm font-medium">Font Size: {newFontSize}px</label>
+                <Slider
+                  value={[newFontSize]}
+                  onValueChange={(value) => setNewFontSize(value[0])}
+                  min={8}
+                  max={72}
+                  step={1}
+                  className="py-4"
                 />
               </div>
               <div>
@@ -1553,7 +1568,7 @@ export default function DiagramGenerator() {
               </Button>
               <Button
                 onClick={() => {
-                  applyCustomization(newFontFamily, newFontSize, newPlaceholderFontSize, newColor, newBorderColor, newBorderThickness)
+                  applyCustomization(newFontFamily, newFontSize, newColor, newBorderColor, newBorderThickness)
                 }}
               >
                 Save
