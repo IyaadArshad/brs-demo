@@ -1321,7 +1321,10 @@ export default function DiagramGenerator() {
                               left: component.position.x,
                               top: component.position.y,
                             }}
-                            onMouseDown={(e) => startDrag(e, component.id)}
+                            onMouseDown={(e) => {
+                              startDrag(e, component.id);
+                              e.preventDefault(); // Prevent default focus behavior
+                            }}
                           >
                             {component.label ? (
                               <label
@@ -1345,6 +1348,8 @@ export default function DiagramGenerator() {
                               }}
                               readOnly={component.isReadOnly}
                               className="cursor-move"
+                              tabIndex={-1} // Make input unfocusable
+                              onFocus={(e) => e.target.blur()} // Prevent focus
                             />
                           </div>
                         </ContextMenuTrigger>
