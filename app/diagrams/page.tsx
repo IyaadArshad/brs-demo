@@ -421,9 +421,7 @@ const componentData = {
   ],
   forms: {
     fields: [
-      { id: 'text-input', name: 'Text Input', icon: FormInputIcon },
       { id: 'number-input', name: 'Number Input', icon: FormInputIcon },
-      { id: 'textarea', name: 'Textarea', icon: FormInputIcon },
       { id: 'custom-text-input', name: 'Text Input', icon: FormInputIcon },
     ],
     components: [
