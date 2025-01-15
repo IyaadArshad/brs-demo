@@ -65,7 +65,7 @@ const Input = React.forwardRef<
     <input
       type={type}
       className={cn(
-        "flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+        "flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       ref={ref}
@@ -547,12 +547,18 @@ function ComponentsDialog({
     e.dataTransfer.effectAllowed = 'move'
   }
 
-  const filteredComponents = selectedCategory
-    ? (selectedCategory === 'forms'
-      ? componentData.forms.fields
-      : componentData[selectedCategory as keyof typeof componentData] as Array<{ id: string; name: string; icon?: any }>
-    ).filter(component => component.name.toLowerCase().includes(searchTerm.toLowerCase()))
-    : []
+  const filteredComponents = searchTerm
+    ? Object.values(componentData)
+        .flatMap(category => 
+          Array.isArray(category) ? category : Object.values(category).flat()
+        )
+        .filter(component => component.name.toLowerCase().includes(searchTerm.toLowerCase())) as Array<{ id: string; name: string; icon?: React.ComponentType }>
+    : selectedCategory
+      ? (selectedCategory === 'forms'
+          ? componentData.forms.fields
+          : componentData[selectedCategory as keyof typeof componentData] as Array<{ id: string; name: string; icon?: React.ComponentType }>
+        )
+      : []
 
   return (
     <div className={`flex flex-col h-full ${className}`}>
@@ -568,7 +574,23 @@ function ComponentsDialog({
           <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
         </div>
       </div>
-      {selectedCategory ? (
+      {searchTerm ? (
+        <div className="flex-1 overflow-auto">
+          <div className="grid grid-cols-2 gap-4">
+            {filteredComponents.map((component) => (
+              <div
+                key={component.id}
+                draggable
+                onDragStart={(e) => handleDragStart(e, component.id)}
+                className="flex items-center justify-center p-4 rounded-lg bg-white border-2 border-gray-200 text-gray-800 cursor-move hover:border-blue-500 transition-colors"
+              >
+                {component.icon && <component.icon className="mr-2 h-4 w-4" />}
+                <span className="text-sm">{component.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : selectedCategory ? (
         <>
           <Button
             variant="outline"
@@ -1100,7 +1122,7 @@ export default function DiagramGenerator() {
             className="bg-white shadow-lg rounded-tr-lg rounded-br-lg p-4 flex flex-col relative"
             style={{ width: `${sidebarWidth}px`, minWidth: '200px', maxWidth: '400px' }}
           >
-            <h2 className="text-lg font-semibold mb-4">Components</h2>
+            <h1 className="text-4xl font-semibold mb-4">Components</h1>
             <ComponentsDialog 
               open={true}
               onOpenChange={() => {}}
