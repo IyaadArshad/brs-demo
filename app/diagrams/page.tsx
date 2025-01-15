@@ -832,6 +832,11 @@ export default function DiagramGenerator() {
   const [newBorderColor, setNewBorderColor] = useState<string>('')
   const [newBorderThickness, setNewBorderThickness] = useState<number>(2)
 
+  // 1) Add refs for tracking text input resize
+  const resizingInputRef = useRef<string | null>(null)
+  const inputStartWidthRef = useRef<number>(0)
+  const inputStartXRef = useRef<number>(0)
+
   function exportDiagram() {
     const diagramData = { canvasSize, diagramComponents }
     console.log(JSON.stringify(diagramData))
@@ -1128,6 +1133,48 @@ export default function DiagramGenerator() {
     }
   }, [diagramComponents])
 
+  // 2) Add handlers for text-input resize
+  const handleInputResizeStart = (
+    e: React.MouseEvent<HTMLDivElement>,
+    componentId: string
+  ) => {
+    e.stopPropagation()
+    resizingInputRef.current = componentId
+    const comp = diagramComponents.find((c) => c.id === componentId)
+    if (comp) {
+      inputStartWidthRef.current = comp.inputLength || 200
+      inputStartXRef.current = e.clientX
+      document.body.style.cursor = 'col-resize'
+    }
+  }
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!resizingInputRef.current) return
+      const dx = e.clientX - inputStartXRef.current
+      setDiagramComponents((prev) =>
+        prev.map((comp) => {
+          if (comp.id === resizingInputRef.current) {
+            return { ...comp, inputLength: Math.max(50, inputStartWidthRef.current + dx) }
+          }
+          return comp
+        })
+      )
+    }
+
+    const handleMouseUp = () => {
+      resizingInputRef.current = null
+      document.body.style.cursor = 'default'
+    }
+
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [diagramComponents])
+
   return (
     <div className="min-h-screen bg-black flex items-center justify-center">
       <Button 
@@ -1402,6 +1449,17 @@ export default function DiagramGenerator() {
                               className="cursor-move custom-input"
                               tabIndex={-1} // Make input unfocusable
                               onFocus={(e) => e.target.blur()} // Prevent focus
+                            />
+                            <div
+                              style={{
+                                position: 'absolute',
+                                top: 0,
+                                right: 0,
+                                width: '5px',
+                                height: '100%',
+                                cursor: 'col-resize',
+                              }}
+                              onMouseDown={(e) => handleInputResizeStart(e, component.id)}
                             />
                           </div>
                         </ContextMenuTrigger>
