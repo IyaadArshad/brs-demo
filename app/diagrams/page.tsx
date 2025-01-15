@@ -6,6 +6,8 @@ import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import * as ContextMenuPrimitive from "@radix-ui/react-context-menu"
 import { cva, type VariantProps } from "class-variance-authority"
+import { Input as InputComponent } from "@/components/ui/input"
+// Use the existing Input component defined below
 
 // Utility function
 const cn = (...classes: (string | undefined)[]) => classes.filter(Boolean).join(' ')
@@ -379,6 +381,7 @@ type Component = {
   labelColor?: string;
   labelFontSize?: number;
   inputLength?: number;
+  isReadOnly?: boolean; // Added property
 }
 
 // Component data
@@ -794,6 +797,7 @@ export default function DiagramGenerator() {
   const [showCloseConfirm, setShowCloseConfirm] = useState(false)
   const shapeIdRef = useRef(0)
   const [sidebarWidth, setSidebarWidth] = useState(320);
+  const [contextMenu, setContextMenu] = useState<{ mouseX: number; mouseY: number; componentId: string } | null>(null) // Add context menu state
 
   function exportDiagram() {
     const diagramData = { canvasSize, diagramComponents }
@@ -891,6 +895,7 @@ export default function DiagramGenerator() {
             labelColor: '#000000',
             labelFontSize: 14,
             inputLength: 200,
+            isReadOnly: true, // Added property
           }
           setDiagramComponents(prev => [...prev, newComponent])
           return
@@ -924,6 +929,7 @@ export default function DiagramGenerator() {
     e: React.MouseEvent,
     componentId: string
   ) => {
+    if (e.button !== 0) return // Only left-click
     e.stopPropagation()
     setDraggedComponentId(componentId)
     let startX = e.clientX
@@ -1074,6 +1080,19 @@ export default function DiagramGenerator() {
       setHasUnsavedChanges(true)
     }
   }, [diagramComponents])
+
+  const handleContextMenu = (event: React.MouseEvent, componentId: string) => {
+    event.preventDefault()
+    setContextMenu(
+      contextMenu === null
+        ? { mouseX: event.clientX - 2, mouseY: event.clientY - 4, componentId }
+        : null,
+    )
+  }
+
+  const handleCloseContextMenu = () => {
+    setContextMenu(null)
+  }
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center">
@@ -1314,10 +1333,7 @@ export default function DiagramGenerator() {
                           left: component.position.x,
                           top: component.position.y,
                         }}
-                        onContextMenu={(e) => {
-                          e.preventDefault()
-                          handleCustomize(component)
-                        }}
+                        onContextMenu={(e) => handleContextMenu(e, component.id)} // Added handler
                         onMouseDown={(e) => startDrag(e, component.id)}
                       >
                         {component.label ? (
@@ -1332,7 +1348,7 @@ export default function DiagramGenerator() {
                             {component.label}
                           </label>
                         ) : null}
-                        <input
+                        <InputComponent
                           type="text"
                           placeholder={component.placeholder}
                           style={{
@@ -1340,6 +1356,8 @@ export default function DiagramGenerator() {
                             border: `1px solid ${component.borderColor}`,
                             padding: '4px',
                           }}
+                          readOnly={component.isReadOnly}
+                          className="cursor-move" // Ensure drag cursor
                         />
                       </div>
                     )
@@ -1378,7 +1396,6 @@ export default function DiagramGenerator() {
                                 left: `${component.position.x}px`,
                                 top: `${component.position.y}px`,
                               }}
-                              onMouseDown={(e) => startDrag(e, component.id)}
                             >
                               {component.type}
                             </div>
@@ -1581,6 +1598,48 @@ export default function DiagramGenerator() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Context Menu */}
+      {contextMenu && (
+        <ul
+          style={{
+            position: 'absolute',
+            top: contextMenu.mouseY,
+            left: contextMenu.mouseX,
+            backgroundColor: 'white',
+            border: '1px solid #ccc',
+            listStyle: 'none',
+            padding: '10px',
+            zIndex: 1000,
+          }}
+          onMouseLeave={handleCloseContextMenu}
+        >
+          <li
+            className="cursor-pointer p-2 hover:bg-gray-200"
+            onClick={() => {
+              handleCustomize(diagramComponents.find(c => c.id === contextMenu.componentId)!)
+              handleCloseContextMenu()
+            }}
+          >
+            Customize
+          </li>
+          <li
+            className="cursor-pointer p-2 hover:bg-gray-200"
+            onClick={() => {
+              startEditing(contextMenu.componentId)
+              handleCloseContextMenu()
+            }}
+          >
+            Edit
+          </li>
+        </ul>
+      )}
+
+      <style jsx>{`
+        input[readOnly] {
+          cursor: default;
+        }
+      `}</style>
     </div>
   )
 }
