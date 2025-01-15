@@ -1369,9 +1369,8 @@ export default function DiagramGenerator() {
                               placeholder={component.placeholder}
                               style={{
                                 width: component.inputLength,
-                                borderWidth: `${component.borderThickness || 1}px`, // Fixed: Add px unit
-                                borderStyle: 'solid',
-                                borderColor: component.borderColor || '#cccccc',
+                                border: 'none', // Remove default border
+                                outline: `${component.borderThickness || 1}px solid ${component.borderColor || '#cccccc'}`, // Use outline instead
                                 padding: '4px',
                                 fontSize: component.fontSize || 14,
                                 fontFamily: component.fontFamily || 'inherit',
