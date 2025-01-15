@@ -797,7 +797,6 @@ export default function DiagramGenerator() {
   const [showCloseConfirm, setShowCloseConfirm] = useState(false)
   const shapeIdRef = useRef(0)
   const [sidebarWidth, setSidebarWidth] = useState(320);
-  const [contextMenu, setContextMenu] = useState<{ mouseX: number; mouseY: number; componentId: string } | null>(null) // Add context menu state
 
   function exportDiagram() {
     const diagramData = { canvasSize, diagramComponents }
@@ -1081,19 +1080,6 @@ export default function DiagramGenerator() {
     }
   }, [diagramComponents])
 
-  const handleContextMenu = (event: React.MouseEvent, componentId: string) => {
-    event.preventDefault()
-    setContextMenu(
-      contextMenu === null
-        ? { mouseX: event.clientX - 2, mouseY: event.clientY - 4, componentId }
-        : null,
-    )
-  }
-
-  const handleCloseContextMenu = () => {
-    setContextMenu(null)
-  }
-
   return (
     <div className="min-h-screen bg-black flex items-center justify-center">
       <Button 
@@ -1326,40 +1312,58 @@ export default function DiagramGenerator() {
                     break;
                   case 'custom-text-input':
                     ComponentToRender = (
-                      <div
-                        key={component.id}
-                        style={{
-                          position: 'absolute',
-                          left: component.position.x,
-                          top: component.position.y,
-                        }}
-                        onContextMenu={(e) => handleContextMenu(e, component.id)} // Added handler
-                        onMouseDown={(e) => startDrag(e, component.id)}
-                      >
-                        {component.label ? (
-                          <label
+                      <ContextMenu>
+                        <ContextMenuTrigger>
+                          <div
+                            key={component.id}
                             style={{
-                              display: 'block',
-                              fontSize: component.labelFontSize,
-                              color: component.labelColor,
-                              marginBottom: 4,
+                              position: 'absolute',
+                              left: component.position.x,
+                              top: component.position.y,
                             }}
+                            onMouseDown={(e) => startDrag(e, component.id)}
                           >
-                            {component.label}
-                          </label>
-                        ) : null}
-                        <InputComponent
-                          type="text"
-                          placeholder={component.placeholder}
-                          style={{
-                            width: component.inputLength,
-                            border: `1px solid ${component.borderColor}`,
-                            padding: '4px',
-                          }}
-                          readOnly={component.isReadOnly}
-                          className="cursor-move" // Ensure drag cursor
-                        />
-                      </div>
+                            {component.label ? (
+                              <label
+                                style={{
+                                  display: 'block',
+                                  fontSize: component.labelFontSize,
+                                  color: component.labelColor,
+                                  marginBottom: 4,
+                                }}
+                              >
+                                {component.label}
+                              </label>
+                            ) : null}
+                            <InputComponent
+                              type="text"
+                              placeholder={component.placeholder}
+                              style={{
+                                width: component.inputLength,
+                                border: `1px solid ${component.borderColor}`,
+                                padding: '4px',
+                              }}
+                              readOnly={component.isReadOnly}
+                              className="cursor-move"
+                            />
+                          </div>
+                        </ContextMenuTrigger>
+                        <ContextMenuContent>
+                          <ContextMenuItem onClick={() => startEditing(component.id)}>
+                            <Pencil className="mr-2 h-4 w-4" /> Edit
+                          </ContextMenuItem>
+                          <ContextMenuItem onClick={() => handleCustomize(component)}>
+                            <Paintbrush className="mr-2 h-4 w-4" /> Customize
+                          </ContextMenuItem>
+                          <ContextMenuSeparator />
+                          <ContextMenuItem 
+                            onClick={() => removeComponent(component.id)}
+                            className="flex items-center cursor-pointer text-red-600 hover:bg-red-500"
+                          >
+                            <Trash className="mr-2 h-4 w-4" /> Delete
+                          </ContextMenuItem>
+                        </ContextMenuContent>
+                      </ContextMenu>
                     )
                     break;
                   default:
@@ -1597,42 +1601,6 @@ export default function DiagramGenerator() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      )}
-
-      {/* Context Menu */}
-      {contextMenu && (
-        <ul
-          style={{
-            position: 'absolute',
-            top: contextMenu.mouseY,
-            left: contextMenu.mouseX,
-            backgroundColor: 'white',
-            border: '1px solid #ccc',
-            listStyle: 'none',
-            padding: '10px',
-            zIndex: 1000,
-          }}
-          onMouseLeave={handleCloseContextMenu}
-        >
-          <li
-            className="cursor-pointer p-2 hover:bg-gray-200"
-            onClick={() => {
-              handleCustomize(diagramComponents.find(c => c.id === contextMenu.componentId)!)
-              handleCloseContextMenu()
-            }}
-          >
-            Customize
-          </li>
-          <li
-            className="cursor-pointer p-2 hover:bg-gray-200"
-            onClick={() => {
-              startEditing(contextMenu.componentId)
-              handleCloseContextMenu()
-            }}
-          >
-            Edit
-          </li>
-        </ul>
       )}
 
       <style jsx>{`
