@@ -1540,9 +1540,10 @@ export default function DiagramGenerator() {
                 <label className="mb-1 text-sm font-medium">Border Thickness</label>
                 <Input
                   type="number"
+                  step="0.1" // Allow decimal steps
                   placeholder="e.g., 2"
                   value={newBorderThickness}
-                  onChange={(e) => setNewBorderThickness(parseInt(e.target.value))}
+                  onChange={(e) => setNewBorderThickness(parseFloat(e.target.value) || 0)} // Use parseFloat instead of parseInt
                 />
               </div>
             </form>
