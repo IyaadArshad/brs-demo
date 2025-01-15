@@ -409,8 +409,6 @@ const componentData = {
     { id: 'pyramid', name: 'Pyramid', icon: ShapesIcon },
   ],
   text: [
-    { id: 'text1', name: 'Text 1' },
-    { id: 'text2', name: 'Text 2' },
     { id: 'heading', name: 'Heading', icon: TypeIcon },
     { id: 'subheading', name: 'Subheading', icon: TypeIcon },
     { id: 'paragraph', name: 'Paragraph', icon: TypeIcon },
