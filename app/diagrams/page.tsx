@@ -382,6 +382,8 @@ type Component = {
   labelFontSize?: number;
   inputLength?: number;
   isReadOnly?: boolean; // Added property
+  borderThickness?: number; // Added property
+  placeholderFontSize?: number; // Added property
 }
 
 // Component data
@@ -798,6 +800,14 @@ export default function DiagramGenerator() {
   const shapeIdRef = useRef(0)
   const [sidebarWidth, setSidebarWidth] = useState(320);
 
+  // Add new state variables for customization
+  const [newFontFamily, setNewFontFamily] = useState<string>('')
+  const [newFontSize, setNewFontSize] = useState<number>(14)
+  const [newColor, setNewColor] = useState<string>('')
+  const [newBorderColor, setNewBorderColor] = useState<string>('')
+  const [newBorderThickness, setNewBorderThickness] = useState<number>(2)
+  const [newPlaceholderFontSize, setNewPlaceholderFontSize] = useState<number>(14)
+
   function exportDiagram() {
     const diagramData = { canvasSize, diagramComponents }
     console.log(JSON.stringify(diagramData))
@@ -1025,12 +1035,28 @@ export default function DiagramGenerator() {
     setCustomizeDialogOpen(true)
   }
 
-  const applyCustomization = (fontFamily: string, fontSize: number, color: string) => {
+  // Apply Customization Function Modification
+  const applyCustomization = (
+    fontFamily: string, 
+    fontSize: number, 
+    placeholderFontSize: number,
+    color: string, 
+    borderColor: string, 
+    borderThickness: number
+  ) => {
     if (componentToCustomize) {
       setDiagramComponents(prev =>
         prev.map(comp =>
           comp.id === componentToCustomize.id
-            ? { ...comp, fontFamily, fontSize, color }
+            ? { 
+                ...comp, 
+                fontFamily, 
+                fontSize, 
+                placeholderFontSize,
+                color,
+                borderColor,
+                borderThickness
+              }
             : comp
         )
       )
@@ -1343,8 +1369,13 @@ export default function DiagramGenerator() {
                               placeholder={component.placeholder}
                               style={{
                                 width: component.inputLength,
-                                border: `1px solid ${component.borderColor}`,
+                                borderWidth: `${component.borderThickness || 1}px`, // Fixed: Add px unit
+                                borderStyle: 'solid',
+                                borderColor: component.borderColor || '#cccccc',
                                 padding: '4px',
+                                fontSize: component.fontSize || 14,
+                                fontFamily: component.fontFamily || 'inherit',
+                                color: component.color || 'inherit',
                               }}
                               readOnly={component.isReadOnly}
                               className="cursor-move"
@@ -1460,131 +1491,59 @@ export default function DiagramGenerator() {
         <Dialog open={customizeDialogOpen} onOpenChange={setCustomizeDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Customize Text</DialogTitle>
+              <DialogTitle>Customize Component</DialogTitle>
             </DialogHeader>
             <form className="flex flex-col gap-4">
-              {componentToCustomize?.type === 'custom-text-input' && (
-                <>
-                  <div className="flex flex-col">
-                    <label>Field Label (optional)</label>
-                    <Input
-                      type="text"
-                      value={componentToCustomize.label || ''}
-                      onChange={(e) =>
-                        setComponentToCustomize({
-                          ...componentToCustomize,
-                          label: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                  <div className="flex flex-col">
-                    <label>Placeholder</label>
-                    <Input
-                      type="text"
-                      value={componentToCustomize.placeholder || ''}
-                      onChange={(e) =>
-                        setComponentToCustomize({
-                          ...componentToCustomize,
-                          placeholder: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                  <div className="flex flex-col">
-                    <label>Border Color</label>
-                    <Input
-                      type="color"
-                      value={componentToCustomize.borderColor || '#cccccc'}
-                      onChange={(e) =>
-                        setComponentToCustomize({
-                          ...componentToCustomize,
-                          borderColor: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                  <div className="flex flex-col">
-                    <label>Label Color</label>
-                    <Input
-                      type="color"
-                      value={componentToCustomize.labelColor || '#000000'}
-                      onChange={(e) =>
-                        setComponentToCustomize({
-                          ...componentToCustomize,
-                          labelColor: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                  <div className="flex flex-col">
-                    <label>Label Font Size</label>
-                    <Input
-                      type="number"
-                      value={componentToCustomize.labelFontSize || 14}
-                      onChange={(e) =>
-                        setComponentToCustomize({
-                          ...componentToCustomize,
-                          labelFontSize: parseInt(e.target.value) || 14,
-                        })
-                      }
-                    />
-                  </div>
-                  <div className="flex flex-col">
-                    <label>Input Length (pixels)</label>
-                    <Input
-                      type="number"
-                      value={componentToCustomize.inputLength || 200}
-                      onChange={(e) =>
-                        setComponentToCustomize({
-                          ...componentToCustomize,
-                          inputLength: parseInt(e.target.value) || 200,
-                        })
-                      }
-                    />
-                  </div>
-                </>
-              )}
-              <div className="flex flex-col">
-                <label className="mb-1 font-medium">Font Family</label>
+              <div>
+                <label className="mb-1 text-sm font-medium">Font Family</label>
                 <Input
                   type="text"
-                  value={componentToCustomize.fontFamily || ''}
-                  onChange={(e) =>
-                    setComponentToCustomize({
-                      ...componentToCustomize,
-                      fontFamily: e.target.value,
-                    })
-                  }
-                  placeholder="e.g., Arial, Helvetica, sans-serif"
+                  placeholder="e.g., Arial, sans-serif"
+                  value={newFontFamily}
+                  onChange={(e) => setNewFontFamily(e.target.value)}
                 />
               </div>
-              <div className="flex flex-col">
-                <label className="mb-1 font-medium">Font Size (px)</label>
+              <div>
+                <label className="mb-1 text-sm font-medium">Font Size</label>
                 <Input
                   type="number"
-                  value={componentToCustomize.fontSize || 16}
-                  onChange={(e) =>
-                    setComponentToCustomize({
-                      ...componentToCustomize,
-                      fontSize: Number(e.target.value),
-                    })
-                  }
-                  min={8}
-                  max={72}
+                  placeholder="e.g., 14"
+                  value={newFontSize}
+                  onChange={(e) => setNewFontSize(parseInt(e.target.value))}
                 />
               </div>
-              <div className="flex flex-col">
-                <label className="mb-1 font-medium">Color</label>
+              <div>
+                <label className="mb-1 text-sm font-medium">Placeholder Font Size</label>
+                <Input
+                  type="number"
+                  placeholder="e.g., 14"
+                  value={newPlaceholderFontSize}
+                  onChange={(e) => setNewPlaceholderFontSize(parseInt(e.target.value))}
+                />
+              </div>
+              <div>
+                <label className="mb-1 text-sm font-medium">Color</label>
                 <Input
                   type="color"
-                  value={componentToCustomize.color || '#000000'}
-                  onChange={(e) =>
-                    setComponentToCustomize({
-                      ...componentToCustomize,
-                      color: e.target.value,
-                    })
-                  }
+                  value={newColor}
+                  onChange={(e) => setNewColor(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="mb-1 text-sm font-medium">Border Color</label>
+                <Input
+                  type="color"
+                  value={newBorderColor}
+                  onChange={(e) => setNewBorderColor(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="mb-1 text-sm font-medium">Border Thickness</label>
+                <Input
+                  type="number"
+                  placeholder="e.g., 2"
+                  value={newBorderThickness}
+                  onChange={(e) => setNewBorderThickness(parseInt(e.target.value))}
                 />
               </div>
             </form>
@@ -1593,13 +1552,9 @@ export default function DiagramGenerator() {
                 Cancel
               </Button>
               <Button
-                onClick={() =>
-                  applyCustomization(
-                    componentToCustomize.fontFamily || 'Arial',
-                    componentToCustomize.fontSize || 16,
-                    componentToCustomize.color || '#000000'
-                  )
-                }
+                onClick={() => {
+                  applyCustomization(newFontFamily, newFontSize, newPlaceholderFontSize, newColor, newBorderColor, newBorderThickness)
+                }}
               >
                 Save
               </Button>
