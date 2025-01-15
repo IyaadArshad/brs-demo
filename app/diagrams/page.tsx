@@ -373,6 +373,12 @@ type Component = {
     id: string
     title: string
   }[]
+  label?: string;
+  placeholder?: string;
+  borderColor?: string;
+  labelColor?: string;
+  labelFontSize?: number;
+  inputLength?: number;
 }
 
 // Component data
@@ -418,6 +424,7 @@ const componentData = {
       { id: 'text-input', name: 'Text Input', icon: FormInputIcon },
       { id: 'number-input', name: 'Number Input', icon: FormInputIcon },
       { id: 'textarea', name: 'Textarea', icon: FormInputIcon },
+      { id: 'custom-text-input', name: 'Text Input', icon: FormInputIcon },
     ],
     components: [
       { id: 'checkbox', name: 'Checkbox', icon: FormInputIcon },
@@ -875,6 +882,21 @@ export default function DiagramGenerator() {
         case 'paragraph':
           defaultContent = 'This is a sample paragraph text.'
           break
+        case 'custom-text-input': {
+          const newComponent: Component = {
+            id: `text-input-${shapeIdRef.current++}`,
+            type: 'custom-text-input',
+            position: { x, y },
+            label: '',
+            placeholder: 'Enter text...',
+            borderColor: '#cccccc',
+            labelColor: '#000000',
+            labelFontSize: 14,
+            inputLength: 200,
+          }
+          setDiagramComponents(prev => [...prev, newComponent])
+          return
+        }
         default:
           defaultContent = ''
       }
@@ -1285,6 +1307,45 @@ export default function DiagramGenerator() {
                       </ContextMenu>
                     )
                     break;
+                  case 'custom-text-input':
+                    ComponentToRender = (
+                      <div
+                        key={component.id}
+                        style={{
+                          position: 'absolute',
+                          left: component.position.x,
+                          top: component.position.y,
+                        }}
+                        onContextMenu={(e) => {
+                          e.preventDefault()
+                          handleCustomize(component)
+                        }}
+                        onMouseDown={(e) => startDrag(e, component.id)}
+                      >
+                        {component.label ? (
+                          <label
+                            style={{
+                              display: 'block',
+                              fontSize: component.labelFontSize,
+                              color: component.labelColor,
+                              marginBottom: 4,
+                            }}
+                          >
+                            {component.label}
+                          </label>
+                        ) : null}
+                        <input
+                          type="text"
+                          placeholder={component.placeholder}
+                          style={{
+                            width: component.inputLength,
+                            border: `1px solid ${component.borderColor}`,
+                            padding: '4px',
+                          }}
+                        />
+                      </div>
+                    )
+                    break;
                   default:
                     if (componentData.shapes.some(shape => shape.id === component.type)) {
                       ComponentToRender = (
@@ -1378,6 +1439,88 @@ export default function DiagramGenerator() {
               <DialogTitle>Customize Text</DialogTitle>
             </DialogHeader>
             <form className="flex flex-col gap-4">
+              {componentToCustomize?.type === 'custom-text-input' && (
+                <>
+                  <div className="flex flex-col">
+                    <label>Field Label (optional)</label>
+                    <Input
+                      type="text"
+                      value={componentToCustomize.label || ''}
+                      onChange={(e) =>
+                        setComponentToCustomize({
+                          ...componentToCustomize,
+                          label: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <label>Placeholder</label>
+                    <Input
+                      type="text"
+                      value={componentToCustomize.placeholder || ''}
+                      onChange={(e) =>
+                        setComponentToCustomize({
+                          ...componentToCustomize,
+                          placeholder: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <label>Border Color</label>
+                    <Input
+                      type="color"
+                      value={componentToCustomize.borderColor || '#cccccc'}
+                      onChange={(e) =>
+                        setComponentToCustomize({
+                          ...componentToCustomize,
+                          borderColor: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <label>Label Color</label>
+                    <Input
+                      type="color"
+                      value={componentToCustomize.labelColor || '#000000'}
+                      onChange={(e) =>
+                        setComponentToCustomize({
+                          ...componentToCustomize,
+                          labelColor: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <label>Label Font Size</label>
+                    <Input
+                      type="number"
+                      value={componentToCustomize.labelFontSize || 14}
+                      onChange={(e) =>
+                        setComponentToCustomize({
+                          ...componentToCustomize,
+                          labelFontSize: parseInt(e.target.value) || 14,
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <label>Input Length (pixels)</label>
+                    <Input
+                      type="number"
+                      value={componentToCustomize.inputLength || 200}
+                      onChange={(e) =>
+                        setComponentToCustomize({
+                          ...componentToCustomize,
+                          inputLength: parseInt(e.target.value) || 200,
+                        })
+                      }
+                    />
+                  </div>
+                </>
+              )}
               <div className="flex flex-col">
                 <label className="mb-1 font-medium">Font Family</label>
                 <Input
