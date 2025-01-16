@@ -707,7 +707,7 @@ function ComponentsDialog({
                     key={component.id}
                     draggable
                     onDragStart={(e) => handleDragStart(e, component.id)}
-                    className="flex items-center justify-center p-4 rounded-lg bg-[#18181a] border-2 border-[#27272a] text-[#fafafa] cursor-move hover:border-blue-500 hover:bg-[#27272a] transition-colors"
+                    className="flex sidebar-category items-center justify-center p-4 rounded-lg bg-[#18181a] border-2 border-[#27272a] text-[#fafafa] cursor-move hover:border-blue-500 hover:bg-[#27272a] transition-colors"
                   >
                     {component.icon && (
                       <component.icon className="mr-2 h-4 w-4" />
@@ -1441,8 +1441,13 @@ export default function DiagramGenerator() {
             <ArrowLeft className="mr-4 h-4 w-4" />
             {showTextWithIcons && "Back"}
           </Button>
-          <div className="flex gap-2">
-            <Button variant="outline" className="topbox" size="sm" onClick={() => {}}>
+            <div className="flex gap-2">
+            <Button
+              variant="outline"
+              className={theme === "dark" ? "topbox" : ""}
+              size="sm"
+              onClick={() => {}}
+            >
               <Layout className="mr-4 h-4 w-4" />
               {showTextWithIcons && "Layouts"}
             </Button>
@@ -1454,11 +1459,21 @@ export default function DiagramGenerator() {
               <X className="mr-4 h-4 w-4" />
               {showTextWithIcons && "Clear"}
             </Button>
-            <Button variant="outline" size="sm" className="topbox" onClick={importDiagram}>
+            <Button
+              variant="outline"
+              size="sm"
+              className={theme === "dark" ? "topbox" : ""}
+              onClick={importDiagram}
+            >
               <Download className="mr-4 h-4 w-4" />
               {showTextWithIcons && "Import"}
             </Button>
-            <Button variant="outline" size="sm" className="topbox" onClick={exportDiagram}>
+            <Button
+              variant="outline"
+              size="sm"
+              className={theme === "dark" ? "topbox" : ""}
+              onClick={exportDiagram}
+            >
               <Upload className="mr-4 h-4 w-4" />
               {showTextWithIcons && "Export"}
             </Button>
@@ -1466,12 +1481,12 @@ export default function DiagramGenerator() {
               variant="outline"
               size="sm"
               onClick={() => setIsSettingsOpen(true)}
-              className="topbox"
+              className={theme === "dark" ? "topbox" : ""}
             >
               <SettingsIcon className="mr-4 h-4 w-4" />
               {showTextWithIcons && "Settings"}
             </Button>
-          </div>
+            </div>
         </div>
 
         {/* Main Content Area */}
