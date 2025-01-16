@@ -607,7 +607,7 @@ function ComponentsDialog({
 
   const renderSettings = () => (
     <div className="flex-1 overflow-auto space-y-6 p-4">
-      <h2 className="text-2xl font-semibold mb-6">Settings</h2>
+      <h1 className="text-4xl font-semibold mb-6">Settings</h1>
       <div>
         <Label.Root className="block mb-1">Name</Label.Root>
         <Input
@@ -648,7 +648,7 @@ function ComponentsDialog({
         renderSettings()
       ) : (
         <>
-          <h2 className="text-2xl font-semibold mb-4">Components</h2>
+          <h1 className="text-4xl font-semibold mb-4">Components</h1>
           <div className="mb-4">
             <div className="relative">
               <Input
@@ -1315,7 +1315,6 @@ export default function DiagramGenerator() {
             className="bg-white shadow-lg rounded-tr-lg rounded-br-lg p-4 flex flex-col relative"
             style={{ width: `${sidebarWidth}px`, minWidth: '200px', maxWidth: '400px' }}
           >
-            <h1 className="text-4xl font-semibold mb-4">Components</h1>
             <ComponentsDialog 
               open={true}
               onOpenChange={() => {}}
