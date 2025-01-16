@@ -1,20 +1,41 @@
-'use client'
+"use client";
 
-import { useState, useRef, useEffect } from 'react'
-import { Plus, Layout, X, Search, PinIcon, LayoutIcon, ShapesIcon, TypeIcon, FormInputIcon, Pencil, Paintbrush, Trash, Download, Upload, ArrowLeft, Check, ChevronRight, Circle, Settings as SettingsIcon } from 'lucide-react'
-import * as React from "react"
-import * as DialogPrimitive from "@radix-ui/react-dialog"
-import * as ContextMenuPrimitive from "@radix-ui/react-context-menu"
-import { cva, type VariantProps } from "class-variance-authority"
-import { Input as InputComponent } from "@/components/ui/input"
-import * as SliderPrimitive from "@radix-ui/react-slider"
-import * as Switch from '@radix-ui/react-switch'
-import * as Label from '@radix-ui/react-label'
-import * as Select from '@radix-ui/react-select'
+import { useState, useRef, useEffect } from "react";
+import {
+  Plus,
+  Layout,
+  X,
+  Search,
+  PinIcon,
+  LayoutIcon,
+  ShapesIcon,
+  TypeIcon,
+  FormInputIcon,
+  Pencil,
+  Paintbrush,
+  Trash,
+  Download,
+  Upload,
+  ArrowLeft,
+  Check,
+  ChevronRight,
+  Circle,
+  Settings as SettingsIcon,
+} from "lucide-react";
+import * as React from "react";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+import * as ContextMenuPrimitive from "@radix-ui/react-context-menu";
+import { cva, type VariantProps } from "class-variance-authority";
+import { Input as InputComponent } from "@/components/ui/input";
+import * as SliderPrimitive from "@radix-ui/react-slider";
+import * as Switch from "@radix-ui/react-switch";
+import * as Label from "@radix-ui/react-label";
+import * as Select from "@radix-ui/react-select";
 import "./globals.css";
 
 // Utility function
-const cn = (...classes: (string | undefined)[]) => classes.filter(Boolean).join(' ')
+const cn = (...classes: (string | undefined)[]) =>
+  classes.filter(Boolean).join(" ");
 
 // Button component
 const buttonVariants = cva(
@@ -23,9 +44,12 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline: "border border-input hover:bg-accent hover:text-accent-foreground",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        destructive:
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        outline:
+          "border border-input hover:bg-accent hover:text-accent-foreground",
+        secondary:
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "underline-offset-4 hover:underline text-primary",
       },
@@ -40,27 +64,27 @@ const buttonVariants = cva(
       size: "default",
     },
   }
-)
+);
 
 interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
-  asChild?: boolean
+  asChild?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? React.Fragment : "button"
+    const Comp = asChild ? React.Fragment : "button";
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         {...props}
       />
-    )
+    );
   }
-)
-Button.displayName = "Button"
+);
+Button.displayName = "Button";
 
 // Input component
 const Input = React.forwardRef<
@@ -77,9 +101,9 @@ const Input = React.forwardRef<
       ref={ref}
       {...props}
     />
-  )
-})
-Input.displayName = "Input"
+  );
+});
+Input.displayName = "Input";
 
 // Slider component
 const Slider = React.forwardRef<
@@ -94,22 +118,19 @@ const Slider = React.forwardRef<
     )}
     {...props}
   >
-    <SliderPrimitive.Track
-      className="relative h-2 w-full grow overflow-hidden rounded-full bg-secondary">
+    <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full bg-secondary">
       <SliderPrimitive.Range className="absolute h-full bg-primary" />
     </SliderPrimitive.Track>
-    <SliderPrimitive.Thumb
-      className="block h-5 w-5 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-    />
+    <SliderPrimitive.Thumb className="block h-5 w-5 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" />
   </SliderPrimitive.Root>
-))
-Slider.displayName = SliderPrimitive.Root.displayName
+));
+Slider.displayName = SliderPrimitive.Root.displayName;
 
 // Dialog component
-const Dialog = DialogPrimitive.Root
-const DialogTrigger = DialogPrimitive.Trigger
-const DialogPortal = DialogPrimitive.Portal
-const DialogClose = DialogPrimitive.Close
+const Dialog = DialogPrimitive.Root;
+const DialogTrigger = DialogPrimitive.Trigger;
+const DialogPortal = DialogPrimitive.Portal;
+const DialogClose = DialogPrimitive.Close;
 
 const DialogOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
@@ -123,8 +144,8 @@ const DialogOverlay = React.forwardRef<
     )}
     {...props}
   />
-))
-DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
+));
+DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
@@ -147,8 +168,8 @@ const DialogContent = React.forwardRef<
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
   </DialogPortal>
-))
-DialogContent.displayName = DialogPrimitive.Content.displayName
+));
+DialogContent.displayName = DialogPrimitive.Content.displayName;
 
 const DialogHeader = ({
   className,
@@ -161,8 +182,8 @@ const DialogHeader = ({
     )}
     {...props}
   />
-)
-DialogHeader.displayName = "DialogHeader"
+);
+DialogHeader.displayName = "DialogHeader";
 
 const DialogFooter = ({
   className,
@@ -175,8 +196,8 @@ const DialogFooter = ({
     )}
     {...props}
   />
-)
-DialogFooter.displayName = "DialogFooter"
+);
+DialogFooter.displayName = "DialogFooter";
 
 const DialogTitle = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Title>,
@@ -190,8 +211,8 @@ const DialogTitle = React.forwardRef<
     )}
     {...props}
   />
-))
-DialogTitle.displayName = DialogPrimitive.Title.displayName
+));
+DialogTitle.displayName = DialogPrimitive.Title.displayName;
 
 const DialogDescription = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Description>,
@@ -202,21 +223,21 @@ const DialogDescription = React.forwardRef<
     className={cn("text-sm text-muted-foreground", className)}
     {...props}
   />
-))
-DialogDescription.displayName = DialogPrimitive.Description.displayName
+));
+DialogDescription.displayName = DialogPrimitive.Description.displayName;
 
 // ContextMenu component
-const ContextMenu = ContextMenuPrimitive.Root
-const ContextMenuTrigger = ContextMenuPrimitive.Trigger
-const ContextMenuGroup = ContextMenuPrimitive.Group
-const ContextMenuPortal = ContextMenuPrimitive.Portal
-const ContextMenuSub = ContextMenuPrimitive.Sub
-const ContextMenuRadioGroup = ContextMenuPrimitive.RadioGroup
+const ContextMenu = ContextMenuPrimitive.Root;
+const ContextMenuTrigger = ContextMenuPrimitive.Trigger;
+const ContextMenuGroup = ContextMenuPrimitive.Group;
+const ContextMenuPortal = ContextMenuPrimitive.Portal;
+const ContextMenuSub = ContextMenuPrimitive.Sub;
+const ContextMenuRadioGroup = ContextMenuPrimitive.RadioGroup;
 
 const ContextMenuSubTrigger = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.SubTrigger>,
   React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.SubTrigger> & {
-    inset?: boolean
+    inset?: boolean;
   }
 >(({ className, inset, children, ...props }, ref) => (
   <ContextMenuPrimitive.SubTrigger
@@ -231,8 +252,8 @@ const ContextMenuSubTrigger = React.forwardRef<
     {children}
     <ChevronRight className="ml-auto h-4 w-4" />
   </ContextMenuPrimitive.SubTrigger>
-))
-ContextMenuSubTrigger.displayName = ContextMenuPrimitive.SubTrigger.displayName
+));
+ContextMenuSubTrigger.displayName = ContextMenuPrimitive.SubTrigger.displayName;
 
 const ContextMenuSubContent = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.SubContent>,
@@ -246,8 +267,8 @@ const ContextMenuSubContent = React.forwardRef<
     )}
     {...props}
   />
-))
-ContextMenuSubContent.displayName = ContextMenuPrimitive.SubContent.displayName
+));
+ContextMenuSubContent.displayName = ContextMenuPrimitive.SubContent.displayName;
 
 const ContextMenuContent = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.Content>,
@@ -263,13 +284,13 @@ const ContextMenuContent = React.forwardRef<
       {...props}
     />
   </ContextMenuPrimitive.Portal>
-))
-ContextMenuContent.displayName = ContextMenuPrimitive.Content.displayName
+));
+ContextMenuContent.displayName = ContextMenuPrimitive.Content.displayName;
 
 const ContextMenuItem = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Item> & {
-    inset?: boolean
+    inset?: boolean;
   }
 >(({ className, inset, ...props }, ref) => (
   <ContextMenuPrimitive.Item
@@ -281,8 +302,8 @@ const ContextMenuItem = React.forwardRef<
     )}
     {...props}
   />
-))
-ContextMenuItem.displayName = ContextMenuPrimitive.Item.displayName
+));
+ContextMenuItem.displayName = ContextMenuPrimitive.Item.displayName;
 
 const ContextMenuCheckboxItem = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.CheckboxItem>,
@@ -304,9 +325,9 @@ const ContextMenuCheckboxItem = React.forwardRef<
     </span>
     {children}
   </ContextMenuPrimitive.CheckboxItem>
-))
+));
 ContextMenuCheckboxItem.displayName =
-  ContextMenuPrimitive.CheckboxItem.displayName
+  ContextMenuPrimitive.CheckboxItem.displayName;
 
 const ContextMenuRadioItem = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.RadioItem>,
@@ -327,13 +348,13 @@ const ContextMenuRadioItem = React.forwardRef<
     </span>
     {children}
   </ContextMenuPrimitive.RadioItem>
-))
-ContextMenuRadioItem.displayName = ContextMenuPrimitive.RadioItem.displayName
+));
+ContextMenuRadioItem.displayName = ContextMenuPrimitive.RadioItem.displayName;
 
 const ContextMenuLabel = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.Label>,
   React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Label> & {
-    inset?: boolean
+    inset?: boolean;
   }
 >(({ className, inset, ...props }, ref) => (
   <ContextMenuPrimitive.Label
@@ -345,8 +366,8 @@ const ContextMenuLabel = React.forwardRef<
     )}
     {...props}
   />
-))
-ContextMenuLabel.displayName = ContextMenuPrimitive.Label.displayName
+));
+ContextMenuLabel.displayName = ContextMenuPrimitive.Label.displayName;
 
 const ContextMenuSeparator = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.Separator>,
@@ -357,8 +378,8 @@ const ContextMenuSeparator = React.forwardRef<
     className={cn("-mx-1 my-1 h-px bg-border", className)}
     {...props}
   />
-))
-ContextMenuSeparator.displayName = ContextMenuPrimitive.Separator.displayName
+));
+ContextMenuSeparator.displayName = ContextMenuPrimitive.Separator.displayName;
 
 const ContextMenuShortcut = ({
   className,
@@ -372,9 +393,9 @@ const ContextMenuShortcut = ({
       )}
       {...props}
     />
-  )
-}
-ContextMenuShortcut.displayName = "ContextMenuShortcut"
+  );
+};
+ContextMenuShortcut.displayName = "ContextMenuShortcut";
 
 // Types
 interface Tab {
@@ -400,9 +421,9 @@ type Component = {
   fontSize?: number;
   color?: string;
   tabs?: {
-    id: string
-    title: string
-  }[]
+    id: string;
+    title: string;
+  }[];
   label?: string;
   placeholder?: string;
   borderColor?: string;
@@ -413,141 +434,156 @@ type Component = {
   borderThickness?: number; // Added property
   placeholderFontSize?: number; // Added property
   height?: number; // Added property
-}
+};
 
 // Component data
 const componentData = {
-  pinned: [{ id: 'pinned1', name: 'Pinned 1' }, { id: 'pinned2', name: 'Pinned 2' }],
+  pinned: [
+    { id: "pinned1", name: "Pinned 1" },
+    { id: "pinned2", name: "Pinned 2" },
+  ],
   windows: [
-    { 
-      id: 'tabs', 
-      name: 'Tabs Window',
-      description: 'A window with multiple tabs',
-      icon: LayoutIcon
-    }
+    {
+      id: "tabs",
+      name: "Tabs Window",
+      description: "A window with multiple tabs",
+      icon: LayoutIcon,
+    },
   ],
   shapes: [
-    { id: 'square', name: 'Square', icon: ShapesIcon },
-    { id: 'circle', name: 'Circle', icon: ShapesIcon },
-    { id: 'triangle', name: 'Triangle', icon: ShapesIcon },
-    { id: 'rectangle', name: 'Rectangle', icon: ShapesIcon },
-    { id: 'oval', name: 'Oval', icon: ShapesIcon },
-    { id: 'hexagon', name: 'Hexagon', icon: ShapesIcon },
-    { id: 'octagon', name: 'Octagon', icon: ShapesIcon },
-    { id: 'pentagon', name: 'Pentagon', icon: ShapesIcon },
-    { id: 'diamond', name: 'Diamond', icon: ShapesIcon },
-    { id: 'star', name: 'Star', icon: ShapesIcon },
-    { id: 'heart', name: 'Heart', icon: ShapesIcon },
-    { id: 'trapezoid', name: 'Trapezoid', icon: ShapesIcon },
-    { id: 'parallelogram', name: 'Parallelogram', icon: ShapesIcon },
-    { id: 'rhombus', name: 'Rhombus', icon: ShapesIcon },
-    { id: 'arrow', name: 'Arrow', icon: ShapesIcon },
-    { id: 'cross', name: 'Cross', icon: ShapesIcon },
-    { id: 'cloud', name: 'Cloud', icon: ShapesIcon },
-    { id: 'cylinder', name: 'Cylinder', icon: ShapesIcon },
-    { id: 'cone', name: 'Cone', icon: ShapesIcon },
-    { id: 'pyramid', name: 'Pyramid', icon: ShapesIcon },
+    { id: "square", name: "Square", icon: ShapesIcon },
+    { id: "circle", name: "Circle", icon: ShapesIcon },
+    { id: "triangle", name: "Triangle", icon: ShapesIcon },
+    { id: "rectangle", name: "Rectangle", icon: ShapesIcon },
+    { id: "oval", name: "Oval", icon: ShapesIcon },
+    { id: "hexagon", name: "Hexagon", icon: ShapesIcon },
+    { id: "octagon", name: "Octagon", icon: ShapesIcon },
+    { id: "pentagon", name: "Pentagon", icon: ShapesIcon },
+    { id: "diamond", name: "Diamond", icon: ShapesIcon },
+    { id: "star", name: "Star", icon: ShapesIcon },
+    { id: "heart", name: "Heart", icon: ShapesIcon },
+    { id: "trapezoid", name: "Trapezoid", icon: ShapesIcon },
+    { id: "parallelogram", name: "Parallelogram", icon: ShapesIcon },
+    { id: "rhombus", name: "Rhombus", icon: ShapesIcon },
+    { id: "arrow", name: "Arrow", icon: ShapesIcon },
+    { id: "cross", name: "Cross", icon: ShapesIcon },
+    { id: "cloud", name: "Cloud", icon: ShapesIcon },
+    { id: "cylinder", name: "Cylinder", icon: ShapesIcon },
+    { id: "cone", name: "Cone", icon: ShapesIcon },
+    { id: "pyramid", name: "Pyramid", icon: ShapesIcon },
   ],
   text: [
-    { id: 'heading', name: 'Heading', icon: TypeIcon },
-    { id: 'subheading', name: 'Subheading', icon: TypeIcon },
-    { id: 'paragraph', name: 'Paragraph', icon: TypeIcon },
+    { id: "heading", name: "Heading", icon: TypeIcon },
+    { id: "subheading", name: "Subheading", icon: TypeIcon },
+    { id: "paragraph", name: "Paragraph", icon: TypeIcon },
   ],
   forms: {
     fields: [
-      { id: 'number-input', name: 'Number Input', icon: FormInputIcon },
-      { id: 'custom-text-input', name: 'Text Input', icon: FormInputIcon },
+      { id: "number-input", name: "Number Input", icon: FormInputIcon },
+      { id: "custom-text-input", name: "Text Input", icon: FormInputIcon },
     ],
     components: [
-      { id: 'checkbox', name: 'Checkbox', icon: FormInputIcon },
-      { id: 'radio', name: 'Radio', icon: FormInputIcon },
-      { id: 'select', name: 'Select', icon: FormInputIcon },
-      { id: 'blank-form', name: 'Blank Form', icon: FormInputIcon },
+      { id: "checkbox", name: "Checkbox", icon: FormInputIcon },
+      { id: "radio", name: "Radio", icon: FormInputIcon },
+      { id: "select", name: "Select", icon: FormInputIcon },
+      { id: "blank-form", name: "Blank Form", icon: FormInputIcon },
     ],
     pinned: [
-      { id: 'pinned-form1', name: 'Pinned Form 1', icon: PinIcon },
-      { id: 'pinned-form2', name: 'Pinned Form 2', icon: PinIcon },
+      { id: "pinned-form1", name: "Pinned Form 1", icon: PinIcon },
+      { id: "pinned-form2", name: "Pinned Form 2", icon: PinIcon },
     ],
     templates: [
-      { id: 'login-form', name: 'Login Form', icon: LayoutIcon },
-      { id: 'signup-form', name: 'Signup Form', icon: LayoutIcon },
+      { id: "login-form", name: "Login Form", icon: LayoutIcon },
+      { id: "signup-form", name: "Signup Form", icon: LayoutIcon },
     ],
   },
-}
+};
 
 const componentCategories = [
-  { id: 'pinned', name: 'Pinned', icon: PinIcon },
-  { id: 'windows', name: 'Windows', icon: LayoutIcon },
-  { id: 'shapes', name: 'Shapes', icon: ShapesIcon },
-  { id: 'text', name: 'Text', icon: TypeIcon },
-  { id: 'forms', name: 'Forms', icon: FormInputIcon },
-]
+  { id: "pinned", name: "Pinned", icon: PinIcon },
+  { id: "windows", name: "Windows", icon: LayoutIcon },
+  { id: "shapes", name: "Shapes", icon: ShapesIcon },
+  { id: "text", name: "Text", icon: TypeIcon },
+  { id: "forms", name: "Forms", icon: FormInputIcon },
+];
 
 const formCategories = [
-  { id: 'fields', name: 'Fields', icon: FormInputIcon },
-  { id: 'components', name: 'Components', icon: LayoutIcon },
-  { id: 'pinned', name: 'Pinned', icon: PinIcon },
-  { id: 'templates', name: 'Templates', icon: LayoutIcon },
-]
+  { id: "fields", name: "Fields", icon: FormInputIcon },
+  { id: "components", name: "Components", icon: LayoutIcon },
+  { id: "pinned", name: "Pinned", icon: PinIcon },
+  { id: "templates", name: "Templates", icon: LayoutIcon },
+];
 
 // Shape rendering function
 const renderShape = (type: string) => {
   switch (type) {
-    case 'square':
+    case "square":
       return <rect width="40" height="40" fill="#4299e1" />;
-    case 'circle':
+    case "circle":
       return <circle cx="20" cy="20" r="20" fill="#48bb78" />;
-    case 'triangle':
+    case "triangle":
       return <polygon points="20,0 40,40 0,40" fill="#ed8936" />;
-    case 'rectangle':
+    case "rectangle":
       return <rect width="60" height="40" fill="#9f7aea" />;
-    case 'oval':
+    case "oval":
       return <ellipse cx="30" cy="20" rx="30" ry="20" fill="#ed64a6" />;
-    case 'hexagon':
-      return <polygon points="30,0 60,20 60,50 30,70 0,50 0,20" fill="#667eea" />;
-    case 'octagon':
-      return <polygon points="20,0 60,0 80,20 80,60 60,80 20,80 0,60 0,20" fill="#f56565" />;
-    case 'pentagon':
+    case "hexagon":
+      return (
+        <polygon points="30,0 60,20 60,50 30,70 0,50 0,20" fill="#667eea" />
+      );
+    case "octagon":
+      return (
+        <polygon
+          points="20,0 60,0 80,20 80,60 60,80 20,80 0,60 0,20"
+          fill="#f56565"
+        />
+      );
+    case "pentagon":
       return <polygon points="50,0 100,38 81,100 19,100 0,38" fill="#68d391" />;
-    case 'diamond':
+    case "diamond":
       return <polygon points="40,0 80,40 40,80 0,40" fill="#4fd1c5" />;
-    case 'star':
+    case "star":
       return (
         <path
           d="M20,0 25,15 40,15 30,25 35,40 20,30 5,40 10,25 0,15 15,15 Z"
           fill="#f6e05e"
         />
       );
-    case 'heart':
+    case "heart":
       return (
         <path
           d="M20,10 C20,-10 60,0 40,20 C60,40 20,50 20,30 C20,50 -20,40 0,20 C-20,0 20,-10 20,10 Z"
           fill="#fc8181"
         />
       );
-    case 'trapezoid':
+    case "trapezoid":
       return <polygon points="20,0 80,0 100,40 0,40" fill="#b794f4" />;
-    case 'parallelogram':
+    case "parallelogram":
       return <polygon points="20,0 100,0 80,40 0,40" fill="#90cdf4" />;
-    case 'rhombus':
+    case "rhombus":
       return <polygon points="40,0 80,40 40,80 0,40" fill="#f687b3" />;
-    case 'arrow':
-      return <polygon points="0,20 60,20 60,0 100,40 60,80 60,60 0,60" fill="#a0aec0" />;
-    case 'cross':
+    case "arrow":
+      return (
+        <polygon
+          points="0,20 60,20 60,0 100,40 60,80 60,60 0,60"
+          fill="#a0aec0"
+        />
+      );
+    case "cross":
       return (
         <path
           d="M20,0 V20 H0 V60 H20 V80 H60 V60 H80 V20 H60 V0 Z"
           fill="#cbd5e0"
         />
       );
-    case 'cloud':
+    case "cloud":
       return (
         <path
           d="M20,60 C0,60 0,30 20,30 C20,10 50,10 50,30 C70,30 70,60 50,60 Z"
           fill="#63b3ed"
         />
       );
-    case 'cylinder':
+    case "cylinder":
       return (
         <g>
           <ellipse cx="40" cy="10" rx="40" ry="10" fill="#d53f8c" />
@@ -555,9 +591,9 @@ const renderShape = (type: string) => {
           <ellipse cx="40" cy="70" rx="40" ry="10" fill="#b83280" />
         </g>
       );
-    case 'cone':
+    case "cone":
       return <polygon points="50,0 100,100 0,100" fill="#f6ad55" />;
-    case 'pyramid':
+    case "pyramid":
       return (
         <g>
           <polygon points="50,0 100,100 0,100" fill="#ecc94b" />
@@ -570,36 +606,41 @@ const renderShape = (type: string) => {
 };
 
 // Components Dialog Component
-function ComponentsDialog({ 
-  className
-}: { 
-  open: boolean; 
+function ComponentsDialog({
+  className,
+  theme,
+}: {
+  open: boolean;
   onOpenChange: (open: boolean) => void;
   triggerRef: React.RefObject<HTMLButtonElement | null>;
   className?: string;
+  theme: Theme;
 }) {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [userName, setUserName] = useState('')
-  const [userEmail, setUserEmail] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [userName, setUserName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
 
   const handleDragStart = (e: React.DragEvent, componentId: string) => {
-    e.dataTransfer.setData('application/reactflow', componentId)
-    e.dataTransfer.effectAllowed = 'move'
-  }
+    e.dataTransfer.setData("application/reactflow", componentId);
+    e.dataTransfer.effectAllowed = "move";
+  };
 
   const filteredComponents = searchTerm
-    ? Object.values(componentData)
-        .flatMap(category => 
+    ? (Object.values(componentData)
+        .flatMap((category) =>
           Array.isArray(category) ? category : Object.values(category).flat()
         )
-        .filter(component => component.name.toLowerCase().includes(searchTerm.toLowerCase())) as Array<{ id: string; name: string; icon?: React.ComponentType }>
+        .filter((component) =>
+          component.name.toLowerCase().includes(searchTerm.toLowerCase())
+        ) as Array<{ id: string; name: string; icon?: React.ComponentType }>)
     : selectedCategory
-      ? (selectedCategory === 'forms'
-          ? componentData.forms.fields
-          : componentData[selectedCategory as keyof typeof componentData] as Array<{ id: string; name: string; icon?: React.ComponentType }>
-        )
-      : []
+    ? selectedCategory === "forms"
+      ? componentData.forms.fields
+      : (componentData[
+          selectedCategory as keyof typeof componentData
+        ] as Array<{ id: string; name: string; icon?: React.ComponentType }>)
+    : [];
 
   const renderSettings = () => (
     <div className="flex-1 overflow-auto space-y-6 p-4">
@@ -622,15 +663,19 @@ function ComponentsDialog({
           placeholder="Enter your email"
         />
       </div>
-      <Button variant="outline" size="sm" onClick={() => setSelectedCategory(null)}>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => setSelectedCategory(null)}
+      >
         Back
       </Button>
     </div>
-  )
+  );
 
   return (
     <div className={`flex flex-col h-full ${className}`}>
-      {selectedCategory === 'settings' ? (
+      {selectedCategory === "settings" ? (
         renderSettings()
       ) : (
         <>
@@ -643,7 +688,11 @@ function ComponentsDialog({
                 placeholder="Search components..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 bg-white border-gray-200 focus:border-gray-300 focus:ring-gray-300"
+                className={`w-full pl-10 ${
+                  theme === "dark"
+                    ? "bg-[#18181a] border-[#27272a] hover:bg-[#27272a]"
+                    : "bg-white border-gray-200 focus:border-gray-300 focus:ring-gray-300"
+                }`}
               />
             </div>
           </div>
@@ -657,62 +706,68 @@ function ComponentsDialog({
                     onDragStart={(e) => handleDragStart(e, component.id)}
                     className="flex items-center justify-center p-4 rounded-lg bg-white border-2 border-gray-200 text-gray-800 cursor-move hover:border-blue-500 transition-colors"
                   >
-                    {component.icon && <component.icon className="mr-2 h-4 w-4" />}
+                    {component.icon && (
+                      <component.icon className="mr-2 h-4 w-4" />
+                    )}
                     <span className="text-sm">{component.name}</span>
                   </div>
                 ))}
               </div>
             </div>
           ) : selectedCategory ? (
-            selectedCategory === 'settings'
-              ? renderSettings()
-              : (
-                <>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setSelectedCategory(null)}
-                    className="mb-4"
-                  >
-                    Back to Categories
-                  </Button>
-                  <div className="flex-1 overflow-auto">
-                    <div className="grid grid-cols-2 gap-4">
-                      {filteredComponents.map((component) => (
-                        <div
-                          key={component.id}
-                          draggable
-                          onDragStart={(e) => handleDragStart(e, component.id)}
-                          className="flex items-center justify-center p-4 rounded-lg bg-white border-2 border-gray-200 text-gray-800 cursor-move hover:border-blue-500 transition-colors"
-                        >
-                          {component.icon && <component.icon className="mr-2 h-4 w-4" />}
-                          <span className="text-sm">{component.name}</span>
-                        </div>
-                      ))}
-                    </div>
+            selectedCategory === "settings" ? (
+              renderSettings()
+            ) : (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedCategory(null)}
+                  className="mb-4"
+                >
+                  Back to Categories
+                </Button>
+                <div className="flex-1 overflow-auto">
+                  <div className="grid grid-cols-2 gap-4">
+                    {filteredComponents.map((component) => (
+                      <div
+                        key={component.id}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, component.id)}
+                        className="flex items-center justify-center p-4 rounded-lg bg-white border-2 border-gray-200 text-gray-800 cursor-move hover:border-blue-500 transition-colors"
+                      >
+                        {component.icon && (
+                          <component.icon className="mr-2 h-4 w-4" />
+                        )}
+                        <span className="text-sm">{component.name}</span>
+                      </div>
+                    ))}
                   </div>
-                </>
-              )
+                </div>
+              </>
+            )
           ) : (
             <div className="grid grid-cols-2 gap-3">
               {componentCategories.map((category) => (
-              <div
-                key={category.id}
-                className="bg-white hover:bg-gray-50 border border-gray-200 rounded-md p-2 shadow-sm hover:shadow transition-all cursor-pointer"
-                onClick={() => setSelectedCategory(category.id)}
-              >
-                <div className="flex flex-col items-center justify-center h-24">
-                  <category.icon className="h-6 w-6 mb-2 text-gray-600" />
-                  <span className="text-sm font-medium text-gray-700">{category.name}</span>
+                <div
+                  key={category.id}
+                  className="bg-white hover:bg-gray-50 border border-gray-200 rounded-md p-2 shadow-sm hover:shadow transition-all cursor-pointer"
+                  onClick={() => setSelectedCategory(category.id)}
+                >
+                  <div className="flex flex-col items-center justify-center h-24">
+                    <category.icon className="h-6 w-6 mb-2 text-gray-600" />
+                    <span className="text-sm font-medium text-gray-700">
+                      {category.name}
+                    </span>
+                  </div>
                 </div>
-              </div>
               ))}
             </div>
           )}
         </>
       )}
     </div>
-  )
+  );
 }
 
 function SettingsDialog({
@@ -730,7 +785,6 @@ function SettingsDialog({
   theme: Theme;
   onThemeChange: (theme: Theme) => void;
 }) {
-
   const handleSave = () => {
     onOpenChange(false);
   };
@@ -745,7 +799,10 @@ function SettingsDialog({
           {/* Add the Theme dropdown without theming logic */}
           <div className="p-4 border rounded-lg">
             <Label.Root className="block mb-1">Theme</Label.Root>
-            <Select.Root value={theme} onValueChange={(value: Theme) => onThemeChange(value)}>
+            <Select.Root
+              value={theme}
+              onValueChange={(value: Theme) => onThemeChange(value)}
+            >
               <Select.Trigger className="inline-flex items-center justify-between w-full px-3 py-2 text-sm border rounded-md bg-white border-gray-200">
                 <Select.Value placeholder="Select theme" />
                 <Select.Icon>
@@ -755,10 +812,16 @@ function SettingsDialog({
               <Select.Portal>
                 <Select.Content className="z-50 mt-1 bg-white border rounded-md shadow-lg">
                   <Select.Viewport className="p-1">
-                    <Select.Item value="light" className="px-2 py-1.5 text-sm rounded-md cursor-pointer hover:bg-gray-100">
+                    <Select.Item
+                      value="light"
+                      className="px-2 py-1.5 text-sm rounded-md cursor-pointer hover:bg-gray-100"
+                    >
                       <Select.ItemText>Light</Select.ItemText>
                     </Select.Item>
-                    <Select.Item value="dark" className="px-2 py-1.5 text-sm rounded-md cursor-pointer hover:bg-gray-100">
+                    <Select.Item
+                      value="dark"
+                      className="px-2 py-1.5 text-sm rounded-md cursor-pointer hover:bg-gray-100"
+                    >
                       <Select.ItemText>Dark</Select.ItemText>
                     </Select.Item>
                   </Select.Viewport>
@@ -768,8 +831,8 @@ function SettingsDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button 
-            variant="default" 
+          <Button
+            variant="default"
             onClick={handleSave}
             className="bg-blue-500 text-white hover:bg-blue-600"
           >
@@ -791,49 +854,52 @@ function TabsWindow({
   activeTab,
   onActiveTabChange,
 }: TabsWindowProps & {
-  tabs: { id: string; title: string }[]
-  onTabsChange: (newTabs: { id: string; title: string }[]) => void
-  activeTab: string
-  onActiveTabChange: (tabId: string) => void
+  tabs: { id: string; title: string }[];
+  onTabsChange: (newTabs: { id: string; title: string }[]) => void;
+  activeTab: string;
+  onActiveTabChange: (tabId: string) => void;
 }) {
-  const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false)
-  const [tabToRename, setTabToRename] = useState<{ id: string; title: string } | null>(null)
-  const [newTabName, setNewTabName] = useState('')
+  const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
+  const [tabToRename, setTabToRename] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
+  const [newTabName, setNewTabName] = useState("");
 
   const addTab = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    const newTab = { id: `tab-${Date.now()}`, title: 'New Tab' }
-    onTabsChange([...tabs, newTab])
-    onActiveTabChange(newTab.id)
-  }
+    e.stopPropagation();
+    const newTab = { id: `tab-${Date.now()}`, title: "New Tab" };
+    onTabsChange([...tabs, newTab]);
+    onActiveTabChange(newTab.id);
+  };
 
   const removeTab = (tabId: string, e?: React.MouseEvent) => {
-    e?.stopPropagation()
+    e?.stopPropagation();
     if (tabs.length === 1) {
-      onError?.('Cannot close the last tab')
-      return
+      onError?.("Cannot close the last tab");
+      return;
     }
-    const newTabs = tabs.filter(tab => tab.id !== tabId)
-    onTabsChange(newTabs)
+    const newTabs = tabs.filter((tab) => tab.id !== tabId);
+    onTabsChange(newTabs);
     if (activeTab === tabId) {
-      onActiveTabChange(newTabs[newTabs.length - 1].id)
+      onActiveTabChange(newTabs[newTabs.length - 1].id);
     }
-  }
+  };
 
   const handleRename = (tab: { id: string; title: string }) => {
-    setTabToRename(tab)
-    setNewTabName(tab.title)
-    setIsRenameDialogOpen(true)
-  }
+    setTabToRename(tab);
+    setNewTabName(tab.title);
+    setIsRenameDialogOpen(true);
+  };
 
   const confirmRename = () => {
-    if (!tabToRename) return
-    const updated = tabs.map(t =>
-      t.id === tabToRename.id ? { ...t, title: newTabName || 'Untitled' } : t
-    )
-    onTabsChange(updated)
-    setIsRenameDialogOpen(false)
-  }
+    if (!tabToRename) return;
+    const updated = tabs.map((t) =>
+      t.id === tabToRename.id ? { ...t, title: newTabName || "Untitled" } : t
+    );
+    onTabsChange(updated);
+    setIsRenameDialogOpen(false);
+  };
 
   return (
     <>
@@ -904,427 +970,444 @@ function TabsWindow({
             placeholder="Enter tab name"
           />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsRenameDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsRenameDialogOpen(false)}
+            >
               Cancel
             </Button>
-            <Button onClick={confirmRename}>
-              Save
-            </Button>
+            <Button onClick={confirmRename}>Save</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
-  )
+  );
 }
 
 // Main Component
 // Add theme type
-type Theme = 'light' | 'dark';
+type Theme = "light" | "dark";
 
 export default function DiagramGenerator() {
-  const [isEditorOpen, setIsEditorOpen] = useState(false)
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const [showTextWithIcons, setShowTextWithIcons] = useState(true)
-  const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 })
-  const [diagramComponents, setDiagramComponents] = useState<Component[]>([])
-  const canvasRef = useRef<HTMLDivElement>(null)
-  const resizingRef = useRef<boolean>(false)
-  const startPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
-  const [hoveredComponentId, setHoveredComponentId] = useState<string | null>(null)
-  const [draggedComponentId, setDraggedComponentId] = useState<string | null>(null)
-  const [customizeDialogOpen, setCustomizeDialogOpen] = useState(false)
-  const [componentToCustomize, setComponentToCustomize] = useState<Component | null>(null)
-  const [activeTabStates, setActiveTabStates] = useState<Record<string, string>>({})
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
-  const [showCloseConfirm, setShowCloseConfirm] = useState(false)
-  const shapeIdRef = useRef(0)
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [showTextWithIcons, setShowTextWithIcons] = useState(true);
+  const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
+  const [diagramComponents, setDiagramComponents] = useState<Component[]>([]);
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const resizingRef = useRef<boolean>(false);
+  const startPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [hoveredComponentId, setHoveredComponentId] = useState<string | null>(
+    null
+  );
+  const [draggedComponentId, setDraggedComponentId] = useState<string | null>(
+    null
+  );
+  const [customizeDialogOpen, setCustomizeDialogOpen] = useState(false);
+  const [componentToCustomize, setComponentToCustomize] =
+    useState<Component | null>(null);
+  const [activeTabStates, setActiveTabStates] = useState<
+    Record<string, string>
+  >({});
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showCloseConfirm, setShowCloseConfirm] = useState(false);
+  const shapeIdRef = useRef(0);
   const [sidebarWidth, setSidebarWidth] = useState(320);
-  const [theme, setTheme] = useState<Theme>('light');
+  const [theme, setTheme] = useState<Theme>("light");
 
   // Add theme styles
   const themeStyles = {
     topBar: {
-      background: theme === 'dark' ? '#09090b' : '#fafafa', // dark:bg-[#09090b] : bg-[#fafafa]
-      borderColor: theme === 'dark' ? 'rgb(31 41 55)' : 'rgb(229 231 235)', // dark:border-gray-800 : border-gray-200
-      text: theme === 'dark' ? '#fafafa' : 'rgb(75 85 99)', // dark:text-[#fafafa] : text-gray-500
+      background: theme === "dark" ? "#09090b" : "#fafafa", // dark:bg-[#09090b] : bg-[#fafafa]
+      borderColor: theme === "dark" ? "rgb(31 41 55)" : "rgb(229 231 235)", // dark:border-gray-800 : border-gray-200
+      text: theme === "dark" ? "#fafafa" : "rgb(75 85 99)", // dark:text-[#fafafa] : text-gray-500
     },
     sidebar: {
-      background: theme === 'dark' ? '#09090b' : '#fafafa', // dark:bg-[#09090b] : bg-[#fafafa]
-      borderColor: theme === 'dark' ? 'rgb(31 41 55)' : 'rgb(229 231 235)', // dark:border-gray-800 : border-gray-200
-      text: theme === 'dark' ? '#fafafa' : 'inherit', // dark:text-[#fafafa]
-    }
+      background: theme === "dark" ? "#09090b" : "#fafafa", // dark:bg-[#09090b] : bg-[#fafafa]
+      borderColor: theme === "dark" ? "rgb(31 41 55)" : "rgb(229 231 235)", // dark:border-gray-800 : border-gray-200
+      text: theme === "dark" ? "#fafafa" : "inherit", // dark:text-[#fafafa]
+    },
   };
 
   // Add new state variables for customization
-  const [newFontFamily, setNewFontFamily] = useState<string>('')
-  const [newFontSize, setNewFontSize] = useState<number>(14)
-  const [newColor, setNewColor] = useState<string>('')
-  const [newBorderColor, setNewBorderColor] = useState<string>('')
-  const [newBorderThickness, setNewBorderThickness] = useState<number>(2)
+  const [newFontFamily, setNewFontFamily] = useState<string>("");
+  const [newFontSize, setNewFontSize] = useState<number>(14);
+  const [newColor, setNewColor] = useState<string>("");
+  const [newBorderColor, setNewBorderColor] = useState<string>("");
+  const [newBorderThickness, setNewBorderThickness] = useState<number>(2);
 
   // 1) Add refs for tracking text input resize
-  const resizingInputRef = useRef<string | null>(null)
-  const inputStartWidthRef = useRef<number>(0)
-  const inputStartHeightRef = useRef<number>(0)
-  const inputStartXRef = useRef<number>(0)
-  const inputStartYRef = useRef<number>(0)
+  const resizingInputRef = useRef<string | null>(null);
+  const inputStartWidthRef = useRef<number>(0);
+  const inputStartHeightRef = useRef<number>(0);
+  const inputStartXRef = useRef<number>(0);
+  const inputStartYRef = useRef<number>(0);
 
   function exportDiagram() {
-    const diagramData = { canvasSize, diagramComponents }
-    console.log(JSON.stringify(diagramData))
+    const diagramData = { canvasSize, diagramComponents };
+    console.log(JSON.stringify(diagramData));
   }
 
   function importDiagram() {
-    const userInput = prompt("Paste your diagram JSON here:")
-    if (!userInput) return
+    const userInput = prompt("Paste your diagram JSON here:");
+    if (!userInput) return;
     try {
-      const cleaned = userInput.trim()
-      const lastBrace = cleaned.lastIndexOf('}')
+      const cleaned = userInput.trim();
+      const lastBrace = cleaned.lastIndexOf("}");
       if (lastBrace > -1) {
-        const safeJson = cleaned.substring(0, lastBrace + 1)
-        const data = JSON.parse(safeJson)
-        setCanvasSize(data.canvasSize)
-        setDiagramComponents(data.diagramComponents)
+        const safeJson = cleaned.substring(0, lastBrace + 1);
+        const data = JSON.parse(safeJson);
+        setCanvasSize(data.canvasSize);
+        setDiagramComponents(data.diagramComponents);
       }
     } catch (error) {
-      console.error("Invalid diagram JSON", error)
+      console.error("Invalid diagram JSON", error);
     }
   }
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (!resizingRef.current) return
-      
-      const dx = e.clientX - startPosRef.current.x
-      const dy = e.clientY - startPosRef.current.y
-      
-      setCanvasSize(prev => {
-        const newWidth = Math.max(200, prev.width + dx)
-        const newHeight = Math.max(200, prev.height + dy)
-        
-        return { width: newWidth, height: newHeight }
-      })
-      
-      startPosRef.current = { x: e.clientX, y: e.clientY }
-    }
+      if (!resizingRef.current) return;
+
+      const dx = e.clientX - startPosRef.current.x;
+      const dy = e.clientY - startPosRef.current.y;
+
+      setCanvasSize((prev) => {
+        const newWidth = Math.max(200, prev.width + dx);
+        const newHeight = Math.max(200, prev.height + dy);
+
+        return { width: newWidth, height: newHeight };
+      });
+
+      startPosRef.current = { x: e.clientX, y: e.clientY };
+    };
 
     const handleMouseUp = () => {
-      resizingRef.current = false
-      document.body.style.cursor = 'default'
-      setDraggedComponentId(null)
-    }
+      resizingRef.current = false;
+      document.body.style.cursor = "default";
+      setDraggedComponentId(null);
+    };
 
-    document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseup', handleMouseUp)
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
-    }
-  }, [])
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, []);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    resizingRef.current = true
-    startPosRef.current = { x: e.clientX, y: e.clientY }
-    document.body.style.cursor = 'se-resize'
-  }
+    resizingRef.current = true;
+    startPosRef.current = { x: e.clientX, y: e.clientY };
+    document.body.style.cursor = "se-resize";
+  };
 
   const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.dataTransfer.dropEffect = 'move'
-  }
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
 
   const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    const componentType = e.dataTransfer.getData('application/reactflow')
-    const canvasRect = canvasRef.current?.getBoundingClientRect()
-    
+    e.preventDefault();
+    const componentType = e.dataTransfer.getData("application/reactflow");
+    const canvasRect = canvasRef.current?.getBoundingClientRect();
+
     if (canvasRect) {
-      const x = e.clientX - canvasRect.left
-      const y = e.clientY - canvasRect.top
-      
-      let defaultContent = ''
+      const x = e.clientX - canvasRect.left;
+      const y = e.clientY - canvasRect.top;
+
+      let defaultContent = "";
       switch (componentType) {
-        case 'heading':
-          defaultContent = 'Heading Text'
-          break
-        case 'subheading':
-          defaultContent = 'Subheading Text'
-          break
-        case 'paragraph':
-          defaultContent = 'This is a sample paragraph text.'
-          break
-        case 'custom-text-input': {
+        case "heading":
+          defaultContent = "Heading Text";
+          break;
+        case "subheading":
+          defaultContent = "Subheading Text";
+          break;
+        case "paragraph":
+          defaultContent = "This is a sample paragraph text.";
+          break;
+        case "custom-text-input": {
           const newComponent: Component = {
             id: `text-input-${shapeIdRef.current++}`,
-            type: 'custom-text-input',
+            type: "custom-text-input",
             position: { x, y },
-            label: '',
-            placeholder: 'Enter text...',
-            borderColor: '#cccccc',
-            labelColor: '#000000',
+            label: "",
+            placeholder: "Enter text...",
+            borderColor: "#cccccc",
+            labelColor: "#000000",
             labelFontSize: 14,
             inputLength: 200,
             isReadOnly: true, // Added property
-          }
-          setDiagramComponents(prev => [...prev, newComponent])
-          return
+          };
+          setDiagramComponents((prev) => [...prev, newComponent]);
+          return;
         }
         default:
-          defaultContent = ''
+          defaultContent = "";
       }
-      
+
       const newComponent: Component = {
         id: `${componentType}-${shapeIdRef.current++}`,
         type: componentType,
         position: { x, y },
         content: defaultContent,
         isEditing: false,
+      };
+
+      if (componentType === "tabs") {
+        newComponent.tabs = [{ id: "1", title: "New Tab" }];
+        setActiveTabStates((prev) => ({ ...prev, [newComponent.id]: "1" }));
       }
-      
-      if (componentType === 'tabs') {
-        newComponent.tabs = [{ id: '1', title: 'New Tab' }]
-        setActiveTabStates((prev) => ({ ...prev, [newComponent.id]: '1' }))
-      }
-      
-      setDiagramComponents(prev => [...prev, newComponent])
+
+      setDiagramComponents((prev) => [...prev, newComponent]);
     }
-  }
+  };
 
   const handleError = (message: string) => {
-    console.error(message)
-  }
+    console.error(message);
+  };
 
-  const startDrag = (
-    e: React.MouseEvent,
-    componentId: string
-  ) => {
-    if (e.button !== 0) return // Only left-click
-    e.stopPropagation()
-    setDraggedComponentId(componentId)
-    let startX = e.clientX
-    let startY = e.clientY
-  
+  const startDrag = (e: React.MouseEvent, componentId: string) => {
+    if (e.button !== 0) return; // Only left-click
+    e.stopPropagation();
+    setDraggedComponentId(componentId);
+    let startX = e.clientX;
+    let startY = e.clientY;
+
     const handleMouseMove = (moveEvent: MouseEvent) => {
-      const dx = moveEvent.clientX - startX
-      const dy = moveEvent.clientY - startY
-  
-      setDiagramComponents(prev =>
-        prev.map(comp => {
+      const dx = moveEvent.clientX - startX;
+      const dy = moveEvent.clientY - startY;
+
+      setDiagramComponents((prev) =>
+        prev.map((comp) => {
           if (comp.id === componentId) {
-            let newX = comp.position.x + dx
-            let newY = comp.position.y + dy
-  
-            const canvas = canvasRef.current
+            let newX = comp.position.x + dx;
+            let newY = comp.position.y + dy;
+
+            const canvas = canvasRef.current;
             if (canvas) {
-              const canvasWidth = canvas.clientWidth
-              const canvasHeight = canvas.clientHeight
-  
-              const componentWidth = 100
-              const componentHeight = 100
-  
-              newX = Math.max(0, Math.min(newX, canvasWidth - componentWidth))
-              newY = Math.max(0, Math.min(newY, canvasHeight - componentHeight))
+              const canvasWidth = canvas.clientWidth;
+              const canvasHeight = canvas.clientHeight;
+
+              const componentWidth = 100;
+              const componentHeight = 100;
+
+              newX = Math.max(0, Math.min(newX, canvasWidth - componentWidth));
+              newY = Math.max(
+                0,
+                Math.min(newY, canvasHeight - componentHeight)
+              );
             }
-  
+
             return {
               ...comp,
               position: {
                 x: newX,
                 y: newY,
               },
-            }
+            };
           }
-          return comp
+          return comp;
         })
-      )
-  
-      startX = moveEvent.clientX
-      startY = moveEvent.clientY
-    }
-  
+      );
+
+      startX = moveEvent.clientX;
+      startY = moveEvent.clientY;
+    };
+
     const handleMouseUp = () => {
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
-    }
-  
-    document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseup', handleMouseUp)
-  }
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  };
 
   const updateComponentContent = (componentId: string, newContent: string) => {
-    setDiagramComponents(prev =>
-      prev.map(comp =>
-        comp.id === componentId
-          ? { ...comp, content: newContent }
-          : comp
+    setDiagramComponents((prev) =>
+      prev.map((comp) =>
+        comp.id === componentId ? { ...comp, content: newContent } : comp
       )
-    )
-  }
+    );
+  };
 
   const startEditing = (componentId: string) => {
-    setDiagramComponents(prev =>
-      prev.map(comp =>
-        comp.id === componentId
-          ? { ...comp, isEditing: true }
-          : comp
+    setDiagramComponents((prev) =>
+      prev.map((comp) =>
+        comp.id === componentId ? { ...comp, isEditing: true } : comp
       )
-    )
-  }
+    );
+  };
 
-  const stopEditing = (componentId: string, save: boolean, newContent?: string) => {
-    setDiagramComponents(prev =>
-      prev.map(comp => {
+  const stopEditing = (
+    componentId: string,
+    save: boolean,
+    newContent?: string
+  ) => {
+    setDiagramComponents((prev) =>
+      prev.map((comp) => {
         if (comp.id === componentId) {
           return {
             ...comp,
             isEditing: false,
-            content: save && newContent !== undefined ? newContent : comp.content,
-          }
+            content:
+              save && newContent !== undefined ? newContent : comp.content,
+          };
         }
-        return comp
+        return comp;
       })
-    )
-  }
+    );
+  };
 
   const removeComponent = (componentId: string) => {
-    setDiagramComponents(prev => prev.filter(comp => comp.id !== componentId))
-  }
+    setDiagramComponents((prev) =>
+      prev.filter((comp) => comp.id !== componentId)
+    );
+  };
 
   const handleCustomize = (component: Component) => {
-    setComponentToCustomize(component)
-    setNewFontFamily(component.fontFamily || '')
-    setNewFontSize(component.fontSize || 14)
-    setNewColor(component.color || '')
-    setNewBorderColor(component.borderColor || '')
-    setNewBorderThickness(component.borderThickness || 2)
-    setCustomizeDialogOpen(true)
-  }
+    setComponentToCustomize(component);
+    setNewFontFamily(component.fontFamily || "");
+    setNewFontSize(component.fontSize || 14);
+    setNewColor(component.color || "");
+    setNewBorderColor(component.borderColor || "");
+    setNewBorderThickness(component.borderThickness || 2);
+    setCustomizeDialogOpen(true);
+  };
 
   // Apply Customization Function Modification
   const applyCustomization = (
-    fontFamily: string, 
-    fontSize: number, 
-    color: string, 
-    borderColor: string, 
+    fontFamily: string,
+    fontSize: number,
+    color: string,
+    borderColor: string,
     borderThickness: number
   ) => {
     if (componentToCustomize) {
-      setDiagramComponents(prev =>
-        prev.map(comp =>
+      setDiagramComponents((prev) =>
+        prev.map((comp) =>
           comp.id === componentToCustomize.id
-            ? { 
-                ...comp, 
-                fontFamily, 
-                fontSize, 
+            ? {
+                ...comp,
+                fontFamily,
+                fontSize,
                 color,
                 borderColor,
-                borderThickness
+                borderThickness,
               }
             : comp
         )
-      )
-      setCustomizeDialogOpen(false)
-      setComponentToCustomize(null)
+      );
+      setCustomizeDialogOpen(false);
+      setComponentToCustomize(null);
     }
-  }
+  };
 
-  function updateTabs(componentId: string, newTabs: { id: string; title: string }[]) {
-    setDiagramComponents(prev =>
-      prev.map(c => c.id === componentId ? { ...c, tabs: newTabs } : c)
-    )
+  function updateTabs(
+    componentId: string,
+    newTabs: { id: string; title: string }[]
+  ) {
+    setDiagramComponents((prev) =>
+      prev.map((c) => (c.id === componentId ? { ...c, tabs: newTabs } : c))
+    );
   }
 
   function updateActiveTab(componentId: string, tabId: string) {
-    setActiveTabStates(prev => ({ ...prev, [componentId]: tabId }))
+    setActiveTabStates((prev) => ({ ...prev, [componentId]: tabId }));
   }
 
   const handleClose = () => {
     if (hasUnsavedChanges) {
-      setShowCloseConfirm(true)
+      setShowCloseConfirm(true);
     } else {
-      setIsEditorOpen(false)
+      setIsEditorOpen(false);
     }
-  }
+  };
 
   const handleSidebarResize = (e: React.MouseEvent<HTMLDivElement>) => {
     const startX = e.clientX;
     const startWidth = sidebarWidth;
 
     const doDrag = (e: MouseEvent) => {
-      setSidebarWidth(Math.min(Math.max(startWidth + e.clientX - startX, 200), 400));
+      setSidebarWidth(
+        Math.min(Math.max(startWidth + e.clientX - startX, 200), 400)
+      );
     };
 
     const stopDrag = () => {
-      document.removeEventListener('mousemove', doDrag);
-      document.removeEventListener('mouseup', stopDrag);
+      document.removeEventListener("mousemove", doDrag);
+      document.removeEventListener("mouseup", stopDrag);
     };
 
-    document.addEventListener('mousemove', doDrag);
-    document.addEventListener('mouseup', stopDrag);
+    document.addEventListener("mousemove", doDrag);
+    document.addEventListener("mouseup", stopDrag);
   };
 
   useEffect(() => {
     if (diagramComponents.length > 0) {
-      setHasUnsavedChanges(true)
+      setHasUnsavedChanges(true);
     }
-  }, [diagramComponents])
+  }, [diagramComponents]);
 
   // 2) Add handlers for text-input resize
   const handleInputResizeStart = (
     e: React.MouseEvent<HTMLDivElement>,
     componentId: string,
-    direction: 'right' | 'bottom' | 'top'
+    direction: "right" | "bottom" | "top"
   ) => {
-    e.stopPropagation()
-    resizingInputRef.current = componentId
-    const comp = diagramComponents.find((c) => c.id === componentId)
+    e.stopPropagation();
+    resizingInputRef.current = componentId;
+    const comp = diagramComponents.find((c) => c.id === componentId);
     if (comp) {
-      inputStartWidthRef.current = comp.inputLength || 200
-      inputStartHeightRef.current = comp.height || 40
-      inputStartXRef.current = e.clientX
-      inputStartYRef.current = e.clientY
-      document.body.style.cursor = direction === 'right' ? 'col-resize' : 'row-resize'
+      inputStartWidthRef.current = comp.inputLength || 200;
+      inputStartHeightRef.current = comp.height || 40;
+      inputStartXRef.current = e.clientX;
+      inputStartYRef.current = e.clientY;
+      document.body.style.cursor =
+        direction === "right" ? "col-resize" : "row-resize";
     }
-  }
+  };
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (!resizingInputRef.current) return
-      const dx = e.clientX - inputStartXRef.current
-      const dy = e.clientY - inputStartYRef.current
+      if (!resizingInputRef.current) return;
+      const dx = e.clientX - inputStartXRef.current;
+      const dy = e.clientY - inputStartYRef.current;
       setDiagramComponents((prev) =>
         prev.map((comp) => {
           if (comp.id === resizingInputRef.current) {
             return {
               ...comp,
               inputLength: Math.max(50, inputStartWidthRef.current + dx),
-              height: Math.max(20, inputStartHeightRef.current + dy)
-            }
+              height: Math.max(20, inputStartHeightRef.current + dy),
+            };
           }
-          return comp
+          return comp;
         })
-      )
-    }
+      );
+    };
 
     const handleMouseUp = () => {
-      resizingInputRef.current = null
-      document.body.style.cursor = 'default'
-    }
+      resizingInputRef.current = null;
+      document.body.style.cursor = "default";
+    };
 
-    document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseup', handleMouseUp)
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
-    }
-  }, [diagramComponents])
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [diagramComponents]);
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center">
-      <Button 
-        variant="outline" 
-        size="lg" 
+      <Button
+        variant="outline"
+        size="lg"
         className="bg-black text-white border-white hover:bg-white hover:text-black transition-colors"
         onClick={() => setIsEditorOpen(true)}
       >
@@ -1332,18 +1415,18 @@ export default function DiagramGenerator() {
       </Button>
 
       {/* Fullscreen Editor */}
-      <div 
+      <div
         className={`fixed inset-0 bg-white transform transition-transform duration-300 ease-in-out ${
-          isEditorOpen ? 'translate-x-0' : 'translate-x-full'
+          isEditorOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         {/* Top Bar */}
-        <div 
+        <div
           className="flex justify-between items-center p-4 border-b"
           style={{
             background: themeStyles.topBar.background,
             borderColor: themeStyles.topBar.borderColor,
-            color: themeStyles.topBar.text
+            color: themeStyles.topBar.text,
           }}
         >
           <Button
@@ -1353,36 +1436,28 @@ export default function DiagramGenerator() {
             style={{ color: themeStyles.topBar.text }}
           >
             <ArrowLeft className="mr-4 h-4 w-4" />
-            {showTextWithIcons && 'Back'}
+            {showTextWithIcons && "Back"}
           </Button>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => {}}>
               <Layout className="mr-4 h-4 w-4" />
-              {showTextWithIcons && 'Layouts'}
+              {showTextWithIcons && "Layouts"}
             </Button>
-            <Button 
-              variant="destructive" 
-              size="sm" 
+            <Button
+              variant="destructive"
+              size="sm"
               onClick={() => setDiagramComponents([])}
             >
               <X className="mr-4 h-4 w-4" />
-              {showTextWithIcons && 'Clear'}
+              {showTextWithIcons && "Clear"}
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={importDiagram}
-            >
+            <Button variant="outline" size="sm" onClick={importDiagram}>
               <Download className="mr-4 h-4 w-4" />
-              {showTextWithIcons && 'Import'}
+              {showTextWithIcons && "Import"}
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={exportDiagram}
-            >
+            <Button variant="outline" size="sm" onClick={exportDiagram}>
               <Upload className="mr-4 h-4 w-4" />
-              {showTextWithIcons && 'Export'}
+              {showTextWithIcons && "Export"}
             </Button>
             <Button
               variant="outline"
@@ -1390,7 +1465,7 @@ export default function DiagramGenerator() {
               onClick={() => setIsSettingsOpen(true)}
             >
               <SettingsIcon className="mr-4 h-4 w-4" />
-              {showTextWithIcons && 'Settings'}
+              {showTextWithIcons && "Settings"}
             </Button>
           </div>
         </div>
@@ -1398,30 +1473,31 @@ export default function DiagramGenerator() {
         {/* Main Content Area */}
         <div className="flex h-[calc(100vh-64px)]">
           {/* Left Sidebar - Components */}
-            <div 
-              className="h-full border-r flex flex-col relative"
-              style={{
-                width: `${sidebarWidth}px`,
-                minWidth: '200px',
-                maxWidth: '400px',
-                background: themeStyles.sidebar.background,
-                borderColor: themeStyles.sidebar.borderColor,
-                color: themeStyles.sidebar.text
-              }}
-            >
-              <div className="flex-1 overflow-y-auto p-6">
-                <ComponentsDialog 
+          <div
+            className="h-full border-r flex flex-col relative"
+            style={{
+              width: `${sidebarWidth}px`,
+              minWidth: "200px",
+              maxWidth: "400px",
+              background: themeStyles.sidebar.background,
+              borderColor: themeStyles.sidebar.borderColor,
+              color: themeStyles.sidebar.text,
+            }}
+          >
+            <div className="flex-1 overflow-y-auto p-6">
+              <ComponentsDialog
                 open={true}
                 onOpenChange={() => {}}
                 triggerRef={useRef<HTMLButtonElement | null>(null)}
                 className="h-full"
-                />
-              </div>
-              <div
-              className="absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-gray-300 transition-colors"
-              onMouseDown={handleSidebarResize}
+                theme={theme}
               />
             </div>
+            <div
+              className="absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-gray-300 transition-colors"
+              onMouseDown={handleSidebarResize}
+            />
+          </div>
 
           {/* Right - Canvas */}
           <div className="flex-1 p-4 overflow-auto flex items-center justify-center">
@@ -1438,21 +1514,25 @@ export default function DiagramGenerator() {
             >
               {diagramComponents.map((component) => {
                 let ComponentToRender;
-                
+
                 switch (component.type) {
-                  case 'tabs':
+                  case "tabs":
                     ComponentToRender = (
                       <TabsWindow
                         className="absolute inset-0"
                         onError={handleError}
                         tabs={component.tabs || []}
-                        onTabsChange={(newTabs) => updateTabs(component.id, newTabs)}
-                        activeTab={activeTabStates[component.id] || '1'}
-                        onActiveTabChange={(tabId) => updateActiveTab(component.id, tabId)}
+                        onTabsChange={(newTabs) =>
+                          updateTabs(component.id, newTabs)
+                        }
+                        activeTab={activeTabStates[component.id] || "1"}
+                        onActiveTabChange={(tabId) =>
+                          updateActiveTab(component.id, tabId)
+                        }
                       />
                     );
                     break;
-                  case 'blank-form':
+                  case "blank-form":
                     ComponentToRender = (
                       <div
                         className="absolute p-4 border rounded bg-white"
@@ -1465,16 +1545,18 @@ export default function DiagramGenerator() {
                         <Input placeholder="Field 1" className="mb-2" />
                         <Input placeholder="Field 2" className="mb-2" />
                       </div>
-                    )
+                    );
                     break;
-                  case 'heading':
-                  case 'subheading':
-                  case 'paragraph':
+                  case "heading":
+                  case "subheading":
+                  case "paragraph":
                     ComponentToRender = (
                       <ContextMenu>
                         <ContextMenuTrigger>
                           <div
-                            onMouseEnter={() => setHoveredComponentId(component.id)}
+                            onMouseEnter={() =>
+                              setHoveredComponentId(component.id)
+                            }
                             onMouseLeave={() => setHoveredComponentId(null)}
                             onMouseDown={(e) => startDrag(e, component.id)}
                             className={
@@ -1488,9 +1570,9 @@ export default function DiagramGenerator() {
                             style={{
                               left: `${component.position.x}px`,
                               top: `${component.position.y}px`,
-                              fontFamily: component.fontFamily || 'Arial',
+                              fontFamily: component.fontFamily || "Arial",
                               fontSize: `${component.fontSize || 16}px`,
-                              color: component.color || '#000000',
+                              color: component.color || "#000000",
                             }}
                             onDoubleClick={() => startEditing(component.id)}
                           >
@@ -1498,71 +1580,88 @@ export default function DiagramGenerator() {
                               <div
                                 contentEditable
                                 suppressContentEditableWarning
-                                onBlur={(e) => stopEditing(component.id, true, e.currentTarget.textContent || '')}
+                                onBlur={(e) =>
+                                  stopEditing(
+                                    component.id,
+                                    true,
+                                    e.currentTarget.textContent || ""
+                                  )
+                                }
                                 onKeyDown={(e) => {
-                                  if (e.key === 'Enter') {
-                                    e.preventDefault()
-                                    stopEditing(component.id, true, (e.currentTarget as HTMLElement).innerText)
-                                  } else if (e.key === 'Escape') {
-                                    stopEditing(component.id, false)
+                                  if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    stopEditing(
+                                      component.id,
+                                      true,
+                                      (e.currentTarget as HTMLElement).innerText
+                                    );
+                                  } else if (e.key === "Escape") {
+                                    stopEditing(component.id, false);
                                   }
                                 }}
                                 className="w-full outline-none"
                                 style={{
-                                  minHeight: '1.5em',
+                                  minHeight: "1.5em",
                                 }}
                               >
                                 {component.content}
                               </div>
+                            ) : component.type === "heading" ? (
+                              <h1
+                                style={{
+                                  fontFamily: component.fontFamily || "Arial",
+                                  fontSize: `${component.fontSize || 24}px`,
+                                  color: component.color || "#000000",
+                                  fontWeight: "bold",
+                                }}
+                              >
+                                {component.content}
+                              </h1>
+                            ) : component.type === "subheading" ? (
+                              <h2
+                                style={{
+                                  fontFamily: component.fontFamily || "Arial",
+                                  fontSize: `${component.fontSize || 20}px`,
+                                  color: component.color || "#000000",
+                                  fontWeight: "semi-bold",
+                                }}
+                              >
+                                {component.content}
+                              </h2>
                             ) : (
-                              component.type === 'heading' ? (
-                                <h1
-                                  style={{
-                                    fontFamily: component.fontFamily || 'Arial',
-                                    fontSize: `${component.fontSize || 24}px`,
-                                    color: component.color || '#000000',
-                                    fontWeight: 'bold',
-                                  }}
-                                >
-                                  {component.content}
-                                </h1>
-                              ) : component.type === 'subheading' ? (
-                                <h2
-                                  style={{
-                                    fontFamily: component.fontFamily || 'Arial',
-                                    fontSize: `${component.fontSize || 20}px`,
-                                    color: component.color || '#000000',
-                                    fontWeight: 'semi-bold',
-                                  }}
-                                >
-                                  {component.content}
-                                </h2>
-                              ) : (
-                                <p
-                                  style={{
-                                    fontFamily: component.fontFamily || 'Arial',
-                                    fontSize: `${component.fontSize || 16}px`,
-                                    color: component.color || '#000000',
-                                  }}
-                                >
-                                  {component.content}
-                                </p>
-                              )
+                              <p
+                                style={{
+                                  fontFamily: component.fontFamily || "Arial",
+                                  fontSize: `${component.fontSize || 16}px`,
+                                  color: component.color || "#000000",
+                                }}
+                              >
+                                {component.content}
+                              </p>
                             )}
                           </div>
                         </ContextMenuTrigger>
                         <ContextMenuContent>
-                          {['heading', 'subheading', 'paragraph'].includes(component.type) && (
+                          {["heading", "subheading", "paragraph"].includes(
+                            component.type
+                          ) && (
                             <>
-                              <ContextMenuItem className="cursor-pointer" onClick={() => startEditing(component.id)}>
+                              <ContextMenuItem
+                                className="cursor-pointer"
+                                onClick={() => startEditing(component.id)}
+                              >
                                 <Pencil className="mr-4 h-4 w-4" /> Edit
                               </ContextMenuItem>
-                              <ContextMenuItem className="cursor-pointer" onClick={() => handleCustomize(component)}>
-                                <Paintbrush className="mr-4 h-4 w-4" /> Customize
+                              <ContextMenuItem
+                                className="cursor-pointer"
+                                onClick={() => handleCustomize(component)}
+                              >
+                                <Paintbrush className="mr-4 h-4 w-4" />{" "}
+                                Customize
                               </ContextMenuItem>
                               <ContextMenuSeparator />
-                              <ContextMenuItem 
-                                onClick={() => removeComponent(component.id)} 
+                              <ContextMenuItem
+                                onClick={() => removeComponent(component.id)}
                                 className="flex items-center cursor-pointer text-red-600 hover:bg-red-500"
                               >
                                 <Trash className="mr-4 h-4 w-4" /> Delete
@@ -1571,16 +1670,16 @@ export default function DiagramGenerator() {
                           )}
                         </ContextMenuContent>
                       </ContextMenu>
-                    )
+                    );
                     break;
-                  case 'custom-text-input':
+                  case "custom-text-input":
                     ComponentToRender = (
                       <ContextMenu>
                         <ContextMenuTrigger>
                           <div
                             key={component.id}
                             style={{
-                              position: 'absolute',
+                              position: "absolute",
                               left: component.position.x,
                               top: component.position.y,
                             }}
@@ -1592,7 +1691,7 @@ export default function DiagramGenerator() {
                             {component.label ? (
                               <label
                                 style={{
-                                  display: 'block',
+                                  display: "block",
                                   fontSize: component.labelFontSize,
                                   color: component.labelColor,
                                   marginBottom: 4,
@@ -1606,13 +1705,17 @@ export default function DiagramGenerator() {
                               placeholder={component.placeholder}
                               style={{
                                 width: component.inputLength,
-                                height: component.height || 'auto',
-                                border: 'none',
-                                outline: `${component.borderThickness || 1}px solid ${component.borderColor || '#cccccc'}`,
-                                padding: '4px',
+                                height: component.height || "auto",
+                                border: "none",
+                                outline: `${
+                                  component.borderThickness || 1
+                                }px solid ${
+                                  component.borderColor || "#cccccc"
+                                }`,
+                                padding: "4px",
                                 fontSize: component.fontSize || 14,
-                                fontFamily: component.fontFamily || 'inherit',
-                                color: component.color || 'inherit'
+                                fontFamily: component.fontFamily || "inherit",
+                                color: component.color || "inherit",
                               }}
                               readOnly={component.isReadOnly}
                               className="cursor-move custom-input"
@@ -1621,48 +1724,62 @@ export default function DiagramGenerator() {
                             />
                             <div
                               style={{
-                                position: 'absolute',
+                                position: "absolute",
                                 top: 0,
                                 right: 0,
-                                width: '5px',
-                                height: '100%',
-                                cursor: 'col-resize',
+                                width: "5px",
+                                height: "100%",
+                                cursor: "col-resize",
                               }}
-                              onMouseDown={(e) => handleInputResizeStart(e, component.id, 'right')}
+                              onMouseDown={(e) =>
+                                handleInputResizeStart(e, component.id, "right")
+                              }
                             />
                             <div
                               style={{
-                                position: 'absolute',
+                                position: "absolute",
                                 bottom: 0,
                                 left: 0,
-                                width: '100%',
-                                height: '5px',
-                                cursor: 'row-resize',
+                                width: "100%",
+                                height: "5px",
+                                cursor: "row-resize",
                               }}
-                              onMouseDown={(e) => handleInputResizeStart(e, component.id, 'bottom')}
+                              onMouseDown={(e) =>
+                                handleInputResizeStart(
+                                  e,
+                                  component.id,
+                                  "bottom"
+                                )
+                              }
                             />
                             <div
                               style={{
-                                position: 'absolute',
+                                position: "absolute",
                                 top: 0,
                                 left: 0,
-                                width: '100%',
-                                height: '5px',
-                                cursor: 'row-resize',
+                                width: "100%",
+                                height: "5px",
+                                cursor: "row-resize",
                               }}
-                              onMouseDown={(e) => handleInputResizeStart(e, component.id, 'top')}
+                              onMouseDown={(e) =>
+                                handleInputResizeStart(e, component.id, "top")
+                              }
                             />
                           </div>
                         </ContextMenuTrigger>
                         <ContextMenuContent>
-                          <ContextMenuItem onClick={() => startEditing(component.id)}>
+                          <ContextMenuItem
+                            onClick={() => startEditing(component.id)}
+                          >
                             <Pencil className="mr-4 h-4 w-4" /> Edit
                           </ContextMenuItem>
-                          <ContextMenuItem onClick={() => handleCustomize(component)}>
+                          <ContextMenuItem
+                            onClick={() => handleCustomize(component)}
+                          >
                             <Paintbrush className="mr-4 h-4 w-4" /> Customize
                           </ContextMenuItem>
                           <ContextMenuSeparator />
-                          <ContextMenuItem 
+                          <ContextMenuItem
                             onClick={() => removeComponent(component.id)}
                             className="flex items-center cursor-pointer text-red-600 hover:bg-red-500"
                           >
@@ -1670,10 +1787,14 @@ export default function DiagramGenerator() {
                           </ContextMenuItem>
                         </ContextMenuContent>
                       </ContextMenu>
-                    )
+                    );
                     break;
                   default:
-                    if (componentData.shapes.some(shape => shape.id === component.type)) {
+                    if (
+                      componentData.shapes.some(
+                        (shape) => shape.id === component.type
+                      )
+                    ) {
                       ComponentToRender = (
                         <ContextMenu>
                           <ContextMenuTrigger>
@@ -1690,12 +1811,14 @@ export default function DiagramGenerator() {
                             </div>
                           </ContextMenuTrigger>
                           <ContextMenuContent>
-                            <ContextMenuItem onClick={() => removeComponent(component.id)}>
+                            <ContextMenuItem
+                              onClick={() => removeComponent(component.id)}
+                            >
                               Delete
                             </ContextMenuItem>
                           </ContextMenuContent>
                         </ContextMenu>
-                      )
+                      );
                     } else {
                       ComponentToRender = (
                         <ContextMenu>
@@ -1711,20 +1834,18 @@ export default function DiagramGenerator() {
                             </div>
                           </ContextMenuTrigger>
                           <ContextMenuContent>
-                            <ContextMenuItem onClick={() => removeComponent(component.id)}>
+                            <ContextMenuItem
+                              onClick={() => removeComponent(component.id)}
+                            >
                               Delete
                             </ContextMenuItem>
                           </ContextMenuContent>
                         </ContextMenu>
-                      )
+                      );
                     }
                 }
-                
-                return (
-                  <div key={component.id}>
-                    {ComponentToRender}
-                  </div>
-                );
+
+                return <div key={component.id}>{ComponentToRender}</div>;
               })}
             </div>
           </div>
@@ -1739,15 +1860,18 @@ export default function DiagramGenerator() {
           </DialogHeader>
           <p>You have unsaved changes. Are you sure you want to close?</p>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowCloseConfirm(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setShowCloseConfirm(false)}
+            >
               Cancel
             </Button>
-            <Button 
-              variant="destructive" 
+            <Button
+              variant="destructive"
               onClick={() => {
-                setShowCloseConfirm(false)
-                setIsEditorOpen(false)
-                setHasUnsavedChanges(false)
+                setShowCloseConfirm(false);
+                setIsEditorOpen(false);
+                setHasUnsavedChanges(false);
               }}
             >
               Close without saving
@@ -1758,7 +1882,10 @@ export default function DiagramGenerator() {
 
       {/* Customize Dialog */}
       {componentToCustomize && (
-        <Dialog open={customizeDialogOpen} onOpenChange={setCustomizeDialogOpen}>
+        <Dialog
+          open={customizeDialogOpen}
+          onOpenChange={setCustomizeDialogOpen}
+        >
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Customize Component</DialogTitle>
@@ -1774,7 +1901,9 @@ export default function DiagramGenerator() {
                 />
               </div>
               <div>
-                <label className="mb-1 text-sm font-medium">Font Size: {newFontSize}px</label>
+                <label className="mb-1 text-sm font-medium">
+                  Font Size: {newFontSize}px
+                </label>
                 <Slider
                   value={[newFontSize]}
                   onValueChange={(value) => setNewFontSize(value[0])}
@@ -1801,7 +1930,9 @@ export default function DiagramGenerator() {
                 />
               </div>
               <div>
-                <label className="mb-1 text-sm font-medium">Border Thickness: {newBorderThickness.toFixed(1)}px</label>
+                <label className="mb-1 text-sm font-medium">
+                  Border Thickness: {newBorderThickness.toFixed(1)}px
+                </label>
                 <Slider
                   value={[newBorderThickness]}
                   onValueChange={(value) => setNewBorderThickness(value[0])}
@@ -1809,16 +1940,25 @@ export default function DiagramGenerator() {
                   max={10}
                   step={0.1}
                   className="py-4"
-                />  
+                />
               </div>
             </form>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setCustomizeDialogOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setCustomizeDialogOpen(false)}
+              >
                 Cancel
               </Button>
               <Button
                 onClick={() => {
-                  applyCustomization(newFontFamily, newFontSize, newColor, newBorderColor, newBorderThickness)
+                  applyCustomization(
+                    newFontFamily,
+                    newFontSize,
+                    newColor,
+                    newBorderColor,
+                    newBorderThickness
+                  );
                 }}
               >
                 Save
@@ -1842,5 +1982,5 @@ export default function DiagramGenerator() {
         onThemeChange={setTheme}
       />
     </div>
-  )
+  );
 }
