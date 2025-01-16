@@ -693,6 +693,9 @@ function ComponentsDialog({
                     ? "bg-[#18181a] border-[#27272a] hover:bg-[#27272a] focus:border-[#27272a] focus:ring-[#27272a]"
                     : "bg-white "
                 }`}
+                style={{
+                  borderColor: theme === "dark" ? "#27272a" : undefined,
+                }}
               />
             </div>
           </div>
