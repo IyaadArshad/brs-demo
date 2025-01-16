@@ -1442,23 +1442,23 @@ export default function DiagramGenerator() {
             {showTextWithIcons && "Back"}
           </Button>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => {}}>
+            <Button variant="outline" className="topbox" size="sm" onClick={() => {}}>
               <Layout className="mr-4 h-4 w-4" />
               {showTextWithIcons && "Layouts"}
             </Button>
             <Button
-              variant="destructive"
               size="sm"
+              variant="destructive"
               onClick={() => setDiagramComponents([])}
             >
               <X className="mr-4 h-4 w-4" />
               {showTextWithIcons && "Clear"}
             </Button>
-            <Button variant="outline" size="sm" onClick={importDiagram}>
+            <Button variant="outline" size="sm" className="topbox" onClick={importDiagram}>
               <Download className="mr-4 h-4 w-4" />
               {showTextWithIcons && "Import"}
             </Button>
-            <Button variant="outline" size="sm" onClick={exportDiagram}>
+            <Button variant="outline" size="sm" className="topbox" onClick={exportDiagram}>
               <Upload className="mr-4 h-4 w-4" />
               {showTextWithIcons && "Export"}
             </Button>
@@ -1466,6 +1466,7 @@ export default function DiagramGenerator() {
               variant="outline"
               size="sm"
               onClick={() => setIsSettingsOpen(true)}
+              className="topbox"
             >
               <SettingsIcon className="mr-4 h-4 w-4" />
               {showTextWithIcons && "Settings"}
