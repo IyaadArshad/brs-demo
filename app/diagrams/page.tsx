@@ -1610,14 +1610,15 @@ export default function DiagramGenerator() {
                 />
               </div>
               <div>
-                <label className="mb-1 text-sm font-medium">Border Thickness</label>
-                <Input
-                  type="number"
-                  step="0.1" // Allow decimal steps
-                  placeholder="e.g., 2"
-                  value={newBorderThickness}
-                  onChange={(e) => setNewBorderThickness(parseFloat(e.target.value) || 0)} // Use parseFloat instead of parseInt
-                />
+                <label className="mb-1 text-sm font-medium">Border Thickness: {newBorderThickness.toFixed(1)}px</label>
+                <Slider
+                  value={[newBorderThickness]}
+                  onValueChange={(value) => setNewBorderThickness(value[0])}
+                  min={0.1}
+                  max={10}
+                  step={0.1}
+                  className="py-4"
+                />  
               </div>
             </form>
             <DialogFooter>
