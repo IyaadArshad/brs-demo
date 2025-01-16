@@ -1063,6 +1063,11 @@ export default function DiagramGenerator() {
 
   const handleCustomize = (component: Component) => {
     setComponentToCustomize(component)
+    setNewFontFamily(component.fontFamily || '')
+    setNewFontSize(component.fontSize || 14)
+    setNewColor(component.color || '')
+    setNewBorderColor(component.borderColor || '')
+    setNewBorderThickness(component.borderThickness || 2)
     setCustomizeDialogOpen(true)
   }
 
