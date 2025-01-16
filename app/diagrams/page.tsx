@@ -754,14 +754,26 @@ function ComponentsDialog({
               {componentCategories.map((category) => (
                 <div
                   key={category.id}
-                  className="bg-white hover:bg-gray-50 border border-gray-200 rounded-md p-2 shadow-sm hover:shadow transition-all cursor-pointer"
+                  className={`${
+                  theme === "dark"
+                    ? "bg-[#09090b] hover:bg-[#27272a] border-[#27272a]"
+                    : "bg-white hover:bg-gray-50 border-gray-200"
+                  } border rounded-md p-2 shadow-sm hover:shadow transition-all cursor-pointer`}
                   onClick={() => setSelectedCategory(category.id)}
                 >
                   <div className="flex flex-col items-center justify-center h-24">
-                    <category.icon className="h-6 w-6 mb-2 text-gray-600" />
-                    <span className="text-sm font-medium text-gray-700">
-                      {category.name}
-                    </span>
+                  <category.icon
+                    className={`h-6 w-6 mb-2 ${
+                    theme === "dark" ? "text-[#cfcfcf]" : "text-gray-600"
+                    }`}
+                  />
+                  <span
+                    className={`text-sm font-medium ${
+                    theme === "dark" ? "text-[#cfcfcf]" : "text-gray-700"
+                    }`}
+                  >
+                    {category.name}
+                  </span>
                   </div>
                 </div>
               ))}
