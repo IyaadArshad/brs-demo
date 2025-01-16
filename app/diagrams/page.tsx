@@ -720,11 +720,15 @@ function SettingsDialog({
   onOpenChange,
   showTextWithIcons,
   setShowTextWithIcons,
+  theme,
+  onThemeChange,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   showTextWithIcons: boolean;
   setShowTextWithIcons: (show: boolean) => void;
+  theme: Theme;
+  onThemeChange: (theme: Theme) => void;
 }) {
 
   const handleSave = () => {
@@ -741,7 +745,7 @@ function SettingsDialog({
           {/* Add the Theme dropdown without theming logic */}
           <div className="p-4 border rounded-lg">
             <Label.Root className="block mb-1">Theme</Label.Root>
-            <Select.Root>
+            <Select.Root value={theme} onValueChange={(value: Theme) => onThemeChange(value)}>
               <Select.Trigger className="inline-flex items-center justify-between w-full px-3 py-2 text-sm border rounded-md bg-white border-gray-200">
                 <Select.Value placeholder="Select theme" />
                 <Select.Icon>
@@ -914,6 +918,9 @@ function TabsWindow({
 }
 
 // Main Component
+// Add theme type
+type Theme = 'light' | 'dark';
+
 export default function DiagramGenerator() {
   const [isEditorOpen, setIsEditorOpen] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
@@ -932,6 +939,21 @@ export default function DiagramGenerator() {
   const [showCloseConfirm, setShowCloseConfirm] = useState(false)
   const shapeIdRef = useRef(0)
   const [sidebarWidth, setSidebarWidth] = useState(320);
+  const [theme, setTheme] = useState<Theme>('light');
+
+  // Add theme styles
+  const themeStyles = {
+    topBar: {
+      background: theme === 'dark' ? '#09090b' : '#fafafa', // dark:bg-[#09090b] : bg-[#fafafa]
+      borderColor: theme === 'dark' ? 'rgb(31 41 55)' : 'rgb(229 231 235)', // dark:border-gray-800 : border-gray-200
+      text: theme === 'dark' ? '#fafafa' : 'rgb(75 85 99)', // dark:text-[#fafafa] : text-gray-500
+    },
+    sidebar: {
+      background: theme === 'dark' ? '#09090b' : '#fafafa', // dark:bg-[#09090b] : bg-[#fafafa]
+      borderColor: theme === 'dark' ? 'rgb(31 41 55)' : 'rgb(229 231 235)', // dark:border-gray-800 : border-gray-200
+      text: theme === 'dark' ? '#fafafa' : 'inherit', // dark:text-[#fafafa]
+    }
+  };
 
   // Add new state variables for customization
   const [newFontFamily, setNewFontFamily] = useState<string>('')
@@ -1316,11 +1338,19 @@ export default function DiagramGenerator() {
         }`}
       >
         {/* Top Bar */}
-        <div className="flex justify-between items-center p-4 bg-gray-50 border-b border-gray-200">
+        <div 
+          className="flex justify-between items-center p-4 border-b"
+          style={{
+            background: themeStyles.topBar.background,
+            borderColor: themeStyles.topBar.borderColor,
+            color: themeStyles.topBar.text
+          }}
+        >
           <Button
             variant="ghost"
             onClick={() => setIsEditorOpen(false)}
-            className="flex items-center text-sm text-gray-500"
+            className="flex items-center text-sm"
+            style={{ color: themeStyles.topBar.text }}
           >
             <ArrowLeft className="mr-4 h-4 w-4" />
             {showTextWithIcons && 'Back'}
@@ -1369,8 +1399,15 @@ export default function DiagramGenerator() {
         <div className="flex h-[calc(100vh-64px)]">
           {/* Left Sidebar - Components */}
             <div 
-              className="h-full bg-gray-50 border-r border-gray-200 flex flex-col relative"
-              style={{ width: `${sidebarWidth}px`, minWidth: '200px', maxWidth: '400px' }}
+              className="h-full border-r flex flex-col relative"
+              style={{
+                width: `${sidebarWidth}px`,
+                minWidth: '200px',
+                maxWidth: '400px',
+                background: themeStyles.sidebar.background,
+                borderColor: themeStyles.sidebar.borderColor,
+                color: themeStyles.sidebar.text
+              }}
             >
               <div className="flex-1 overflow-y-auto p-6">
                 <ComponentsDialog 
@@ -1801,6 +1838,8 @@ export default function DiagramGenerator() {
         onOpenChange={setIsSettingsOpen}
         showTextWithIcons={showTextWithIcons}
         setShowTextWithIcons={setShowTextWithIcons}
+        theme={theme}
+        onThemeChange={setTheme}
       />
     </div>
   )
