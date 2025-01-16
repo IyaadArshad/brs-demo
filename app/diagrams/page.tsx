@@ -690,8 +690,8 @@ function ComponentsDialog({
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={`w-full pl-10 ${
                   theme === "dark"
-                    ? "bg-[#18181a] border-[#27272a] hover:bg-[#27272a]"
-                    : "bg-white border-gray-200 focus:border-gray-300 focus:ring-gray-300"
+                    ? "bg-[#18181a] border-[#27272a] hover:bg-[#27272a] focus:border-[#27272a] focus:ring-[#27272a]"
+                    : "bg-white "
                 }`}
               />
             </div>
@@ -704,7 +704,7 @@ function ComponentsDialog({
                     key={component.id}
                     draggable
                     onDragStart={(e) => handleDragStart(e, component.id)}
-                    className="flex items-center justify-center p-4 rounded-lg bg-white border-2 border-gray-200 text-gray-800 cursor-move hover:border-blue-500 transition-colors"
+                    className="flex items-center justify-center p-4 rounded-lg bg-[#18181a] border-2 border-[#27272a] text-[#fafafa] cursor-move hover:border-blue-500 hover:bg-[#27272a] transition-colors"
                   >
                     {component.icon && (
                       <component.icon className="mr-2 h-4 w-4" />
