@@ -580,13 +580,8 @@ function ComponentsDialog({
 }) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
-  const [theme, setTheme] = useState<'light' | 'dark'>('light')
   const [userName, setUserName] = useState('')
   const [userEmail, setUserEmail] = useState('')
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark')
-  }, [theme])
 
   const handleDragStart = (e: React.DragEvent, componentId: string) => {
     e.dataTransfer.setData('application/reactflow', componentId)
@@ -626,16 +621,6 @@ function ComponentsDialog({
           onChange={(e) => setUserEmail(e.target.value)}
           placeholder="Enter your email"
         />
-      </div>
-      <div className="p-4 border rounded-lg">
-        <Label.Root className="block mb-1">Theme</Label.Root>
-        <Switch.Root
-          checked={theme === 'dark'}
-          onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
-          className="relative inline-flex h-[24px] w-[44px] items-center rounded-full bg-gray-200"
-        >
-          <Switch.Thumb className="block h-5 w-5 rounded-full bg-white shadow" />
-        </Switch.Root>
       </div>
       <Button variant="outline" size="sm" onClick={() => setSelectedCategory(null)}>
         Back
@@ -741,11 +726,6 @@ function SettingsDialog({
   showTextWithIcons: boolean;
   setShowTextWithIcons: (show: boolean) => void;
 }) {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-  }, [theme]);
 
   const handleSave = () => {
     onOpenChange(false);
@@ -758,11 +738,12 @@ function SettingsDialog({
           <DialogTitle>Settings</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
+          {/* Add the Theme dropdown without theming logic */}
           <div className="p-4 border rounded-lg">
             <Label.Root className="block mb-1">Theme</Label.Root>
-            <Select.Root value={theme} onValueChange={(value) => setTheme(value as 'light' | 'dark')}>
+            <Select.Root>
               <Select.Trigger className="inline-flex items-center justify-between w-full px-3 py-2 text-sm border rounded-md bg-white border-gray-200">
-                <Select.Value />
+                <Select.Value placeholder="Select theme" />
                 <Select.Icon>
                   <ChevronRight className="w-4 h-4" />
                 </Select.Icon>
