@@ -710,16 +710,20 @@ function ComponentsDialog({
           ) : (
             <div className="grid grid-cols-2 gap-4">
               {componentCategories.map((category) => (
+              <div
+                key={category.id}
+                className="bg-white rounded-lg p-4 shadow hover:shadow-lg transform hover:scale-105 transition"
+              >
                 <Button
-                  key={category.id}
-                  variant="outline"
-                  size="lg"
-                  className="h-32 flex flex-col items-center justify-center"
-                  onClick={() => setSelectedCategory(category.id)}
+                variant="ghost"
+                size="lg"
+                className="h-32 w-full flex flex-col items-center justify-center border-none"
+                onClick={() => setSelectedCategory(category.id)}
                 >
-                  <category.icon className="h-8 w-8 mb-2" />
-                  <span>{category.name}</span>
+                <category.icon className="h-8 w-8 mb-2" />
+                <span>{category.name}</span>
                 </Button>
+              </div>
               ))}
             </div>
           )}
