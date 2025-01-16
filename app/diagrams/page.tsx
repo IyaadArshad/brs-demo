@@ -479,7 +479,6 @@ const componentCategories = [
   { id: 'shapes', name: 'Shapes', icon: ShapesIcon },
   { id: 'text', name: 'Text', icon: TypeIcon },
   { id: 'forms', name: 'Forms', icon: FormInputIcon },
-  { id: 'settings', name: 'Settings', icon: SettingsIcon }, // Added Settings category
 ]
 
 const formCategories = [
@@ -607,7 +606,7 @@ function ComponentsDialog({
 
   const renderSettings = () => (
     <div className="flex-1 overflow-auto space-y-6 p-4">
-      <h1 className="text-4xl font-semibold mb-6">Settings</h1>
+      <h1 className="text-4xl font-semibold mb-8">Settings</h1>
       <div>
         <Label.Root className="block mb-1">Name</Label.Root>
         <Input
@@ -648,7 +647,7 @@ function ComponentsDialog({
         renderSettings()
       ) : (
         <>
-          <h1 className="text-4xl font-semibold mb-4">Components</h1>
+          <h1 className="text-4xl font-semibold mb-8">Components</h1>
           <div className="mb-4">
             <div className="relative">
               <Input
@@ -727,6 +726,81 @@ function ComponentsDialog({
       )}
     </div>
   )
+}
+
+function SettingsDialog({
+  open,
+  onOpenChange,
+  showTextWithIcons,
+  setShowTextWithIcons,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  showTextWithIcons: boolean;
+  setShowTextWithIcons: (show: boolean) => void;
+}) {
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+  }, [theme]);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Settings</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <Label.Root className="block mb-1">Name</Label.Root>
+            <Input
+              type="text"
+              value={userName}
+              onChange={(e) => setUserName(e.target.value)}
+              placeholder="Enter your name"
+            />
+          </div>
+          <div>
+            <Label.Root className="block mb-1">Email</Label.Root>
+            <Input
+              type="email"
+              value={userEmail}
+              onChange={(e) => setUserEmail(e.target.value)}
+              placeholder="Enter your email"
+            />
+          </div>
+          <div className="p-4 border rounded-lg flex items-center justify-between">
+            <Label.Root className="block">Theme</Label.Root>
+            <Switch.Root
+              checked={theme === 'dark'}
+              onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+              className="relative inline-flex h-[24px] w-[44px] items-center rounded-full bg-gray-200"
+            >
+              <Switch.Thumb className="block h-5 w-5 rounded-full bg-white shadow" />
+            </Switch.Root>
+          </div>
+          <div className="p-4 border rounded-lg flex items-center justify-between">
+            <Label.Root className="block">Show Text with Icons</Label.Root>
+            <Switch.Root
+              checked={showTextWithIcons}
+              onCheckedChange={(checked) => setShowTextWithIcons(checked)}
+              className="relative inline-flex h-[24px] w-[44px] items-center rounded-full bg-gray-200"
+            >
+              <Switch.Thumb className="block h-5 w-5 rounded-full bg-white shadow" />
+            </Switch.Root>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Close
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
 }
 
 // Modify TabsWindow to accept tabs and an onTabsChange callback instead of local state
@@ -868,6 +942,8 @@ function TabsWindow({
 // Main Component
 export default function DiagramGenerator() {
   const [isEditorOpen, setIsEditorOpen] = useState(false)
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [showTextWithIcons, setShowTextWithIcons] = useState(true)
   const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 })
   const [diagramComponents, setDiagramComponents] = useState<Component[]>([])
   const canvasRef = useRef<HTMLDivElement>(null)
@@ -1256,7 +1332,7 @@ export default function DiagramGenerator() {
         className="bg-black text-white border-white hover:bg-white hover:text-black transition-colors"
         onClick={() => setIsEditorOpen(true)}
       >
-        <Plus className="mr-2 h-4 w-4" /> Generate New Screen
+        <Plus className="mr-4 h-4 w-4" /> Generate New Screen
       </Button>
 
       {/* Fullscreen Editor */}
@@ -1272,38 +1348,45 @@ export default function DiagramGenerator() {
             onClick={() => setIsEditorOpen(false)}
             className="flex items-center text-sm text-gray-500"
           >
-            <ArrowLeft className="mr-1 h-4 w-4" />
-            Back
+            <ArrowLeft className="mr-4 h-4 w-4" />
+            {showTextWithIcons && 'Back'}
           </Button>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="flex items-center">
-              <Layout className="mr-1 h-4 w-4" /> Layouts
+            <Button variant="outline" size="sm" onClick={() => {}}>
+              <Layout className="mr-4 h-4 w-4" />
+              {showTextWithIcons && 'Layouts'}
             </Button>
             <Button 
               variant="destructive" 
               size="sm" 
-              className="flex items-center"
               onClick={() => setDiagramComponents([])}
             >
-              <X className="mr-1 h-4 w-4" /> Clear
+              <X className="mr-4 h-4 w-4" />
+              {showTextWithIcons && 'Clear'}
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={importDiagram}
-              className="flex items-center"
             >
-              <Download className="mr-1 h-4 w-4" />
-              Import
+              <Download className="mr-4 h-4 w-4" />
+              {showTextWithIcons && 'Import'}
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={exportDiagram}
-              className="flex items-center"
             >
-              <Upload className="mr-1 h-4 w-4" />
-              Export
+              <Upload className="mr-4 h-4 w-4" />
+              {showTextWithIcons && 'Export'}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsSettingsOpen(true)}
+            >
+              <SettingsIcon className="mr-4 h-4 w-4" />
+              {showTextWithIcons && 'Settings'}
             </Button>
           </div>
         </div>
@@ -1312,7 +1395,7 @@ export default function DiagramGenerator() {
         <div className="flex h-[calc(100vh-64px)]">
           {/* Left Sidebar - Components */}
           <div 
-            className="bg-white shadow-lg rounded-tr-lg rounded-br-lg p-4 flex flex-col relative"
+            className="bg-white sidebar-t shadow-lg rounded-tr-lg rounded-br-lg p-4 flex flex-col relative"
             style={{ width: `${sidebarWidth}px`, minWidth: '200px', maxWidth: '400px' }}
           >
             <ComponentsDialog 
@@ -1459,17 +1542,17 @@ export default function DiagramGenerator() {
                           {['heading', 'subheading', 'paragraph'].includes(component.type) && (
                             <>
                               <ContextMenuItem className="cursor-pointer" onClick={() => startEditing(component.id)}>
-                                <Pencil className="mr-2 h-4 w-4" /> Edit
+                                <Pencil className="mr-4 h-4 w-4" /> Edit
                               </ContextMenuItem>
                               <ContextMenuItem className="cursor-pointer" onClick={() => handleCustomize(component)}>
-                                <Paintbrush className="mr-2 h-4 w-4" /> Customize
+                                <Paintbrush className="mr-4 h-4 w-4" /> Customize
                               </ContextMenuItem>
                               <ContextMenuSeparator />
                               <ContextMenuItem 
                                 onClick={() => removeComponent(component.id)} 
                                 className="flex items-center cursor-pointer text-red-600 hover:bg-red-500"
                               >
-                                <Trash className="mr-2 h-4 w-4" /> Delete
+                                <Trash className="mr-4 h-4 w-4" /> Delete
                               </ContextMenuItem>
                             </>
                           )}
@@ -1560,17 +1643,17 @@ export default function DiagramGenerator() {
                         </ContextMenuTrigger>
                         <ContextMenuContent>
                           <ContextMenuItem onClick={() => startEditing(component.id)}>
-                            <Pencil className="mr-2 h-4 w-4" /> Edit
+                            <Pencil className="mr-4 h-4 w-4" /> Edit
                           </ContextMenuItem>
                           <ContextMenuItem onClick={() => handleCustomize(component)}>
-                            <Paintbrush className="mr-2 h-4 w-4" /> Customize
+                            <Paintbrush className="mr-4 h-4 w-4" /> Customize
                           </ContextMenuItem>
                           <ContextMenuSeparator />
                           <ContextMenuItem 
                             onClick={() => removeComponent(component.id)}
                             className="flex items-center cursor-pointer text-red-600 hover:bg-red-500"
                           >
-                            <Trash className="mr-2 h-4 w-4" /> Delete
+                            <Trash className="mr-4 h-4 w-4" /> Delete
                           </ContextMenuItem>
                         </ContextMenuContent>
                       </ContextMenu>
@@ -1737,6 +1820,12 @@ export default function DiagramGenerator() {
           cursor: default;
         }
       `}</style>
+      <SettingsDialog
+        open={isSettingsOpen}
+        onOpenChange={setIsSettingsOpen}
+        showTextWithIcons={showTextWithIcons}
+        setShowTextWithIcons={setShowTextWithIcons}
+      />
     </div>
   )
 }
