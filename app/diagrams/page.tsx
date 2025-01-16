@@ -10,6 +10,7 @@ import { Input as InputComponent } from "@/components/ui/input"
 import * as SliderPrimitive from "@radix-ui/react-slider"
 import * as Switch from '@radix-ui/react-switch'
 import * as Label from '@radix-ui/react-label'
+import "./globals.css";
 
 // Utility function
 const cn = (...classes: (string | undefined)[]) => classes.filter(Boolean).join(' ')
@@ -1394,21 +1395,21 @@ export default function DiagramGenerator() {
         {/* Main Content Area */}
         <div className="flex h-[calc(100vh-64px)]">
           {/* Left Sidebar - Components */}
-          <div 
-            className="bg-white sidebar-t shadow-lg rounded-tr-lg rounded-br-lg p-4 flex flex-col relative"
-            style={{ width: `${sidebarWidth}px`, minWidth: '200px', maxWidth: '400px' }}
-          >
-            <ComponentsDialog 
+            <div 
+              className="bg-gray-100 rounded-tr-lg rounded-br-lg p-4 flex flex-col relative border border-gray-200 shadow-lg"
+              style={{ width: `${sidebarWidth}px`, minWidth: '200px', maxWidth: '400px', margin: 'auto', marginTop: '20px', marginBottom: '20px' }}
+            >
+              <ComponentsDialog 
               open={true}
               onOpenChange={() => {}}
               triggerRef={useRef<HTMLButtonElement | null>(null)}
               className="components-sidebar"
-            />
-            <div
+              />
+              <div
               className="absolute top-0 right-0 w-1 h-full cursor-col-resize"
               onMouseDown={handleSidebarResize}
-            />
-          </div>
+              />
+            </div>
 
           {/* Right - Canvas */}
           <div className="flex-1 p-4 overflow-auto flex items-center justify-center">
