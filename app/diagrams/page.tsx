@@ -10,6 +10,7 @@ import { Input as InputComponent } from "@/components/ui/input"
 import * as SliderPrimitive from "@radix-ui/react-slider"
 import * as Switch from '@radix-ui/react-switch'
 import * as Label from '@radix-ui/react-label'
+import * as Select from '@radix-ui/react-select'
 import "./globals.css";
 
 // Utility function
@@ -746,6 +747,10 @@ function SettingsDialog({
     document.documentElement.classList.toggle('dark', theme === 'dark');
   }, [theme]);
 
+  const handleSave = () => {
+    onOpenChange(false);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -753,20 +758,37 @@ function SettingsDialog({
           <DialogTitle>Settings</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          <div className="p-4 border rounded-lg flex items-center justify-between">
-            <Label.Root className="block">Theme</Label.Root>
-            <Switch.Root
-              checked={theme === 'dark'}
-              onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
-              className="relative inline-flex h-[24px] w-[44px] items-center rounded-full bg-gray-200"
-            >
-              <Switch.Thumb className="block h-5 w-5 rounded-full bg-white shadow" />
-            </Switch.Root>
+          <div className="p-4 border rounded-lg">
+            <Label.Root className="block mb-1">Theme</Label.Root>
+            <Select.Root value={theme} onValueChange={(value) => setTheme(value as 'light' | 'dark')}>
+              <Select.Trigger className="inline-flex items-center justify-between w-full px-3 py-2 text-sm border rounded-md bg-white border-gray-200">
+                <Select.Value />
+                <Select.Icon>
+                  <ChevronRight className="w-4 h-4" />
+                </Select.Icon>
+              </Select.Trigger>
+              <Select.Portal>
+                <Select.Content className="z-50 mt-1 bg-white border rounded-md shadow-lg">
+                  <Select.Viewport className="p-1">
+                    <Select.Item value="light" className="px-2 py-1.5 text-sm rounded-md cursor-pointer hover:bg-gray-100">
+                      <Select.ItemText>Light</Select.ItemText>
+                    </Select.Item>
+                    <Select.Item value="dark" className="px-2 py-1.5 text-sm rounded-md cursor-pointer hover:bg-gray-100">
+                      <Select.ItemText>Dark</Select.ItemText>
+                    </Select.Item>
+                  </Select.Viewport>
+                </Select.Content>
+              </Select.Portal>
+            </Select.Root>
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Close
+          <Button 
+            variant="default" 
+            onClick={handleSave}
+            className="bg-blue-500 text-white hover:bg-blue-600"
+          >
+            Save
           </Button>
         </DialogFooter>
       </DialogContent>
