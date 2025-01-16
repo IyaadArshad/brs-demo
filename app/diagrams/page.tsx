@@ -8,7 +8,6 @@ import * as ContextMenuPrimitive from "@radix-ui/react-context-menu"
 import { cva, type VariantProps } from "class-variance-authority"
 import { Input as InputComponent } from "@/components/ui/input"
 import * as SliderPrimitive from "@radix-ui/react-slider"
-// Use the existing Input component defined below
 
 // Utility function
 const cn = (...classes: (string | undefined)[]) => classes.filter(Boolean).join(' ')
