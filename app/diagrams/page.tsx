@@ -1,13 +1,15 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Plus, Layout, X, Search, PinIcon, LayoutIcon, ShapesIcon, TypeIcon, FormInputIcon, Pencil, Paintbrush, Trash, Download, Upload, ArrowLeft, Check, ChevronRight, Circle } from 'lucide-react'
+import { Plus, Layout, X, Search, PinIcon, LayoutIcon, ShapesIcon, TypeIcon, FormInputIcon, Pencil, Paintbrush, Trash, Download, Upload, ArrowLeft, Check, ChevronRight, Circle, Settings as SettingsIcon } from 'lucide-react'
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import * as ContextMenuPrimitive from "@radix-ui/react-context-menu"
 import { cva, type VariantProps } from "class-variance-authority"
 import { Input as InputComponent } from "@/components/ui/input"
 import * as SliderPrimitive from "@radix-ui/react-slider"
+import * as Switch from '@radix-ui/react-switch'
+import * as Label from '@radix-ui/react-label'
 
 // Utility function
 const cn = (...classes: (string | undefined)[]) => classes.filter(Boolean).join(' ')
@@ -477,6 +479,7 @@ const componentCategories = [
   { id: 'shapes', name: 'Shapes', icon: ShapesIcon },
   { id: 'text', name: 'Text', icon: TypeIcon },
   { id: 'forms', name: 'Forms', icon: FormInputIcon },
+  { id: 'settings', name: 'Settings', icon: SettingsIcon }, // Added Settings category
 ]
 
 const formCategories = [
@@ -576,6 +579,13 @@ function ComponentsDialog({
 }) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [theme, setTheme] = useState<'light' | 'dark'>('light')
+  const [userName, setUserName] = useState('')
+  const [userEmail, setUserEmail] = useState('')
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  }, [theme])
 
   const handleDragStart = (e: React.DragEvent, componentId: string) => {
     e.dataTransfer.setData('application/reactflow', componentId)
@@ -595,77 +605,125 @@ function ComponentsDialog({
         )
       : []
 
+  const renderSettings = () => (
+    <div className="flex-1 overflow-auto space-y-6 p-4">
+      <h2 className="text-2xl font-semibold mb-6">Settings</h2>
+      <div>
+        <Label.Root className="block mb-1">Name</Label.Root>
+        <Input
+          type="text"
+          value={userName}
+          onChange={(e) => setUserName(e.target.value)}
+          placeholder="Enter your name"
+        />
+      </div>
+      <div>
+        <Label.Root className="block mb-1">Email</Label.Root>
+        <Input
+          type="email"
+          value={userEmail}
+          onChange={(e) => setUserEmail(e.target.value)}
+          placeholder="Enter your email"
+        />
+      </div>
+      <div className="p-4 border rounded-lg">
+        <Label.Root className="block mb-1">Theme</Label.Root>
+        <Switch.Root
+          checked={theme === 'dark'}
+          onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+          className="relative inline-flex h-[24px] w-[44px] items-center rounded-full bg-gray-200"
+        >
+          <Switch.Thumb className="block h-5 w-5 rounded-full bg-white shadow" />
+        </Switch.Root>
+      </div>
+      <Button variant="outline" size="sm" onClick={() => setSelectedCategory(null)}>
+        Back
+      </Button>
+    </div>
+  )
+
   return (
     <div className={`flex flex-col h-full ${className}`}>
-      <div className="mb-4">
-        <div className="relative">
-          <Input
-            type="text"
-            placeholder="Search components..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-8"
-          />
-          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-        </div>
-      </div>
-      {searchTerm ? (
-        <div className="flex-1 overflow-auto">
-          <div className="grid grid-cols-2 gap-4">
-            {filteredComponents.map((component) => (
-              <div
-                key={component.id}
-                draggable
-                onDragStart={(e) => handleDragStart(e, component.id)}
-                className="flex items-center justify-center p-4 rounded-lg bg-white border-2 border-gray-200 text-gray-800 cursor-move hover:border-blue-500 transition-colors"
-              >
-                {component.icon && <component.icon className="mr-2 h-4 w-4" />}
-                <span className="text-sm">{component.name}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : selectedCategory ? (
+      {selectedCategory === 'settings' ? (
+        renderSettings()
+      ) : (
         <>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setSelectedCategory(null)}
-            className="mb-4"
-          >
-            Back to Categories
-          </Button>
-          <div className="flex-1 overflow-auto">
-            <div className="grid grid-cols-2 gap-4">
-              {filteredComponents.map((component) => (
-                <div
-                  key={component.id}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, component.id)}
-                  className="flex items-center justify-center p-4 rounded-lg bg-white border-2 border-gray-200 text-gray-800 cursor-move hover:border-blue-500 transition-colors"
-                >
-                  {component.icon && <component.icon className="mr-2 h-4 w-4" />}
-                  <span className="text-sm">{component.name}</span>
-                </div>
-              ))}
+          <h2 className="text-2xl font-semibold mb-4">Components</h2>
+          <div className="mb-4">
+            <div className="relative">
+              <Input
+                type="text"
+                placeholder="Search components..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-8"
+              />
+              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
             </div>
           </div>
+          {searchTerm ? (
+            <div className="flex-1 overflow-auto">
+              <div className="grid grid-cols-2 gap-4">
+                {filteredComponents.map((component) => (
+                  <div
+                    key={component.id}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, component.id)}
+                    className="flex items-center justify-center p-4 rounded-lg bg-white border-2 border-gray-200 text-gray-800 cursor-move hover:border-blue-500 transition-colors"
+                  >
+                    {component.icon && <component.icon className="mr-2 h-4 w-4" />}
+                    <span className="text-sm">{component.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : selectedCategory ? (
+            selectedCategory === 'settings'
+              ? renderSettings()
+              : (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedCategory(null)}
+                    className="mb-4"
+                  >
+                    Back to Categories
+                  </Button>
+                  <div className="flex-1 overflow-auto">
+                    <div className="grid grid-cols-2 gap-4">
+                      {filteredComponents.map((component) => (
+                        <div
+                          key={component.id}
+                          draggable
+                          onDragStart={(e) => handleDragStart(e, component.id)}
+                          className="flex items-center justify-center p-4 rounded-lg bg-white border-2 border-gray-200 text-gray-800 cursor-move hover:border-blue-500 transition-colors"
+                        >
+                          {component.icon && <component.icon className="mr-2 h-4 w-4" />}
+                          <span className="text-sm">{component.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              {componentCategories.map((category) => (
+                <Button
+                  key={category.id}
+                  variant="outline"
+                  size="lg"
+                  className="h-32 flex flex-col items-center justify-center"
+                  onClick={() => setSelectedCategory(category.id)}
+                >
+                  <category.icon className="h-8 w-8 mb-2" />
+                  <span>{category.name}</span>
+                </Button>
+              ))}
+            </div>
+          )}
         </>
-      ) : (
-        <div className="grid grid-cols-2 gap-4">
-          {componentCategories.map((category) => (
-            <Button
-              key={category.id}
-              variant="outline"
-              size="lg"
-              className="h-32 flex flex-col items-center justify-center"
-              onClick={() => setSelectedCategory(category.id)}
-            >
-              <category.icon className="h-8 w-8 mb-2" />
-              <span>{category.name}</span>
-            </Button>
-          ))}
-        </div>
       )}
     </div>
   )
