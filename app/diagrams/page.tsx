@@ -741,8 +741,6 @@ function SettingsDialog({
   setShowTextWithIcons: (show: boolean) => void;
 }) {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  const [userName, setUserName] = useState('');
-  const [userEmail, setUserEmail] = useState('');
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
@@ -755,39 +753,11 @@ function SettingsDialog({
           <DialogTitle>Settings</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          <div>
-            <Label.Root className="block mb-1">Name</Label.Root>
-            <Input
-              type="text"
-              value={userName}
-              onChange={(e) => setUserName(e.target.value)}
-              placeholder="Enter your name"
-            />
-          </div>
-          <div>
-            <Label.Root className="block mb-1">Email</Label.Root>
-            <Input
-              type="email"
-              value={userEmail}
-              onChange={(e) => setUserEmail(e.target.value)}
-              placeholder="Enter your email"
-            />
-          </div>
           <div className="p-4 border rounded-lg flex items-center justify-between">
             <Label.Root className="block">Theme</Label.Root>
             <Switch.Root
               checked={theme === 'dark'}
               onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
-              className="relative inline-flex h-[24px] w-[44px] items-center rounded-full bg-gray-200"
-            >
-              <Switch.Thumb className="block h-5 w-5 rounded-full bg-white shadow" />
-            </Switch.Root>
-          </div>
-          <div className="p-4 border rounded-lg flex items-center justify-between">
-            <Label.Root className="block">Show Text with Icons</Label.Root>
-            <Switch.Root
-              checked={showTextWithIcons}
-              onCheckedChange={(checked) => setShowTextWithIcons(checked)}
               className="relative inline-flex h-[24px] w-[44px] items-center rounded-full bg-gray-200"
             >
               <Switch.Thumb className="block h-5 w-5 rounded-full bg-white shadow" />
