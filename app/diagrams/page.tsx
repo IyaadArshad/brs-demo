@@ -649,16 +649,16 @@ function ComponentsDialog({
       ) : (
         <>
           <h1 className="text-4xl font-semibold mb-8">Components</h1>
-          <div className="mb-4">
+          <div className="mb-6">
             <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 type="text"
                 placeholder="Search components..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-8"
+                className="w-full pl-10 bg-white border-gray-200 focus:border-gray-300 focus:ring-gray-300"
               />
-              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
             </div>
           </div>
           {searchTerm ? (
@@ -708,21 +708,17 @@ function ComponentsDialog({
                 </>
               )
           ) : (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               {componentCategories.map((category) => (
               <div
                 key={category.id}
-                className="bg-white rounded-lg p-4 shadow hover:shadow-lg transform hover:scale-105 transition hover:bg-gray-100 cursor-pointer"
+                className="bg-white hover:bg-gray-50 border border-gray-200 rounded-md p-2 shadow-sm hover:shadow transition-all cursor-pointer"
                 onClick={() => setSelectedCategory(category.id)}
               >
-                <Button
-                variant="ghost"
-                size="lg"
-                className="h-32 w-full flex flex-col items-center justify-center border-none"
-                >
-                <category.icon className="h-8 w-8 mb-2" />
-                <span>{category.name}</span>
-                </Button>
+                <div className="flex flex-col items-center justify-center h-24">
+                  <category.icon className="h-6 w-6 mb-2 text-gray-600" />
+                  <span className="text-sm font-medium text-gray-700">{category.name}</span>
+                </div>
               </div>
               ))}
             </div>
@@ -1347,7 +1343,7 @@ export default function DiagramGenerator() {
         }`}
       >
         {/* Top Bar */}
-        <div className="flex justify-between items-center p-4">
+        <div className="flex justify-between items-center p-4 bg-gray-50 border-b border-gray-200">
           <Button
             variant="ghost"
             onClick={() => setIsEditorOpen(false)}
@@ -1400,17 +1396,19 @@ export default function DiagramGenerator() {
         <div className="flex h-[calc(100vh-64px)]">
           {/* Left Sidebar - Components */}
             <div 
-              className="bg-gray-100 rounded-tr-lg rounded-br-lg p-4 flex flex-col relative border border-gray-200 shadow-lg"
-              style={{ width: `${sidebarWidth}px`, minWidth: '200px', maxWidth: '400px', margin: 'auto', marginTop: '20px', marginBottom: '20px' }}
+              className="h-full bg-gray-50 border-r border-gray-200 flex flex-col relative"
+              style={{ width: `${sidebarWidth}px`, minWidth: '200px', maxWidth: '400px' }}
             >
-              <ComponentsDialog 
-              open={true}
-              onOpenChange={() => {}}
-              triggerRef={useRef<HTMLButtonElement | null>(null)}
-              className="components-sidebar"
-              />
+              <div className="flex-1 overflow-y-auto p-6">
+                <ComponentsDialog 
+                open={true}
+                onOpenChange={() => {}}
+                triggerRef={useRef<HTMLButtonElement | null>(null)}
+                className="h-full"
+                />
+              </div>
               <div
-              className="absolute top-0 right-0 w-1 h-full cursor-col-resize"
+              className="absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-gray-300 transition-colors"
               onMouseDown={handleSidebarResize}
               />
             </div>
