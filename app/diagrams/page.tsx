@@ -408,6 +408,7 @@ type Component = {
   isReadOnly?: boolean; // Added property
   borderThickness?: number; // Added property
   placeholderFontSize?: number; // Added property
+  height?: number; // Added property
 }
 
 // Component data
@@ -834,7 +835,9 @@ export default function DiagramGenerator() {
   // 1) Add refs for tracking text input resize
   const resizingInputRef = useRef<string | null>(null)
   const inputStartWidthRef = useRef<number>(0)
+  const inputStartHeightRef = useRef<number>(0)
   const inputStartXRef = useRef<number>(0)
+  const inputStartYRef = useRef<number>(0)
 
   function exportDiagram() {
     const diagramData = { canvasSize, diagramComponents }
@@ -1135,15 +1138,18 @@ export default function DiagramGenerator() {
   // 2) Add handlers for text-input resize
   const handleInputResizeStart = (
     e: React.MouseEvent<HTMLDivElement>,
-    componentId: string
+    componentId: string,
+    direction: 'right' | 'bottom' | 'top'
   ) => {
     e.stopPropagation()
     resizingInputRef.current = componentId
     const comp = diagramComponents.find((c) => c.id === componentId)
     if (comp) {
       inputStartWidthRef.current = comp.inputLength || 200
+      inputStartHeightRef.current = comp.height || 40
       inputStartXRef.current = e.clientX
-      document.body.style.cursor = 'col-resize'
+      inputStartYRef.current = e.clientY
+      document.body.style.cursor = direction === 'right' ? 'col-resize' : 'row-resize'
     }
   }
 
@@ -1151,10 +1157,15 @@ export default function DiagramGenerator() {
     const handleMouseMove = (e: MouseEvent) => {
       if (!resizingInputRef.current) return
       const dx = e.clientX - inputStartXRef.current
+      const dy = e.clientY - inputStartYRef.current
       setDiagramComponents((prev) =>
         prev.map((comp) => {
           if (comp.id === resizingInputRef.current) {
-            return { ...comp, inputLength: Math.max(50, inputStartWidthRef.current + dx) }
+            return {
+              ...comp,
+              inputLength: Math.max(50, inputStartWidthRef.current + dx),
+              height: Math.max(20, inputStartHeightRef.current + dy)
+            }
           }
           return comp
         })
@@ -1437,6 +1448,7 @@ export default function DiagramGenerator() {
                               placeholder={component.placeholder}
                               style={{
                                 width: component.inputLength,
+                                height: component.height || 'auto',
                                 border: 'none',
                                 outline: `${component.borderThickness || 1}px solid ${component.borderColor || '#cccccc'}`,
                                 padding: '4px',
@@ -1458,7 +1470,29 @@ export default function DiagramGenerator() {
                                 height: '100%',
                                 cursor: 'col-resize',
                               }}
-                              onMouseDown={(e) => handleInputResizeStart(e, component.id)}
+                              onMouseDown={(e) => handleInputResizeStart(e, component.id, 'right')}
+                            />
+                            <div
+                              style={{
+                                position: 'absolute',
+                                bottom: 0,
+                                left: 0,
+                                width: '100%',
+                                height: '5px',
+                                cursor: 'row-resize',
+                              }}
+                              onMouseDown={(e) => handleInputResizeStart(e, component.id, 'bottom')}
+                            />
+                            <div
+                              style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                width: '100%',
+                                height: '5px',
+                                cursor: 'row-resize',
+                              }}
+                              onMouseDown={(e) => handleInputResizeStart(e, component.id, 'top')}
                             />
                           </div>
                         </ContextMenuTrigger>
