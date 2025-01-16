@@ -712,13 +712,13 @@ function ComponentsDialog({
               {componentCategories.map((category) => (
               <div
                 key={category.id}
-                className="bg-white rounded-lg p-4 shadow hover:shadow-lg transform hover:scale-105 transition"
+                className="bg-white rounded-lg p-4 shadow hover:shadow-lg transform hover:scale-105 transition hover:bg-gray-100 cursor-pointer"
+                onClick={() => setSelectedCategory(category.id)}
               >
                 <Button
                 variant="ghost"
                 size="lg"
                 className="h-32 w-full flex flex-col items-center justify-center border-none"
-                onClick={() => setSelectedCategory(category.id)}
                 >
                 <category.icon className="h-8 w-8 mb-2" />
                 <span>{category.name}</span>
