@@ -758,7 +758,7 @@ function ComponentsDialog({
               </>
             )
           ) : (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-4">
               {componentCategories.map((category) => (
                 <div
                   key={category.id}
@@ -766,22 +766,33 @@ function ComponentsDialog({
                   theme === "dark"
                     ? "bg-[#09090b] hover:bg-[#27272a] border-[#27272a]"
                     : "bg-white hover:bg-gray-50 border-gray-200"
-                  } border rounded-md p-2 shadow-sm hover:shadow transition-all cursor-pointer`}
+                  } border rounded-lg p-6 shadow-sm hover:shadow transition-all cursor-pointer`}
                   onClick={() => setSelectedCategory(category.id)}
                 >
-                  <div className="flex flex-col items-center justify-center h-24">
-                  <category.icon
-                    className={`h-6 w-6 mb-2 ${
-                    theme === "dark" ? "text-[#cfcfcf]" : "text-gray-600"
-                    }`}
-                  />
-                  <span
-                    className={`text-sm font-medium ${
-                    theme === "dark" ? "text-[#cfcfcf]" : "text-gray-700"
-                    }`}
-                  >
-                    {category.name}
-                  </span>
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0">
+                      <category.icon
+                        className={`h-8 w-8 ${
+                        theme === "dark" ? "text-[#cfcfcf]" : "text-gray-600"
+                        }`}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <h3
+                        className={`text-lg font-semibold mb-2 ${
+                        theme === "dark" ? "text-[#cfcfcf]" : "text-gray-700"
+                        }`}
+                      >
+                        {category.name}
+                      </h3>
+                      <p
+                        className={`text-sm ${
+                        theme === "dark" ? "text-gray-400" : "text-gray-500"
+                        }`}
+                      >
+                        {getCategoryDescription(category.id)}
+                      </p>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -791,6 +802,23 @@ function ComponentsDialog({
       )}
     </div>
   );
+}
+
+function getCategoryDescription(categoryId: string): string {
+  switch (categoryId) {
+    case "pinned":
+      return "Quick access to your frequently used components";
+    case "windows":
+      return "Container components like tabs and blank windows";
+    case "shapes":
+      return "Basic shapes and geometric elements for diagrams";
+    case "text":
+      return "Text elements including headings and paragraphs";
+    case "forms":
+      return "Form elements and input fields for user interaction";
+    default:
+      return "";
+  }
 }
 
 function SettingsDialog({
@@ -1475,7 +1503,7 @@ export default function DiagramGenerator() {
           <Button
             variant="ghost"
             onClick={() => setIsEditorOpen(false)}
-            className="flex items-center text-sm"
+            className="flex items-center text-sm back-button"
             style={{ color: themeStyles.topBar.text }}
           >
             <ArrowLeft className="mr-4 h-4 w-4" />
