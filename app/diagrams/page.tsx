@@ -726,24 +726,26 @@ function ComponentsDialog({
                   variant="outline"
                   size="sm"
                   onClick={() => setSelectedCategory(null)}
-                  className="mb-4"
+                  className={`mb-4 ${theme === "dark" ? "shadcn-button" : ""}`}
                 >
                   Back to Categories
                 </Button>
                 <div className="flex-1 overflow-auto">
                   <div className="grid grid-cols-2 gap-4">
                     {filteredComponents.map((component) => (
-                      <div
+                        <div
                         key={component.id}
                         draggable
                         onDragStart={(e) => handleDragStart(e, component.id)}
-                        className="flex items-center justify-center p-4 rounded-lg bg-white border-2 border-gray-200 text-gray-800 cursor-move hover:border-blue-500 transition-colors"
-                      >
+                        className={`flex items-center justify-center p-4 rounded-lg bg-white border-2 border-gray-200 text-gray-800 cursor-move hover:border-blue-500 transition-colors ${
+                          theme === "dark" ? "shadcn-component" : ""
+                        }`}
+                        >
                         {component.icon && (
                           <component.icon className="mr-2 h-4 w-4" />
                         )}
                         <span className="text-sm">{component.name}</span>
-                      </div>
+                        </div>
                     ))}
                   </div>
                 </div>

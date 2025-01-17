@@ -6,3 +6,14 @@
 .topbox {
     border-color: #27272a;
 }
+
+.shadcn-button {
+    border-color: #27272a;
+    color: #fafafa;
+}
+
+.shadcn-component {
+    border-color: #27272a;
+    background-color: #09090b;
+    color: #fafafa;
+}
