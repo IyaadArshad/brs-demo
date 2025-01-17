@@ -1531,7 +1531,7 @@ export default function DiagramGenerator() {
           </div>
 
           {/* Right - Canvas */}
-          <div className="flex-1 p-4 overflow-auto flex items-center justify-center">
+            <div className={`flex-1 p-4 overflow-auto flex items-center justify-center ${theme === "dark" ? "bg-[#151517]" : ""}`}>
             <div
               ref={canvasRef}
               className="bg-gray-100 border border-gray-200 rounded-lg cursor-se-resize relative"
