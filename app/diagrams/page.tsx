@@ -439,66 +439,207 @@ type Component = {
 // Component data
 const componentData = {
   pinned: [
-    { id: "pinned1", name: "Pinned 1", description: "A frequently accessed pinned item, offering quick entry to essential features whenever needed." },
-    { id: "pinned2", name: "Pinned 2", description: "Another critical pinned item that helps streamline workflows by keeping core functions at hand." },
+    {
+      id: "pinned1",
+      name: "Pinned 1",
+      description:
+        "A frequently accessed pinned item, offering quick entry to essential features whenever needed.",
+    },
+    {
+      id: "pinned2",
+      name: "Pinned 2",
+      description:
+        "Another critical pinned item that helps streamline workflows by keeping core functions at hand.",
+    },
   ],
   windows: [
     {
       id: "tabs",
       name: "Tabs Window",
-      description: "A multi-tabbed container allowing structured organization of content or views for easier navigation.",
+      description:
+        "A multi-tabbed container allowing structured organization of content or views for easier navigation.",
       icon: LayoutIcon,
     },
     {
       id: "blank",
       name: "Blank Window",
-      description: "A simple, empty container that can be customized with various elements for building custom layouts.",
+      description:
+        "A simple, empty container that can be customized with various elements for building custom layouts.",
       icon: LayoutIcon,
     },
   ],
   shapes: [
-    { id: "square", name: "Square", icon: ShapesIcon, description: "A foundational shape suited for flowcharts, diagrams, or highlighting key parts of a layout." },
+    {
+      id: "square",
+      name: "Square",
+      icon: ShapesIcon,
+      description:
+        "A foundational shape suited for flowcharts, diagrams, or highlighting key parts of a layout.",
+    },
   ],
   text: [
-    { id: "heading", name: "Heading", icon: TypeIcon, description: "A large, attention-grabbing text element designed for titles and key section headings." },
-    { id: "subheading", name: "Subheading", icon: TypeIcon, description: "A medium-sized text element typically used for subtitles or secondary headings." },
-    { id: "paragraph", name: "Paragraph", icon: TypeIcon, description: "A standard text block for detailed information, instructions, or descriptive content." },
+    {
+      id: "heading",
+      name: "Heading",
+      icon: TypeIcon,
+      description:
+        "A large, attention-grabbing text element designed for titles and key section headings.",
+    },
+    {
+      id: "subheading",
+      name: "Subheading",
+      icon: TypeIcon,
+      description:
+        "A medium-sized text element typically used for subtitles or secondary headings.",
+    },
+    {
+      id: "paragraph",
+      name: "Paragraph",
+      icon: TypeIcon,
+      description:
+        "A standard text block for detailed information, instructions, or descriptive content.",
+    },
   ],
   forms: {
     fields: [
-      { id: "number-input", name: "Number Input", icon: FormInputIcon, description: "A specialized field for entering numeric values, complete with built-in validation." },
-      { id: "custom-text-input", name: "Text Input", icon: FormInputIcon, description: "A basic text field for collecting user data, supporting a range of input scenarios." },
+      {
+        id: "number-input",
+        name: "Number Input",
+        icon: FormInputIcon,
+        description:
+          "A specialized field for entering numeric values, complete with built-in validation.",
+      },
+      {
+        id: "custom-text-input",
+        name: "Text Input",
+        icon: FormInputIcon,
+        description:
+          "A basic text field for collecting user data, supporting a range of input scenarios.",
+      },
     ],
     components: [
-      { id: "checkbox", name: "Checkbox", icon: FormInputIcon, description: "An option selector that can be toggled on or off for multiple-choice input." },
-      { id: "radio", name: "Radio", icon: FormInputIcon, description: "A circular button for exclusive selection among multiple related options." },
-      { id: "select", name: "Select", icon: FormInputIcon, description: "A dropdown for picking a single choice from a predefined set of options." },
-      { id: "blank-form", name: "Blank Form", icon: FormInputIcon, description: "An empty form template suitable for creating custom input structures." },
+      {
+        id: "checkbox",
+        name: "Checkbox",
+        icon: FormInputIcon,
+        description:
+          "An option selector that can be toggled on or off for multiple-choice input.",
+      },
+      {
+        id: "radio",
+        name: "Radio",
+        icon: FormInputIcon,
+        description:
+          "A circular button for exclusive selection among multiple related options.",
+      },
+      {
+        id: "select",
+        name: "Select",
+        icon: FormInputIcon,
+        description:
+          "A dropdown for picking a single choice from a predefined set of options.",
+      },
+      {
+        id: "blank-form",
+        name: "Blank Form",
+        icon: FormInputIcon,
+        description:
+          "An empty form template suitable for creating custom input structures.",
+      },
     ],
     pinned: [
-      { id: "pinned-form1", name: "Pinned Form 1", icon: PinIcon, description: "A frequently used form blueprint, enabling swift creation of commonly needed interfaces." },
-      { id: "pinned-form2", name: "Pinned Form 2", icon: PinIcon, description: "Another often-accessed form template for swiftly adding user input functionality." },
+      {
+        id: "pinned-form1",
+        name: "Pinned Form 1",
+        icon: PinIcon,
+        description:
+          "A frequently used form blueprint, enabling swift creation of commonly needed interfaces.",
+      },
+      {
+        id: "pinned-form2",
+        name: "Pinned Form 2",
+        icon: PinIcon,
+        description:
+          "Another often-accessed form template for swiftly adding user input functionality.",
+      },
     ],
     templates: [
-      { id: "login-form", name: "Login Form", icon: LayoutIcon, description: "A ready-to-use login interface template for authenticating user credentials efficiently." },
-      { id: "signup-form", name: "Signup Form", icon: LayoutIcon, description: "A pre-built signup interface template designed to streamline user registration." },
+      {
+        id: "login-form",
+        name: "Login Form",
+        icon: LayoutIcon,
+        description:
+          "A ready-to-use login interface template for authenticating user credentials efficiently.",
+      },
+      {
+        id: "signup-form",
+        name: "Signup Form",
+        icon: LayoutIcon,
+        description:
+          "A pre-built signup interface template designed to streamline user registration.",
+      },
     ],
   },
 };
 
 const componentCategories = [
-  { id: "pinned", name: "Pinned", icon: PinIcon, description: "Quick access to your frequently used components" },
-  { id: "windows", name: "Windows", icon: LayoutIcon, description: "Container components like tabs and blank windows" },
-  { id: "shapes", name: "Shapes", icon: ShapesIcon, description: "Basic geometric shapes" },
-  { id: "text", name: "Text", icon: TypeIcon, description: "Text elements including headings and paragraphs" },
-  { id: "forms", name: "Forms", icon: FormInputIcon, description: "Form elements and input fields for user interaction" },
+  {
+    id: "pinned",
+    name: "Pinned",
+    icon: PinIcon,
+    description: "Quick access to your frequently used components",
+  },
+  {
+    id: "windows",
+    name: "Windows",
+    icon: LayoutIcon,
+    description: "Container components like tabs and blank windows",
+  },
+  {
+    id: "shapes",
+    name: "Shapes",
+    icon: ShapesIcon,
+    description: "Basic geometric shapes",
+  },
+  {
+    id: "text",
+    name: "Text",
+    icon: TypeIcon,
+    description: "Text elements including headings and paragraphs",
+  },
+  {
+    id: "forms",
+    name: "Forms",
+    icon: FormInputIcon,
+    description: "Form elements and input fields for user interaction",
+  },
 ];
 
 const formCategories = [
-  { id: "fields", name: "Fields", icon: FormInputIcon, description: "Basic form fields" },
-  { id: "components", name: "Components", icon: LayoutIcon, description: "Form components like checkboxes and radios" },
-  { id: "pinned", name: "Pinned", icon: PinIcon, description: "Frequently used form components" },
-  { id: "templates", name: "Templates", icon: LayoutIcon, description: "Form templates for quick setup" },
+  {
+    id: "fields",
+    name: "Fields",
+    icon: FormInputIcon,
+    description: "Basic form fields",
+  },
+  {
+    id: "components",
+    name: "Components",
+    icon: LayoutIcon,
+    description: "Form components like checkboxes and radios",
+  },
+  {
+    id: "pinned",
+    name: "Pinned",
+    icon: PinIcon,
+    description: "Frequently used form components",
+  },
+  {
+    id: "templates",
+    name: "Templates",
+    icon: LayoutIcon,
+    description: "Form templates for quick setup",
+  },
 ];
 
 // Shape rendering function
@@ -718,21 +859,49 @@ function ComponentsDialog({
                   Back to Categories
                 </Button>
                 <div className="flex-1 overflow-auto">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4">
                     {filteredComponents.map((component) => (
-                        <div
+                      <div
                         key={component.id}
                         draggable
                         onDragStart={(e) => handleDragStart(e, component.id)}
-                        className={`flex items-center justify-center p-4 rounded-lg bg-white border-2 border-gray-200 text-gray-800 cursor-move hover:border-blue-500 transition-colors ${
-                          theme === "dark" ? "shadcn-component" : ""
+                        className={`flex items-center justify-center p-4 rounded-lg border-2 text-gray-800 cursor-move hover:border-blue-500 transition-colors ${
+                          theme === "dark"
+                            ? "bg-[#09090b] hover:bg-[#27272a] border-[#27272a]"
+                            : "bg-white hover:bg-gray-50 border-gray-200"
                         }`}
-                        >
-                        {component.icon && (
-                          <component.icon className="mr-2 h-4 w-4" />
-                        )}
-                        <span className="text-sm">{component.name}</span>
+                      >
+                        <div className="flex items-start space-x-4">
+                          <div className="flex-shrink-0">
+                            {component.icon && (
+                              <component.icon className="mr-2 h-4 w-4" />
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <h3
+                              className={`text-lg font-semibold mb-2 ${
+                                theme === "dark"
+                                  ? "text-[#cfcfcf]"
+                                  : "text-gray-700"
+                              }`}
+                            >
+                              {component.name}
+                            </h3>
+                            {"description" in component && (
+                              <p
+                                className={`text-sm ${
+                                  theme === "dark"
+                                    ? "text-gray-400"
+                                    : "text-gray-500"
+                                }`}
+                              >
+                                {component.description}
+                              </p>
+                            )}
+                          </div>
+                          <span className="text-sm">{component.name}</span>
                         </div>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -744,9 +913,9 @@ function ComponentsDialog({
                 <div
                   key={category.id}
                   className={`${
-                  theme === "dark"
-                    ? "bg-[#09090b] hover:bg-[#27272a] border-[#27272a]"
-                    : "bg-white hover:bg-gray-50 border-gray-200"
+                    theme === "dark"
+                      ? "bg-[#09090b] hover:bg-[#27272a] border-[#27272a]"
+                      : "bg-white hover:bg-gray-50 border-gray-200"
                   } border rounded-lg p-6 shadow-sm hover:shadow transition-all cursor-pointer`}
                   onClick={() => setSelectedCategory(category.id)}
                 >
@@ -754,21 +923,21 @@ function ComponentsDialog({
                     <div className="flex-shrink-0">
                       <category.icon
                         className={`h-8 w-8 ${
-                        theme === "dark" ? "text-[#cfcfcf]" : "text-gray-600"
+                          theme === "dark" ? "text-[#cfcfcf]" : "text-gray-600"
                         }`}
                       />
                     </div>
                     <div className="flex-1">
                       <h3
                         className={`text-lg font-semibold mb-2 ${
-                        theme === "dark" ? "text-[#cfcfcf]" : "text-gray-700"
+                          theme === "dark" ? "text-[#cfcfcf]" : "text-gray-700"
                         }`}
                       >
                         {category.name}
                       </h3>
                       <p
                         className={`text-sm ${
-                        theme === "dark" ? "text-gray-400" : "text-gray-500"
+                          theme === "dark" ? "text-gray-400" : "text-gray-500"
                         }`}
                       >
                         {getCategoryDescription(category.id)}
@@ -1490,7 +1659,7 @@ export default function DiagramGenerator() {
             <ArrowLeft className="mr-4 h-4 w-4" />
             {showTextWithIcons && "Back"}
           </Button>
-            <div className="flex gap-2">
+          <div className="flex gap-2">
             <Button
               variant="outline"
               className={theme === "dark" ? "topbox" : ""}
@@ -1535,7 +1704,7 @@ export default function DiagramGenerator() {
               <SettingsIcon className="mr-4 h-4 w-4" />
               {showTextWithIcons && "Settings"}
             </Button>
-            </div>
+          </div>
         </div>
 
         {/* Main Content Area */}
@@ -1568,7 +1737,11 @@ export default function DiagramGenerator() {
           </div>
 
           {/* Right - Canvas */}
-            <div className={`flex-1 p-4 overflow-auto flex items-center justify-center ${theme === "dark" ? "bg-[#151517]" : ""}`}>
+          <div
+            className={`flex-1 p-4 overflow-auto flex items-center justify-center ${
+              theme === "dark" ? "bg-[#151517]" : ""
+            }`}
+          >
             <div
               ref={canvasRef}
               className="bg-gray-100 border border-gray-200 rounded-lg cursor-se-resize relative"
@@ -1602,9 +1775,7 @@ export default function DiagramGenerator() {
                     break;
                   case "blank":
                     ComponentToRender = (
-                      <BlankWindow
-                        className="absolute inset-0"
-                      />
+                      <BlankWindow className="absolute inset-0" />
                     );
                     break;
                   case "blank-form":
