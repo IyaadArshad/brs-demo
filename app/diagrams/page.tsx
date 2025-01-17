@@ -449,6 +449,12 @@ const componentData = {
       description: "A window with multiple tabs",
       icon: LayoutIcon,
     },
+    {
+      id: "blank",
+      name: "Blank Window",
+      description: "A simple blank window",
+      icon: LayoutIcon,
+    },
   ],
   shapes: [
     { id: "square", name: "Square", icon: ShapesIcon },
@@ -998,6 +1004,26 @@ function TabsWindow({
         </DialogContent>
       </Dialog>
     </>
+  );
+}
+
+function BlankWindow({
+  className,
+  style,
+}: {
+  className?: string;
+  style?: React.CSSProperties;
+}) {
+  return (
+    <div
+      className={cn(
+        "absolute inset-0 flex flex-col bg-white rounded-lg overflow-hidden border",
+        className
+      )}
+      style={style}
+    >
+      <div className="flex-1 bg-white"></div>
+    </div>
   );
 }
 
@@ -1562,6 +1588,13 @@ export default function DiagramGenerator() {
                         onActiveTabChange={(tabId) =>
                           updateActiveTab(component.id, tabId)
                         }
+                      />
+                    );
+                    break;
+                  case "blank":
+                    ComponentToRender = (
+                      <BlankWindow
+                        className="absolute inset-0"
                       />
                     );
                     break;
