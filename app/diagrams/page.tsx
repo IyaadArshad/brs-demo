@@ -439,85 +439,66 @@ type Component = {
 // Component data
 const componentData = {
   pinned: [
-    { id: "pinned1", name: "Pinned 1" },
-    { id: "pinned2", name: "Pinned 2" },
+    { id: "pinned1", name: "Pinned 1", description: "A frequently accessed pinned item, offering quick entry to essential features whenever needed." },
+    { id: "pinned2", name: "Pinned 2", description: "Another critical pinned item that helps streamline workflows by keeping core functions at hand." },
   ],
   windows: [
     {
       id: "tabs",
       name: "Tabs Window",
-      description: "A window with multiple tabs",
+      description: "A multi-tabbed container allowing structured organization of content or views for easier navigation.",
       icon: LayoutIcon,
     },
     {
       id: "blank",
       name: "Blank Window",
-      description: "A simple blank window",
+      description: "A simple, empty container that can be customized with various elements for building custom layouts.",
       icon: LayoutIcon,
     },
   ],
   shapes: [
-    { id: "square", name: "Square", icon: ShapesIcon },
-    { id: "circle", name: "Circle", icon: ShapesIcon },
-    { id: "triangle", name: "Triangle", icon: ShapesIcon },
-    { id: "rectangle", name: "Rectangle", icon: ShapesIcon },
-    { id: "oval", name: "Oval", icon: ShapesIcon },
-    { id: "hexagon", name: "Hexagon", icon: ShapesIcon },
-    { id: "octagon", name: "Octagon", icon: ShapesIcon },
-    { id: "pentagon", name: "Pentagon", icon: ShapesIcon },
-    { id: "diamond", name: "Diamond", icon: ShapesIcon },
-    { id: "star", name: "Star", icon: ShapesIcon },
-    { id: "heart", name: "Heart", icon: ShapesIcon },
-    { id: "trapezoid", name: "Trapezoid", icon: ShapesIcon },
-    { id: "parallelogram", name: "Parallelogram", icon: ShapesIcon },
-    { id: "rhombus", name: "Rhombus", icon: ShapesIcon },
-    { id: "arrow", name: "Arrow", icon: ShapesIcon },
-    { id: "cross", name: "Cross", icon: ShapesIcon },
-    { id: "cloud", name: "Cloud", icon: ShapesIcon },
-    { id: "cylinder", name: "Cylinder", icon: ShapesIcon },
-    { id: "cone", name: "Cone", icon: ShapesIcon },
-    { id: "pyramid", name: "Pyramid", icon: ShapesIcon },
+    { id: "square", name: "Square", icon: ShapesIcon, description: "A foundational shape suited for flowcharts, diagrams, or highlighting key parts of a layout." },
   ],
   text: [
-    { id: "heading", name: "Heading", icon: TypeIcon },
-    { id: "subheading", name: "Subheading", icon: TypeIcon },
-    { id: "paragraph", name: "Paragraph", icon: TypeIcon },
+    { id: "heading", name: "Heading", icon: TypeIcon, description: "A large, attention-grabbing text element designed for titles and key section headings." },
+    { id: "subheading", name: "Subheading", icon: TypeIcon, description: "A medium-sized text element typically used for subtitles or secondary headings." },
+    { id: "paragraph", name: "Paragraph", icon: TypeIcon, description: "A standard text block for detailed information, instructions, or descriptive content." },
   ],
   forms: {
     fields: [
-      { id: "number-input", name: "Number Input", icon: FormInputIcon },
-      { id: "custom-text-input", name: "Text Input", icon: FormInputIcon },
+      { id: "number-input", name: "Number Input", icon: FormInputIcon, description: "A specialized field for entering numeric values, complete with built-in validation." },
+      { id: "custom-text-input", name: "Text Input", icon: FormInputIcon, description: "A basic text field for collecting user data, supporting a range of input scenarios." },
     ],
     components: [
-      { id: "checkbox", name: "Checkbox", icon: FormInputIcon },
-      { id: "radio", name: "Radio", icon: FormInputIcon },
-      { id: "select", name: "Select", icon: FormInputIcon },
-      { id: "blank-form", name: "Blank Form", icon: FormInputIcon },
+      { id: "checkbox", name: "Checkbox", icon: FormInputIcon, description: "An option selector that can be toggled on or off for multiple-choice input." },
+      { id: "radio", name: "Radio", icon: FormInputIcon, description: "A circular button for exclusive selection among multiple related options." },
+      { id: "select", name: "Select", icon: FormInputIcon, description: "A dropdown for picking a single choice from a predefined set of options." },
+      { id: "blank-form", name: "Blank Form", icon: FormInputIcon, description: "An empty form template suitable for creating custom input structures." },
     ],
     pinned: [
-      { id: "pinned-form1", name: "Pinned Form 1", icon: PinIcon },
-      { id: "pinned-form2", name: "Pinned Form 2", icon: PinIcon },
+      { id: "pinned-form1", name: "Pinned Form 1", icon: PinIcon, description: "A frequently used form blueprint, enabling swift creation of commonly needed interfaces." },
+      { id: "pinned-form2", name: "Pinned Form 2", icon: PinIcon, description: "Another often-accessed form template for swiftly adding user input functionality." },
     ],
     templates: [
-      { id: "login-form", name: "Login Form", icon: LayoutIcon },
-      { id: "signup-form", name: "Signup Form", icon: LayoutIcon },
+      { id: "login-form", name: "Login Form", icon: LayoutIcon, description: "A ready-to-use login interface template for authenticating user credentials efficiently." },
+      { id: "signup-form", name: "Signup Form", icon: LayoutIcon, description: "A pre-built signup interface template designed to streamline user registration." },
     ],
   },
 };
 
 const componentCategories = [
-  { id: "pinned", name: "Pinned", icon: PinIcon },
-  { id: "windows", name: "Windows", icon: LayoutIcon },
-  { id: "shapes", name: "Shapes", icon: ShapesIcon },
-  { id: "text", name: "Text", icon: TypeIcon },
-  { id: "forms", name: "Forms", icon: FormInputIcon },
+  { id: "pinned", name: "Pinned", icon: PinIcon, description: "Quick access to your frequently used components" },
+  { id: "windows", name: "Windows", icon: LayoutIcon, description: "Container components like tabs and blank windows" },
+  { id: "shapes", name: "Shapes", icon: ShapesIcon, description: "Basic geometric shapes" },
+  { id: "text", name: "Text", icon: TypeIcon, description: "Text elements including headings and paragraphs" },
+  { id: "forms", name: "Forms", icon: FormInputIcon, description: "Form elements and input fields for user interaction" },
 ];
 
 const formCategories = [
-  { id: "fields", name: "Fields", icon: FormInputIcon },
-  { id: "components", name: "Components", icon: LayoutIcon },
-  { id: "pinned", name: "Pinned", icon: PinIcon },
-  { id: "templates", name: "Templates", icon: LayoutIcon },
+  { id: "fields", name: "Fields", icon: FormInputIcon, description: "Basic form fields" },
+  { id: "components", name: "Components", icon: LayoutIcon, description: "Form components like checkboxes and radios" },
+  { id: "pinned", name: "Pinned", icon: PinIcon, description: "Frequently used form components" },
+  { id: "templates", name: "Templates", icon: LayoutIcon, description: "Form templates for quick setup" },
 ];
 
 // Shape rendering function
