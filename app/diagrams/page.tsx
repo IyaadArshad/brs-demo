@@ -874,7 +874,7 @@ function ComponentsDialog({
                         <div className="flex items-start space-x-4">
                           <div className="flex-shrink-0">
                             {component.icon && (
-                              <component.icon className="mr-2 h-4 w-4" />
+                              <component.icon className={`mr-2 h-4 w-4 ${theme === "dark" ? "dark-icon" : ""}`} />
                             )}
                           </div>
                           <div className="flex-1">
@@ -899,7 +899,6 @@ function ComponentsDialog({
                               </p>
                             )}
                           </div>
-                          <span className="text-sm">{component.name}</span>
                         </div>
                       </div>
                     ))}
