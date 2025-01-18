@@ -2048,7 +2048,9 @@ export default function DiagramGenerator() {
                               style={{
                                 left: `${component.position.x}px`,
                                 top: `${component.position.y}px`,
+                                cursor: "move",
                               }}
+                              onMouseDown={(e) => startDrag(e, component.id)}
                             >
                               <svg width="80" height="80" viewBox="0 0 100 100">
                                 {renderShape(component.type)}
