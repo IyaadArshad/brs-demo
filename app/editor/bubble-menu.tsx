@@ -6,7 +6,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { Separator } from "@/components/ui/separator"
-
+import { Highlight } from '@tiptap/extension-highlight'
+    
 interface BubbleMenuProps {
   editor: Editor
 }
@@ -41,6 +42,19 @@ const colors = [
   { name: 'Green', color: '#16a34a' },
   { name: 'Orange', color: '#ea580c' },
   { name: 'Pink', color: '#db2777' },
+  { name: 'Gray', color: '#a8a29e' },
+]
+
+const highlights = [
+  { name: 'Default', color: 'var(--novel-highlight-default)' },
+  { name: 'Purple', color: 'var(--novel-highlight-purple)' },
+  { name: 'Red', color: 'var(--novel-highlight-red)' },
+  { name: 'Yellow', color: 'var(--novel-highlight-yellow)' },
+  { name: 'Blue', color: 'var(--novel-highlight-blue)' },
+  { name: 'Green', color: 'var(--novel-highlight-green)' },
+  { name: 'Orange', color: 'var(--novel-highlight-orange)' },
+  { name: 'Pink', color: 'var(--novel-highlight-pink)' },
+  { name: 'Gray', color: 'var(--novel-highlight-gray)' },
 ]
 
 function ColorSelector({ editor }: { editor: Editor }) {
@@ -59,31 +73,60 @@ function ColorSelector({ editor }: { editor: Editor }) {
           <ChevronDown className="h-3 w-3" />
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-48 p-1 max-h-60 overflow-y-auto" align="start">
-        {colors.map(({ name, color }, index) => (
-          <button
-            key={index}
-            onClick={() => {
-              if (name === 'Default') {
-                editor.chain().focus().unsetColor().run()
-              } else {
-                editor.chain().focus().setColor(color).run()
-              }
-            }}
-            className="flex w-full items-center gap-2 rounded-md p-1 px-2 text-sm hover:bg-accent"
-            title={name}
-          >
-            <div className="flex h-5 w-5 items-center justify-center rounded border">
-              <span
-                className="text-xs font-medium"
-                style={{ color }}
-              >
-                A
-              </span>
+      <PopoverContent className="my-1 flex max-h-80 w-48 flex-col overflow-hidden overflow-y-auto rounded border p-1 shadow-xl" align="start">
+        <div className="flex flex-col">
+          <div className="my-1 px-2 text-sm font-semibold text-muted-foreground">
+            Color
+          </div>
+          {colors.map(({ name, color }, index) => (
+            <div
+              key={index}
+              onClick={() => {
+                if (name === 'Default') {
+                  editor.chain().focus().unsetColor().run()
+                } else {
+                  editor.chain().focus().setColor(color).run()
+                }
+              }}
+              className="flex cursor-pointer items-center justify-between px-2 py-1 text-sm hover:bg-accent"
+            >
+              <div className="flex items-center gap-2">
+                <div className="rounded-sm border px-2 py-px font-medium" style={{ color }}>
+                  A
+                </div>
+                <span>{name}</span>
+              </div>
             </div>
-            <span className="text-sm">{name}</span>
-          </button>
-        ))}
+          ))}
+        </div>
+        <div>
+          <div className="my-1 px-2 text-sm font-semibold text-muted-foreground">
+            Background
+          </div>
+          {highlights.map(({ name, color }, index) => (
+            <div
+              key={index}
+              onClick={() => {
+                if (name === 'Default') {
+                  editor.chain().focus().unsetMark('highlight').run()
+                } else {
+                  editor.chain().focus().setMark('highlight', { color }).run()
+                }
+              }}
+              className="flex cursor-pointer items-center justify-between px-2 py-1 text-sm hover:bg-accent"
+            >
+              <div className="flex items-center gap-2">
+                <div 
+                  className="rounded-sm border px-2 py-px font-medium" 
+                  style={{ backgroundColor: color }}
+                >
+                  A
+                </div>
+                <span>{name}</span>
+              </div>
+            </div>
+          ))}
+        </div>
       </PopoverContent>
     </Popover>
   )

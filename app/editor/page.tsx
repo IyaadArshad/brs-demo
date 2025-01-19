@@ -11,6 +11,7 @@ import { Markdown } from 'tiptap-markdown'
 import { FormattingMenu } from './bubble-menu'
 import TextStyle from '@tiptap/extension-text-style'
 import { Color } from '@tiptap/extension-color'
+import { Highlight } from '@tiptap/extension-highlight'
 
 function ThemeToggle() {
   const { theme, setTheme } = useTheme()
@@ -43,6 +44,9 @@ export default function Page() {
       }),
       TextStyle,
       Color,
+      Highlight.configure({
+        multicolor: true,
+      }),
       Markdown.configure({
         html: false,
         transformPastedText: true,
