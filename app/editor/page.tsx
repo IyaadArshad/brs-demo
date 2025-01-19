@@ -33,6 +33,10 @@ export default function Page() {
         heading: {
           levels: [1, 2, 3, 4, 5, 6],
         },
+        bulletList: {
+          keepMarks: true,
+          keepAttributes: false,
+        },
       }),
       Markdown.configure({
         html: false,
