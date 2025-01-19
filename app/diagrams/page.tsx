@@ -434,7 +434,6 @@ type Component = {
   borderThickness?: number; // Added property
   placeholderFontSize?: number; // Added property
   height?: number; // Added property
-  width?: number; // new property
 };
 
 // Component data
@@ -644,18 +643,10 @@ const formCategories = [
 ];
 
 // Shape rendering function
-function renderShape(type: string, comp?: Component) {
+const renderShape = (type: string) => {
   switch (type) {
     case "square":
-      return (
-        <rect
-          width={comp?.width || 40}
-          height={comp?.height || 40}
-          fill={comp?.color || "#4299e1"}
-          stroke={comp?.borderColor || "none"}
-          strokeWidth={comp?.borderThickness || 0}
-        />
-      );
+      return <rect width="40" height="40" fill="#4299e1" />;
     case "circle":
       return <circle cx="20" cy="20" r="20" fill="#48bb78" />;
     case "triangle":
@@ -740,7 +731,7 @@ function renderShape(type: string, comp?: Component) {
     default:
       return <rect width="40" height="40" fill="#a0aec0" />;
   }
-}
+};
 
 // Components Dialog Component
 function ComponentsDialog({
@@ -1264,8 +1255,6 @@ export default function DiagramGenerator() {
   const [newColor, setNewColor] = useState<string>("");
   const [newBorderColor, setNewBorderColor] = useState<string>("");
   const [newBorderThickness, setNewBorderThickness] = useState<number>(2);
-  const [newWidth, setNewWidth] = useState<number>(40);
-  const [newHeight, setNewHeight] = useState<number>(40);
 
   // 1) Add refs for tracking text input resize
   const resizingInputRef = useRef<string | null>(null);
@@ -1506,8 +1495,6 @@ export default function DiagramGenerator() {
     setNewColor(component.color || "");
     setNewBorderColor(component.borderColor || "");
     setNewBorderThickness(component.borderThickness || 2);
-    setNewWidth(component.width || 40);
-    setNewHeight(component.height || 40);
     setCustomizeDialogOpen(true);
   };
 
@@ -1517,34 +1504,22 @@ export default function DiagramGenerator() {
     fontSize: number,
     color: string,
     borderColor: string,
-    borderThickness: number,
-    width?: number,
-    height?: number
+    borderThickness: number
   ) => {
     if (componentToCustomize) {
       setDiagramComponents((prev) =>
-        prev.map((comp) => {
-          if (comp.id === componentToCustomize.id) {
-            if (comp.type === "square") {
-              return {
+        prev.map((comp) =>
+          comp.id === componentToCustomize.id
+            ? {
                 ...comp,
-                width: width || comp.width,
-                height: height || comp.height,
-                borderColor: borderColor || comp.borderColor,
-                borderThickness: borderThickness || comp.borderThickness,
-              };
-            }
-            return {
-              ...comp,
-              fontFamily,
-              fontSize,
-              color,
-              borderColor,
-              borderThickness,
-            };
-          }
-          return comp;
-        })
+                fontFamily,
+                fontSize,
+                color,
+                borderColor,
+                borderThickness,
+              }
+            : comp
+        )
       );
       setCustomizeDialogOpen(false);
       setComponentToCustomize(null);
@@ -2073,21 +2048,14 @@ export default function DiagramGenerator() {
                               style={{
                                 left: `${component.position.x}px`,
                                 top: `${component.position.y}px`,
-                                cursor: "move",
                               }}
-                              onMouseDown={(e) => startDrag(e, component.id)}
                             >
                               <svg width="80" height="80" viewBox="0 0 100 100">
-                                {renderShape(component.type, component)}
+                                {renderShape(component.type)}
                               </svg>
                             </div>
                           </ContextMenuTrigger>
                           <ContextMenuContent>
-                            <ContextMenuItem
-                              onClick={() => handleCustomize(component)}
-                            >
-                              Customize
-                            </ContextMenuItem>
                             <ContextMenuItem
                               onClick={() => removeComponent(component.id)}
                             >
@@ -2168,115 +2136,57 @@ export default function DiagramGenerator() {
               <DialogTitle>Customize Component</DialogTitle>
             </DialogHeader>
             <form className="flex flex-col gap-4">
-              {componentToCustomize.type !== "square" && (
-                <>
-                  <div>
-                    <label className="mb-1 text-sm font-medium">
-                      Font Family
-                    </label>
-                    <Input
-                      type="text"
-                      placeholder="e.g., Arial, sans-serif"
-                      value={newFontFamily}
-                      onChange={(e) => setNewFontFamily(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1 text-sm font-medium">
-                      Font Size: {newFontSize}px
-                    </label>
-                    <Slider
-                      value={[newFontSize]}
-                      onValueChange={(value) => setNewFontSize(value[0])}
-                      min={8}
-                      max={72}
-                      step={1}
-                      className="py-4"
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1 text-sm font-medium">Color</label>
-                    <Input
-                      type="color"
-                      value={newColor}
-                      onChange={(e) => setNewColor(e.target.value)}
-                    />
-                  </div>
-                </>
-              )}
-              {componentToCustomize.type === "square" && (
-                <>
-                  <div>
-                    <label className="mb-1 text-sm font-medium">
-                      Width: {newWidth}px
-                    </label>
-                    <Slider
-                      value={[newWidth]}
-                      onValueChange={(val) => {
-                        const v = val[0];
-                        const pct = (v / 200) * 100;
-                        let step = 30;
-                        if (pct <= 33) step = 10;
-                        else if (pct <= 49.5) step = 15;
-                        else if (pct <= 66) step = 20;
-                        const rounded = Math.round(v / step) * step;
-                        setNewWidth(rounded);
-                      }}
-                      min={10}
-                      max={200}
-                      step={1}
-                      className="py-4"
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1 text-sm font-medium">
-                      Height: {newHeight}px
-                    </label>
-                    <Slider
-                      value={[newHeight]}
-                      onValueChange={(val) => {
-                        const v = val[0];
-                        const pct = (v / 200) * 100;
-                        let step = 30;
-                        if (pct <= 33) step = 10;
-                        else if (pct <= 49.5) step = 15;
-                        else if (pct <= 66) step = 20;
-                        const rounded = Math.round(v / step) * step;
-                        setNewHeight(rounded);
-                      }}
-                      min={10}
-                      max={200}
-                      step={1}
-                      className="py-4"
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1 text-sm font-medium">
-                      Border Color
-                    </label>
-                    <Input
-                      type="color"
-                      value={newBorderColor}
-                      onChange={(e) => setNewBorderColor(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1 text-sm font-medium">
-                      Border Thickness: {newBorderThickness.toFixed(1)}px
-                    </label>
-                    <Slider
-                      value={[newBorderThickness]}
-                      onValueChange={(value) =>
-                        setNewBorderThickness(value[0])
-                      }
-                      min={0.1}
-                      max={10}
-                      step={0.1}
-                      className="py-4"
-                    />
-                  </div>
-                </>
-              )}
+              <div>
+                <label className="mb-1 text-sm font-medium">Font Family</label>
+                <Input
+                  type="text"
+                  placeholder="e.g., Arial, sans-serif"
+                  value={newFontFamily}
+                  onChange={(e) => setNewFontFamily(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="mb-1 text-sm font-medium">
+                  Font Size: {newFontSize}px
+                </label>
+                <Slider
+                  value={[newFontSize]}
+                  onValueChange={(value) => setNewFontSize(value[0])}
+                  min={8}
+                  max={72}
+                  step={1}
+                  className="py-4"
+                />
+              </div>
+              <div>
+                <label className="mb-1 text-sm font-medium">Color</label>
+                <Input
+                  type="color"
+                  value={newColor}
+                  onChange={(e) => setNewColor(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="mb-1 text-sm font-medium">Border Color</label>
+                <Input
+                  type="color"
+                  value={newBorderColor}
+                  onChange={(e) => setNewBorderColor(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="mb-1 text-sm font-medium">
+                  Border Thickness: {newBorderThickness.toFixed(1)}px
+                </label>
+                <Slider
+                  value={[newBorderThickness]}
+                  onValueChange={(value) => setNewBorderThickness(value[0])}
+                  min={0.1}
+                  max={10}
+                  step={0.1}
+                  className="py-4"
+                />
+              </div>
             </form>
             <DialogFooter>
               <Button
@@ -2292,9 +2202,7 @@ export default function DiagramGenerator() {
                     newFontSize,
                     newColor,
                     newBorderColor,
-                    newBorderThickness,
-                    newWidth,
-                    newHeight
+                    newBorderThickness
                   );
                 }}
               >

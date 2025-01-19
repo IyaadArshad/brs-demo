@@ -21,3 +21,7 @@
 .dark-icon {
     color: #fafafa
 }
+
+input[readOnly] {
+    cursor: default;
+  }
