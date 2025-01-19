@@ -466,3 +466,14 @@ ul[data-type="taskList"] li[data-checked="true"] > div > p {
   cursor: grabbing;
 }
 
+/* Add these rules before the end of the file */
+.ProseMirror mark {
+  border-radius: 0.375rem;
+  padding: 0.125rem 0.25rem;
+}
+
+/* Optional: Add a slight transition for a smoother look */
+.ProseMirror mark {
+  transition: background-color 0.2s ease;
+}
+

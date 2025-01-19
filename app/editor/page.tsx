@@ -46,6 +46,9 @@ export default function Page() {
       Color,
       Highlight.configure({
         multicolor: true,
+        HTMLAttributes: {
+          class: 'rounded-md px-1 py-0.5',
+        },
       }),
       Markdown.configure({
         html: false,
