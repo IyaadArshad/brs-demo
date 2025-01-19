@@ -19,6 +19,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { Separator } from "@/components/ui/separator"
+import { SettingsDialog } from './settings-dialog'
 
 interface BubbleMenuProps {
   editor: Editor
@@ -47,6 +48,8 @@ const MenuButton = ({
 
 const colors = [
   { name: 'Default', color: 'currentColor' },
+  { name: 'Black', color: '#000000' },
+  { name: 'White', color: '#ffffff' },
   { name: 'Purple', color: '#9333ea' },
   { name: 'Red', color: '#e11d48' },
   { name: 'Yellow', color: '#eab308' },
@@ -188,24 +191,6 @@ export function FormattingMenu({ editor }: BubbleMenuProps) {
   )
 }
 
-
-function ThemeToggle() {
-  const { theme, setTheme } = useTheme()
-
-  return (
-    <Button
-      variant="outline"
-      size="icon"
-      className="rounded-full w-10 h-10"
-      onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-    >
-      <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-      <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-      <span className="sr-only">Toggle theme</span>
-    </Button>
-  )
-}
-
 export default function Page() {
   const editor = useEditor({
     extensions: [
@@ -254,7 +239,7 @@ export default function Page() {
         {editor && <FormattingMenu editor={editor} />}
         <EditorContent editor={editor} />
         <div className="fixed bottom-4 right-4">
-          <ThemeToggle />
+          <SettingsDialog />
         </div>
       </div>
     </main>
