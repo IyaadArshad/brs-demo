@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button'
 import { Moon, Sun } from 'lucide-react'
 import { Markdown } from 'tiptap-markdown'
 import { FormattingMenu } from './bubble-menu'
+import TextStyle from '@tiptap/extension-text-style'
+import { Color } from '@tiptap/extension-color'
 
 function ThemeToggle() {
   const { theme, setTheme } = useTheme()
@@ -39,6 +41,8 @@ export default function Page() {
           keepAttributes: false,
         },
       }),
+      TextStyle,
+      Color,
       Markdown.configure({
         html: false,
         transformPastedText: true,
