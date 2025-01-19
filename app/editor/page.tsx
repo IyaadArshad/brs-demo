@@ -8,6 +8,7 @@ import { useTheme } from 'next-themes'
 import { Button } from '@/components/ui/button'
 import { Moon, Sun } from 'lucide-react'
 import { Markdown } from 'tiptap-markdown'
+import { FormattingMenu } from './bubble-menu'
 
 function ThemeToggle() {
   const { theme, setTheme } = useTheme()
@@ -63,6 +64,7 @@ export default function Page() {
   return (
     <main className="relative min-h-screen bg-background">
       <div className="mx-auto max-w-2xl p-12">
+        {editor && <FormattingMenu editor={editor} />}
         <EditorContent editor={editor} />
         <div className="fixed bottom-4 right-4">
           <ThemeToggle />
