@@ -361,6 +361,30 @@ ul[data-type="taskList"] li[data-checked="true"] > div > p {
   margin-bottom: 0.5rem;
 }
 
+.prose h4,
+.ProseMirror h4 {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  margin-top: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose h5,
+.ProseMirror h5 {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  margin-top: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose h6,
+.ProseMirror h6 {
+  font-size: 1rem;
+  line-height: 1.5rem;
+  margin-top: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
 .prose p,
 .ProseMirror p {
   margin-top: 0.75rem;
@@ -406,6 +430,9 @@ ul[data-type="taskList"] li[data-checked="true"] > div > p {
 .ProseMirror h1,
 .ProseMirror h2,
 .ProseMirror h3,
+.ProseMirror h4,
+.ProseMirror h5,
+.ProseMirror h6,
 .ProseMirror p {
   position: relative;
 }
@@ -413,6 +440,9 @@ ul[data-type="taskList"] li[data-checked="true"] > div > p {
 .ProseMirror h1:hover .drag-handle,
 .ProseMirror h2:hover .drag-handle,
 .ProseMirror h3:hover .drag-handle,
+.ProseMirror h4:hover .drag-handle,
+.ProseMirror h5:hover .drag-handle,
+.ProseMirror h6:hover .drag-handle,
 .ProseMirror p:hover .drag-handle {
   opacity: 1;
 }
