@@ -12,7 +12,8 @@ import TextStyle from '@tiptap/extension-text-style'
 import { Color } from '@tiptap/extension-color'
 import { Highlight } from '@tiptap/extension-highlight'
 import { BubbleMenu, Editor } from '@tiptap/react'
-import { Bold, Italic, Strikethrough, Code, ChevronDown } from 'lucide-react'
+import { Bold, Italic, Strikethrough, Code, ChevronDown, AlignLeft, AlignCenter, AlignRight } from 'lucide-react'
+import TextAlign from '@tiptap/extension-text-align'
 import {
   Popover,
   PopoverContent,
@@ -20,6 +21,7 @@ import {
 } from "@/components/ui/popover"
 import { Separator } from "@/components/ui/separator"
 import { SettingsDialog } from './settings-dialog'
+import { useState } from 'react'
 
 interface BubbleMenuProps {
   editor: Editor
@@ -48,8 +50,6 @@ const MenuButton = ({
 
 const colors = [
   { name: 'Default', color: 'currentColor' },
-  { name: 'Black', color: '#000000' },
-  { name: 'White', color: '#ffffff' },
   { name: 'Purple', color: '#9333ea' },
   { name: 'Red', color: '#e11d48' },
   { name: 'Yellow', color: '#eab308' },
@@ -57,7 +57,9 @@ const colors = [
   { name: 'Green', color: '#16a34a' },
   { name: 'Orange', color: '#ea580c' },
   { name: 'Pink', color: '#db2777' },
+  { name: 'White', color: '#ffffff' },
   { name: 'Gray', color: '#a8a29e' },
+  { name: 'Black', color: '#000000' },
 ]
 
 const highlights = [
@@ -147,6 +149,37 @@ function ColorSelector({ editor }: { editor: Editor }) {
   )
 }
 
+function AlignmentSelector({ editor }: { editor: Editor }) {
+  const alignments = [
+    { name: 'Left', value: 'left', icon: <AlignLeft className="h-4 w-4" /> },
+    { name: 'Center', value: 'center', icon: <AlignCenter className="h-4 w-4" /> },
+    { name: 'Right', value: 'right', icon: <AlignRight className="h-4 w-4" /> },
+  ]
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button className="p-2 rounded-lg text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground flex items-center gap-1">
+          {<AlignLeft className="h-4 w-4" />} {/* Just an icon placeholder */}
+          <ChevronDown className="h-3 w-3" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="my-1 w-32 p-1 flex flex-col gap-1" align="start">
+        {alignments.map(({ name, value, icon }, i) => (
+          <button
+            key={i}
+            onClick={() => editor.chain().focus().setTextAlign(value).run()}
+            className="flex items-center gap-2 px-2 py-1 text-sm hover:bg-accent"
+          >
+            {icon}
+            <span>{name}</span>
+          </button>
+        ))}
+      </PopoverContent>
+    </Popover>
+  )
+}
+
 export function FormattingMenu({ editor }: BubbleMenuProps) {
   if (!editor) return null
 
@@ -187,11 +220,21 @@ export function FormattingMenu({ editor }: BubbleMenuProps) {
       <Separator orientation="vertical" className="mx-1 h-6" />
       
       <ColorSelector editor={editor} />
+      <Separator orientation="vertical" className="mx-1 h-6" />
+      <AlignmentSelector editor={editor} />
     </BubbleMenu>
   )
 }
 
+const editorWidths = {
+  default: 'max-w-3xl',
+  wide: 'max-w-5xl',
+  ultraWide: 'max-w-full'
+} as const
+
 export default function Page() {
+  const [editorWidth, setEditorWidth] = useState<keyof typeof editorWidths>('default')
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -225,6 +268,9 @@ export default function Page() {
         },
         includeChildren: true,
       }),
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+      }),
     ],
     editorProps: {
       attributes: {
@@ -235,11 +281,11 @@ export default function Page() {
 
   return (
     <main className="relative min-h-screen bg-background">
-      <div className="mx-auto max-w-2xl p-12">
+      <div className={`mx-auto ${editorWidths[editorWidth]} p-12`}>
         {editor && <FormattingMenu editor={editor} />}
         <EditorContent editor={editor} />
         <div className="fixed bottom-4 right-4">
-          <SettingsDialog />
+          <SettingsDialog onWidthChange={setEditorWidth} />
         </div>
       </div>
     </main>

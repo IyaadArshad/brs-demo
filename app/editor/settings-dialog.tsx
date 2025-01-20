@@ -18,8 +18,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { useState } from 'react'
 
-export function SettingsDialog() {
+const editorWidths = {
+  default: 'max-w-2xl', // current width
+  wide: 'max-w-[70%]',
+  ultraWide: 'max-w-[90%]',
+}
+
+type EditorWidth = keyof typeof editorWidths
+
+export function SettingsDialog({ 
+  onWidthChange 
+}: { 
+  onWidthChange: (width: EditorWidth) => void 
+}) {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -37,7 +50,19 @@ export function SettingsDialog() {
         </DialogHeader>
         <ScrollArea className="h-[400px] pr-4">
           <div className="space-y-6 py-4">
-            {/* Add other settings here */}
+            <div className="space-y-2">
+              <Label>Editor Width</Label>
+              <Select onValueChange={(value: EditorWidth) => onWidthChange(value)} defaultValue="default">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select width" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="default">Default</SelectItem>
+                  <SelectItem value="wide">Wide</SelectItem>
+                  <SelectItem value="ultraWide">Ultra Wide</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </ScrollArea>
       </DialogContent>
