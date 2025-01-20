@@ -277,6 +277,9 @@ export default function Page() {
         class: 'prose prose-stone dark:prose-invert focus:outline-none max-w-full prose-headings:mb-4 prose-headings:mt-6',
       },
     },
+    onUpdate: ({ editor }) => {
+      console.log(editor.storage.markdown.getMarkdown())
+    }
   })
 
   return (
