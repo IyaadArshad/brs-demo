@@ -180,7 +180,7 @@ function AlignmentSelector({ editor }: { editor: Editor }) {
   )
 }
 
-export function FormattingMenu({ editor }: BubbleMenuProps) {
+function FormattingMenu({ editor }: BubbleMenuProps) {
   if (!editor) return null
 
   return (
