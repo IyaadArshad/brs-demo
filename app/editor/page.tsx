@@ -279,7 +279,8 @@ export default function Page() {
     },
     onUpdate: ({ editor }) => {
       console.log(editor.storage.markdown.getMarkdown())
-    }
+    },
+    immediatelyRender: false
   })
 
   return (
