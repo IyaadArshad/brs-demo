@@ -31,11 +31,11 @@ const developmentNotes = `
 - Text alignment options
 
 ## To Do
-- [ ] Add image support
-- [ ] Add table support
-- [ ] Add link support
-- [ ] Add more formatting options
-- [ ] Add export options
+- Add image support
+- Add table support
+- Add link support
+- Add more formatting options
+- Add export options
 
 ## Known Issues
 - Highlighting or changing text color does not save to the markdown file itself.
