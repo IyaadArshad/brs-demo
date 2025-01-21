@@ -477,3 +477,38 @@ ul[data-type="taskList"] li[data-checked="true"] > div > p {
   transition: background-color 0.2s ease;
 }
 
+/* Update the task list styles for better alignment */
+ul[data-type="taskList"] {
+  list-style: none;
+  padding: 0;
+}
+
+ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  margin: 0.5em 0;
+}
+
+ul[data-type="taskList"] li > label {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  padding-top: 4px;
+}
+
+ul[data-type="taskList"] li > div {
+  margin: 0;
+  display: flex;
+  flex: 1;
+}
+
+ul[data-type="taskList"] li > div > p {
+  margin: 0;
+}
+
+ul[data-type="taskList"] li > label input[type="checkbox"] {
+  margin: 0 0.5em 0 0;
+  position: relative;
+  top: -1px;
+}
+

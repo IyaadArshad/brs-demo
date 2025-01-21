@@ -22,6 +22,8 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { SettingsDialog } from './settings-dialog'
 import { useState } from 'react'
+import { TaskList } from '@tiptap/extension-task-list'
+import { TaskItem } from '@tiptap/extension-task-item'
 
 interface BubbleMenuProps {
   editor: Editor
@@ -248,10 +250,14 @@ export default function Page() {
       }),
       TextStyle,
       Color,
+      TaskList,
+      TaskItem.configure({
+        nested: true,
+      }),
       Highlight.configure({
         multicolor: true,
         HTMLAttributes: {
-          class: 'rounded-md px-1 py-0.5',
+          class: "rounded-md px-1 py-0.5",
         },
       }),
       Markdown.configure({
@@ -261,27 +267,28 @@ export default function Page() {
       }),
       Placeholder.configure({
         placeholder: ({ node }) => {
-          if (node.type.name === 'heading') {
-            return `Heading ${node.attrs.level}`
+          if (node.type.name === "heading") {
+            return `Heading ${node.attrs.level}`;
           }
-          return 'Start writing...'
+          return "Start writing...";
         },
         includeChildren: true,
       }),
       TextAlign.configure({
-        types: ['heading', 'paragraph'],
+        types: ["heading", "paragraph"],
       }),
     ],
     editorProps: {
       attributes: {
-        class: 'prose prose-stone dark:prose-invert focus:outline-none max-w-full prose-headings:mb-4 prose-headings:mt-6',
+        class:
+          "prose prose-stone dark:prose-invert focus:outline-none max-w-full prose-headings:mb-4 prose-headings:mt-6 [&_ul[data-type='taskList']]:list-none",
       },
     },
     onUpdate: ({ editor }) => {
-      console.log(editor.storage.markdown.getMarkdown())
+      console.log(editor.storage.markdown.getMarkdown());
     },
-    immediatelyRender: false
-  })
+    immediatelyRender: false,
+  });
 
   return (
     <main className="relative min-h-screen bg-background">
