@@ -522,6 +522,19 @@ function AlignmentSelector({ editor }: { editor: Editor }) {
   );
 }
 
+function ImageBubbleMenu({ editor }: BubbleMenuProps) {
+  return (
+    <BubbleMenu 
+      editor={editor}
+      tippyOptions={{ duration: 100 }}
+      shouldShow={({ editor }) => editor.isActive('image')}
+      className="flex items-center gap-1 overflow-hidden rounded-lg border bg-background shadow-md p-1"
+    >
+      <AlignmentSelector editor={editor} />
+    </BubbleMenu>
+  );
+}
+
 function FormattingMenu({ editor }: BubbleMenuProps) {
   if (!editor) return null;
 
@@ -604,73 +617,77 @@ function FormattingMenu({ editor }: BubbleMenuProps) {
   ];
 
   return (
-    <BubbleMenu
-      editor={editor}
-      tippyOptions={{ duration: 100 }}
-      className="flex items-center gap-1 overflow-hidden rounded-lg border bg-background shadow-md p-1"
-    >
-      <Popover>
-        <PopoverTrigger asChild>
-          <button className="flex items-center gap-1 p-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-lg">
-            <span>{getCurrentNodeType()}</span>
-            <ChevronDown className="h-3 w-3" />
-          </button>
-        </PopoverTrigger>
-        <PopoverContent className="w-48 p-1 mt-1" sideOffset={5}>
-          {componentTypes.map((type, index) => (
-            <button
-              key={index}
-              onClick={type.action}
-              className="flex items-center justify-between w-full px-2 py-1 text-sm hover:bg-accent rounded-lg"
-            >
-              <div className="flex items-center gap-2">
-                <div className="p-1 rounded border">{type.icon}</div>
-                <span>{type.name}</span>
-              </div>
-              {getCurrentNodeType() === type.name && (
-                <Check className="h-4 w-4" />
-              )}
+    <>
+      <BubbleMenu 
+        editor={editor}
+        tippyOptions={{ duration: 100 }}
+        shouldShow={({ editor }) => !editor.isActive('image')}
+        className="flex items-center gap-1 overflow-hidden rounded-lg border bg-background shadow-md p-1"
+      >
+        <Popover>
+          <PopoverTrigger asChild>
+            <button className="flex items-center gap-1 p-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-lg">
+              <span>{getCurrentNodeType()}</span>
+              <ChevronDown className="h-3 w-3" />
             </button>
-          ))}
-        </PopoverContent>
-      </Popover>
+          </PopoverTrigger>
+          <PopoverContent className="w-48 p-1 mt-1" sideOffset={5}>
+            {componentTypes.map((type, index) => (
+              <button
+                key={index}
+                onClick={type.action}
+                className="flex items-center justify-between w-full px-2 py-1 text-sm hover:bg-accent rounded-lg"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="p-1 rounded border">{type.icon}</div>
+                  <span>{type.name}</span>
+                </div>
+                {getCurrentNodeType() === type.name && (
+                  <Check className="h-4 w-4" />
+                )}
+              </button>
+            ))}
+          </PopoverContent>
+        </Popover>
 
-      <Separator orientation="vertical" className="mx-1 h-6" />
+        <Separator orientation="vertical" className="mx-1 h-6" />
 
-      <MenuButton
-        onClick={() => editor.chain().focus().toggleBold().run()}
-        isActive={editor.isActive("bold")}
-      >
-        <Bold className="h-4 w-4" />
-      </MenuButton>
+        <MenuButton
+          onClick={() => editor.chain().focus().toggleBold().run()}
+          isActive={editor.isActive("bold")}
+        >
+          <Bold className="h-4 w-4" />
+        </MenuButton>
 
-      <MenuButton
-        onClick={() => editor.chain().focus().toggleItalic().run()}
-        isActive={editor.isActive("italic")}
-      >
-        <Italic className="h-4 w-4" />
-      </MenuButton>
+        <MenuButton
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+          isActive={editor.isActive("italic")}
+        >
+          <Italic className="h-4 w-4" />
+        </MenuButton>
 
-      <MenuButton
-        onClick={() => editor.chain().focus().toggleStrike().run()}
-        isActive={editor.isActive("strike")}
-      >
-        <Strikethrough className="h-4 w-4" />
-      </MenuButton>
+        <MenuButton
+          onClick={() => editor.chain().focus().toggleStrike().run()}
+          isActive={editor.isActive("strike")}
+        >
+          <Strikethrough className="h-4 w-4" />
+        </MenuButton>
 
-      <MenuButton
-        onClick={() => editor.chain().focus().toggleCode().run()}
-        isActive={editor.isActive("code")}
-      >
-        <Code className="h-4 w-4" />
-      </MenuButton>
+        <MenuButton
+          onClick={() => editor.chain().focus().toggleCode().run()}
+          isActive={editor.isActive("code")}
+        >
+          <Code className="h-4 w-4" />
+        </MenuButton>
 
-      <Separator orientation="vertical" className="mx-1 h-6" />
+        <Separator orientation="vertical" className="mx-1 h-6" />
 
-      <ColorSelector editor={editor} />
-      <Separator orientation="vertical" className="mx-1 h-6" />
-      <AlignmentSelector editor={editor} />
-    </BubbleMenu>
+        <ColorSelector editor={editor} />
+        <Separator orientation="vertical" className="mx-1 h-6" />
+        <AlignmentSelector editor={editor} />
+      </BubbleMenu>
+      <ImageBubbleMenu editor={editor} />
+    </>
   );
 }
 
