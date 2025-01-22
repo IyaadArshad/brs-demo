@@ -28,6 +28,7 @@ import {
   Text,
   Table as TableIcon,
   Pilcrow,
+  Image as ImageIcon,
 } from "lucide-react";
 import TextAlign from "@tiptap/extension-text-align";
 import {
@@ -46,6 +47,8 @@ import TableHeader from "@tiptap/extension-table-header";
 import TableCell from "@tiptap/extension-table-cell";
 import * as Dialog from "@radix-ui/react-dialog";
 import { cn } from "@/lib/utils";
+import Image from "@tiptap/extension-image";
+import { v4 as uuidv4 } from 'uuid'; // Add import for unique IDs
 
 interface CommandPaletteProps {
   editor: Editor;
@@ -123,6 +126,92 @@ const visibleCommands = [
         .focus()
         .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
         .run(),
+  },
+  {
+    title: "Upload Image",
+    description: "Insert an image from your device",
+    icon: <ImageIcon className="h-6 w-6" />,
+    command: async (editor: Editor) => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      
+      input.onchange = async () => {
+        const file = input.files?.[0];
+        if (!file) return;
+
+        // Create a temporary URL for the skeleton
+        const tempUrl = URL.createObjectURL(file);
+        const img = new window.Image();
+        
+        img.onload = async () => {
+          const tempId = uuidv4();
+          
+          // Insert skeleton with actual dimensions
+          editor.chain().focus().insertContent([
+            {
+              type: 'image',
+              attrs: {
+                src: tempUrl,
+                alt: file.name,
+                'data-temp-id': tempId,
+                width: img.naturalWidth,
+                height: img.naturalHeight,
+                class: 'skeleton',
+              },
+            },
+            { type: 'paragraph' }
+          ]).run();
+
+          const formData = new FormData();
+          formData.append('image', file);
+
+          try {
+            const response = await fetch('/api/editor/uploadImage', {
+              method: 'POST',
+              body: formData,
+            });
+
+            const data = await response.json();
+            if (data.url) {
+              // Replace skeleton with actual image
+              editor.chain().focus().command(({ tr, state }) => {
+                state.doc.descendants((node, pos) => {
+                  if (node.type.name === 'image' && node.attrs['data-temp-id'] === tempId) {
+                    tr.setNodeMarkup(pos, undefined, {
+                      ...node.attrs,
+                      src: data.url,
+                      class: undefined,
+                      'data-temp-id': undefined,
+                    });
+                    return false;
+                  }
+                });
+                return true;
+              }).run();
+            }
+          } catch (error) {
+            console.error('Error uploading image:', error);
+            // Remove failed upload
+            editor.chain().focus().command(({ tr, state }) => {
+              state.doc.descendants((node, pos) => {
+                if (node.type.name === 'image' && node.attrs['data-temp-id'] === tempId) {
+                  tr.delete(pos, pos + node.nodeSize);
+                  return false;
+                }
+              });
+              return true;
+            }).run();
+          } finally {
+            URL.revokeObjectURL(tempUrl);
+          }
+        };
+
+        img.src = tempUrl;
+      };
+
+      input.click();
+    },
   },
 ];
 
@@ -656,6 +745,7 @@ export default function Page() {
           class: "border border-gray-200 dark:border-gray-700 p-3",
         },
       }),
+      Image,
     ],
     editorProps: {
       attributes: {
