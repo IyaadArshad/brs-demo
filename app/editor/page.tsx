@@ -27,6 +27,7 @@ import {
   Heading3,
   Text,
   Table as TableIcon,
+  Pilcrow,
 } from "lucide-react";
 import TextAlign from "@tiptap/extension-text-align";
 import {
@@ -53,68 +54,68 @@ interface CommandPaletteProps {
 // Split commands into visible and hidden
 const visibleCommands = [
   {
-    title: "Text",
-    description: "Just start typing with plain text",
-    icon: <Text className="h-6 w-6" />,
+    title: "Paragraph",
+    description: "Begin with a clean paragraph structure for your text.",
+    icon: <Pilcrow className="h-6 w-6" />,
     command: (editor: Editor) => editor.chain().focus().setParagraph().run(),
   },
   {
     title: "Heading 1",
-    description: "Large section heading",
+    description: "Create a primary heading to define main sections.",
     icon: <Heading1 className="h-6 w-6" />,
     command: (editor: Editor) =>
       editor.chain().focus().toggleHeading({ level: 1 }).run(),
   },
   {
     title: "Heading 2",
-    description: "Medium section heading",
+    description: "Insert a subheading for organizing subsections.",
     icon: <Heading2 className="h-6 w-6" />,
     command: (editor: Editor) =>
       editor.chain().focus().toggleHeading({ level: 2 }).run(),
   },
   {
     title: "Heading 3",
-    description: "Small section heading",
+    description: "Use a third-level heading for detailed subsections.",
     icon: <Heading3 className="h-6 w-6" />,
     command: (editor: Editor) =>
       editor.chain().focus().toggleHeading({ level: 3 }).run(),
   },
   {
     title: "Bullet List",
-    description: "Create a simple bullet list",
+    description: "Generate a bullet-point list for unordered items.",
     icon: <List className="h-6 w-6" />,
     command: (editor: Editor) =>
       editor.chain().focus().toggleBulletList().run(),
   },
   {
     title: "Numbered List",
-    description: "Create a numbered list",
+    description: "Generate a numbered list to organize items sequentially.",
     icon: <ListOrdered className="h-6 w-6" />,
     command: (editor: Editor) =>
       editor.chain().focus().toggleOrderedList().run(),
   },
   {
     title: "Task List",
-    description: "Create a task list",
+    description: "Build a to-do list to manage and track your tasks.",
     icon: <List className="h-6 w-6" />,
     command: (editor: Editor) => editor.chain().focus().toggleTaskList().run(),
   },
   {
     title: "Quote",
-    description: "Add a quote block",
+    description: "Insert a blockquote to emphasize important quotes.",
     icon: <TextQuote className="h-6 w-6" />,
     command: (editor: Editor) =>
       editor.chain().focus().toggleBlockquote().run(),
   },
   {
     title: "Code Block",
-    description: "Add a code block",
+    description: "Add a code block to showcase code snippets clearly.",
     icon: <Code className="h-6 w-6" />,
     command: (editor: Editor) => editor.chain().focus().toggleCodeBlock().run(),
   },
   {
     title: "Table",
-    description: "Add a table",
+    description: "Create a table to neatly organize and display your data.",
     icon: <TableIcon className="h-6 w-6" />,
     command: (editor: Editor) =>
       editor
@@ -128,19 +129,19 @@ const visibleCommands = [
 const hiddenCommands = [
   {
     title: "Heading 4",
-    description: "Smaller section heading",
+    description: "Subsection heading for detailed content.",
     icon: <Heading3 className="h-6 w-6 scale-90" />,
     command: (editor: Editor) => editor.chain().focus().toggleHeading({ level: 4 }).run(),
   },
   {
     title: "Heading 5",
-    description: "Tiny section heading",
+    description: "Minor heading for specific topics.",
     icon: <Heading3 className="h-6 w-6 scale-75" />,
     command: (editor: Editor) => editor.chain().focus().toggleHeading({ level: 5 }).run(),
   },
   {
     title: "Heading 6",
-    description: "Smallest section heading",
+    description: "Fine-grained heading for detailed breakdowns.",
     icon: <Heading3 className="h-6 w-6 scale-[0.65]" />,
     command: (editor: Editor) => editor.chain().focus().toggleHeading({ level: 6 }).run(),
   },
@@ -447,13 +448,13 @@ function FormattingMenu({ editor }: BubbleMenuProps) {
     if (editor.isActive("orderedList")) return "Numbered List";
     if (editor.isActive("blockquote")) return "Quote";
     if (editor.isActive("codeBlock")) return "Code Block";
-    return "Text";
+    return "Paragraph";
   };
 
   const componentTypes = [
     {
-      name: "Text",
-      icon: <Text className="h-4 w-4" />,
+      name: "Paragraph",
+      icon: <Pilcrow className="h-4 w-4" />,
       action: () => editor.chain().focus().setParagraph().run(),
     },
     {
