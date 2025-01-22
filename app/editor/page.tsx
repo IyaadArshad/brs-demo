@@ -225,7 +225,7 @@ function CommandPalette({ editor }: CommandPaletteProps) {
           <div className="bg-background rounded-lg border shadow-2xl overflow-hidden">
             <input
               className="w-full px-4 py-4 outline-none bg-background text-foreground border-b"
-              placeholder="Search commands..."
+              placeholder="Search components..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               autoFocus
@@ -627,7 +627,7 @@ export default function Page() {
           if (node.type.name === "heading") {
             return `Heading ${node.attrs.level}`;
           }
-          return "Start writing...";
+          return "Start writing, or search components...";
         },
         includeChildren: true,
       }),
