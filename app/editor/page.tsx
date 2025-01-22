@@ -1,32 +1,265 @@
-'use client'
+"use client";
 
-import * as React from 'react'
-import { useEditor, EditorContent } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
-import Placeholder from '@tiptap/extension-placeholder'
-import { useTheme } from 'next-themes'
-import { Button } from '@/components/ui/button'
-import { Moon, Sun } from 'lucide-react'
-import { Markdown } from 'tiptap-markdown'
-import TextStyle from '@tiptap/extension-text-style'
-import { Color } from '@tiptap/extension-color'
-import { Highlight } from '@tiptap/extension-highlight'
-import { BubbleMenu, Editor } from '@tiptap/react'
-import { Bold, Italic, Strikethrough, Code, ChevronDown, AlignLeft, AlignCenter, AlignRight, Check, TextQuote, List, ListOrdered, Heading1, Heading2, Heading3, Text } from 'lucide-react'
-import TextAlign from '@tiptap/extension-text-align'
+import * as React from "react";
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Placeholder from "@tiptap/extension-placeholder";
+import { Markdown } from "tiptap-markdown";
+import TextStyle from "@tiptap/extension-text-style";
+import { Color } from "@tiptap/extension-color";
+import { Highlight } from "@tiptap/extension-highlight";
+import { BubbleMenu, Editor } from "@tiptap/react";
+import {
+  Bold,
+  Italic,
+  Strikethrough,
+  Code,
+  ChevronDown,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Check,
+  TextQuote,
+  List,
+  ListOrdered,
+  Heading1,
+  Heading2,
+  Heading3,
+  Text,
+  Table as TableIcon,
+} from "lucide-react";
+import TextAlign from "@tiptap/extension-text-align";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
-import { Separator } from "@/components/ui/separator"
-import { SettingsDialog } from './settings-dialog'
-import { useState } from 'react'
-import { TaskList } from '@tiptap/extension-task-list'
-import { TaskItem } from '@tiptap/extension-task-item'
+} from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
+import { SettingsDialog } from "./settings-dialog";
+import { useState, useCallback, useEffect } from "react";
+import { TaskList } from "@tiptap/extension-task-list";
+import { TaskItem } from "@tiptap/extension-task-item";
+import Table from "@tiptap/extension-table";
+import TableRow from "@tiptap/extension-table-row";
+import TableHeader from "@tiptap/extension-table-header";
+import TableCell from "@tiptap/extension-table-cell";
+import * as Dialog from "@radix-ui/react-dialog";
+import { cn } from "@/lib/utils";
+
+interface CommandPaletteProps {
+  editor: Editor;
+}
+
+const commands = [
+  {
+    title: "Text",
+    description: "Just start typing with plain text",
+    icon: <Text className="h-6 w-6" />,
+    command: (editor: Editor) => editor.chain().focus().setParagraph().run(),
+  },
+  {
+    title: "Heading 1",
+    description: "Large section heading",
+    icon: <Heading1 className="h-6 w-6" />,
+    command: (editor: Editor) =>
+      editor.chain().focus().toggleHeading({ level: 1 }).run(),
+  },
+  {
+    title: "Heading 2",
+    description: "Medium section heading",
+    icon: <Heading2 className="h-6 w-6" />,
+    command: (editor: Editor) =>
+      editor.chain().focus().toggleHeading({ level: 2 }).run(),
+  },
+  {
+    title: "Heading 3",
+    description: "Small section heading",
+    icon: <Heading3 className="h-6 w-6" />,
+    command: (editor: Editor) =>
+      editor.chain().focus().toggleHeading({ level: 3 }).run(),
+  },
+  {
+    title: "Heading 4",
+    description: "Smaller section heading",
+    icon: <Heading3 className="h-6 w-6 scale-90" />,
+    command: (editor: Editor) => editor.chain().focus().toggleHeading({ level: 4 }).run(),
+  },
+  {
+    title: "Heading 5",
+    description: "Tiny section heading",
+    icon: <Heading3 className="h-6 w-6 scale-75" />,
+    command: (editor: Editor) => editor.chain().focus().toggleHeading({ level: 5 }).run(),
+  },
+  {
+    title: "Heading 6",
+    description: "Smallest section heading",
+    icon: <Heading3 className="h-6 w-6 scale-[0.65]" />,
+    command: (editor: Editor) => editor.chain().focus().toggleHeading({ level: 6 }).run(),
+  },
+  {
+    title: "Bullet List",
+    description: "Create a simple bullet list",
+    icon: <List className="h-6 w-6" />,
+    command: (editor: Editor) =>
+      editor.chain().focus().toggleBulletList().run(),
+  },
+  {
+    title: "Numbered List",
+    description: "Create a numbered list",
+    icon: <ListOrdered className="h-6 w-6" />,
+    command: (editor: Editor) =>
+      editor.chain().focus().toggleOrderedList().run(),
+  },
+  {
+    title: "Task List",
+    description: "Create a task list",
+    icon: <List className="h-6 w-6" />,
+    command: (editor: Editor) => editor.chain().focus().toggleTaskList().run(),
+  },
+  {
+    title: "Quote",
+    description: "Add a quote block",
+    icon: <TextQuote className="h-6 w-6" />,
+    command: (editor: Editor) =>
+      editor.chain().focus().toggleBlockquote().run(),
+  },
+  {
+    title: "Code Block",
+    description: "Add a code block",
+    icon: <Code className="h-6 w-6" />,
+    command: (editor: Editor) => editor.chain().focus().toggleCodeBlock().run(),
+  },
+  {
+    title: "Table",
+    description: "Add a table",
+    icon: <TableIcon className="h-6 w-6" />,
+    command: (editor: Editor) =>
+      editor
+        .chain()
+        .focus()
+        .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+        .run(),
+  },
+];
+
+function CommandPalette({ editor }: CommandPaletteProps) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const selectedRef = React.useRef<HTMLButtonElement>(null);
+
+  // Add this effect to handle scrolling
+  React.useEffect(() => {
+    if (selectedRef.current && containerRef.current) {
+      const container = containerRef.current;
+      const element = selectedRef.current;
+
+      const elementRect = element.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+
+      const isAbove = elementRect.top < containerRect.top;
+      const isBelow = elementRect.bottom > containerRect.bottom;
+
+      if (isAbove) {
+        element.scrollIntoView({ block: "nearest" });
+      }
+      if (isBelow) {
+        element.scrollIntoView({ block: "nearest" });
+      }
+    }
+  }, [selectedIndex]);
+
+  const filteredCommands = commands.filter(
+    (command) =>
+      command.title.toLowerCase().includes(search.toLowerCase()) ||
+      command.description.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const onKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.ctrlKey && e.key === "i") {
+      e.preventDefault();
+      setOpen(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [onKeyDown]);
+
+  return (
+    <Dialog.Root open={open} onOpenChange={setOpen}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm animate-fade-in" />
+        <Dialog.Content
+          className="fixed top-[20%] left-1/2 -translate-x-1/2 w-full max-w-[650px] animate-scale-in"
+          onKeyDown={(e) => {
+            if (e.key === "ArrowDown") {
+              e.preventDefault();
+              setSelectedIndex((prev) => (prev + 1) % filteredCommands.length);
+            } else if (e.key === "ArrowUp") {
+              e.preventDefault();
+              setSelectedIndex(
+                (prev) =>
+                  (prev - 1 + filteredCommands.length) % filteredCommands.length
+              );
+            } else if (e.key === "Enter") {
+              e.preventDefault();
+              const command = filteredCommands[selectedIndex];
+              if (command) {
+                command.command(editor);
+                setOpen(false);
+              }
+            }
+          }}
+        >
+          <div className="bg-background rounded-lg border shadow-2xl overflow-hidden">
+            <input
+              className="w-full px-4 py-4 outline-none bg-background text-foreground border-b"
+              placeholder="Search commands..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              autoFocus
+            />
+            <div
+              className="max-h-[400px] overflow-y-auto scroll-smooth"
+              ref={containerRef}
+            >
+              {filteredCommands.map((command, index) => (
+                <button
+                  key={command.title}
+                  ref={index === selectedIndex ? selectedRef : null}
+                  className={cn(
+                    "w-full flex items-center gap-3 px-4 py-3 text-left",
+                    index === selectedIndex ? "bg-accent" : "hover:bg-accent/50"
+                  )}
+                  onClick={() => {
+                    command.command(editor);
+                    setOpen(false);
+                  }}
+                >
+                  <div className="p-1 rounded-md border bg-background">
+                    {command.icon}
+                  </div>
+                  <div>
+                    <div className="font-medium">{command.title}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {command.description}
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
 
 interface BubbleMenuProps {
-  editor: Editor
+  editor: Editor;
 }
 
 const MenuButton = ({
@@ -34,65 +267,65 @@ const MenuButton = ({
   isActive,
   children,
 }: {
-  onClick: () => void
-  isActive: boolean
-  children: React.ReactNode
+  onClick: () => void;
+  isActive: boolean;
+  children: React.ReactNode;
 }) => (
   <button
     onClick={onClick}
     className={`p-2 rounded-lg text-sm ${
-      isActive 
-        ? 'bg-accent text-accent-foreground' 
-        : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+      isActive
+        ? "bg-accent text-accent-foreground"
+        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
     }`}
   >
     {children}
   </button>
-)
+);
 
 const colors = [
-  { name: 'Default', color: 'currentColor' },
-  { name: 'Purple', color: '#9333ea' },
-  { name: 'Red', color: '#e11d48' },
-  { name: 'Yellow', color: '#eab308' },
-  { name: 'Blue', color: '#2563eb' },
-  { name: 'Green', color: '#16a34a' },
-  { name: 'Orange', color: '#ea580c' },
-  { name: 'Pink', color: '#db2777' },
-  { name: 'White', color: '#ffffff' },
-  { name: 'Gray', color: '#a8a29e' },
-  { name: 'Black', color: '#000000' },
-]
+  { name: "Default", color: "currentColor" },
+  { name: "Purple", color: "#9333ea" },
+  { name: "Red", color: "#e11d48" },
+  { name: "Yellow", color: "#eab308" },
+  { name: "Blue", color: "#2563eb" },
+  { name: "Green", color: "#16a34a" },
+  { name: "Orange", color: "#ea580c" },
+  { name: "Pink", color: "#db2777" },
+  { name: "White", color: "#ffffff" },
+  { name: "Gray", color: "#a8a29e" },
+  { name: "Black", color: "#000000" },
+];
 
 const highlights = [
-  { name: 'Default', color: 'var(--novel-highlight-default)' },
-  { name: 'Purple', color: 'var(--novel-highlight-purple)' },
-  { name: 'Red', color: 'var(--novel-highlight-red)' },
-  { name: 'Yellow', color: 'var(--novel-highlight-yellow)' },
-  { name: 'Blue', color: 'var(--novel-highlight-blue)' },
-  { name: 'Green', color: 'var(--novel-highlight-green)' },
-  { name: 'Orange', color: 'var(--novel-highlight-orange)' },
-  { name: 'Pink', color: 'var(--novel-highlight-pink)' },
-  { name: 'Gray', color: 'var(--novel-highlight-gray)' },
-]
+  { name: "Default", color: "var(--novel-highlight-default)" },
+  { name: "Purple", color: "var(--novel-highlight-purple)" },
+  { name: "Red", color: "var(--novel-highlight-red)" },
+  { name: "Yellow", color: "var(--novel-highlight-yellow)" },
+  { name: "Blue", color: "var(--novel-highlight-blue)" },
+  { name: "Green", color: "var(--novel-highlight-green)" },
+  { name: "Orange", color: "var(--novel-highlight-orange)" },
+  { name: "Pink", color: "var(--novel-highlight-pink)" },
+  { name: "Gray", color: "var(--novel-highlight-gray)" },
+];
 
 function ColorSelector({ editor }: { editor: Editor }) {
-  const activeColor = editor.getAttributes('textStyle').color || 'currentColor'
+  const activeColor = editor.getAttributes("textStyle").color || "currentColor";
 
   return (
     <Popover>
       <PopoverTrigger asChild>
         <button className="flex items-center gap-1 p-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-lg">
-          <span
-            className="text-sm font-medium"
-            style={{ color: activeColor }}
-          >
+          <span className="text-sm font-medium" style={{ color: activeColor }}>
             A
           </span>
           <ChevronDown className="h-3 w-3" />
         </button>
       </PopoverTrigger>
-      <PopoverContent className="my-1 flex max-h-80 w-48 flex-col overflow-hidden overflow-y-auto rounded border p-1 shadow-xl" align="start">
+      <PopoverContent
+        className="my-1 flex max-h-80 w-48 flex-col overflow-hidden overflow-y-auto rounded border p-1 shadow-xl"
+        align="start"
+      >
         <div className="flex flex-col">
           <div className="my-1 px-2 text-sm font-semibold text-muted-foreground">
             Color
@@ -101,16 +334,19 @@ function ColorSelector({ editor }: { editor: Editor }) {
             <div
               key={index}
               onClick={() => {
-                if (name === 'Default') {
-                  editor.chain().focus().unsetColor().run()
+                if (name === "Default") {
+                  editor.chain().focus().unsetColor().run();
                 } else {
-                  editor.chain().focus().setColor(color).run()
+                  editor.chain().focus().setColor(color).run();
                 }
               }}
               className="flex cursor-pointer items-center justify-between px-2 py-1 text-sm hover:bg-accent"
             >
               <div className="flex items-center gap-2">
-                <div className="rounded-sm border px-2 py-px font-medium" style={{ color }}>
+                <div
+                  className="rounded-sm border px-2 py-px font-medium"
+                  style={{ color }}
+                >
                   A
                 </div>
                 <span>{name}</span>
@@ -126,17 +362,17 @@ function ColorSelector({ editor }: { editor: Editor }) {
             <div
               key={index}
               onClick={() => {
-                if (name === 'Default') {
-                  editor.chain().focus().unsetMark('highlight').run()
+                if (name === "Default") {
+                  editor.chain().focus().unsetMark("highlight").run();
                 } else {
-                  editor.chain().focus().setMark('highlight', { color }).run()
+                  editor.chain().focus().setMark("highlight", { color }).run();
                 }
               }}
               className="flex cursor-pointer items-center justify-between px-2 py-1 text-sm hover:bg-accent"
             >
               <div className="flex items-center gap-2">
-                <div 
-                  className="rounded-sm border px-2 py-px font-medium" 
+                <div
+                  className="rounded-sm border px-2 py-px font-medium"
                   style={{ backgroundColor: color }}
                 >
                   A
@@ -148,15 +384,19 @@ function ColorSelector({ editor }: { editor: Editor }) {
         </div>
       </PopoverContent>
     </Popover>
-  )
+  );
 }
 
 function AlignmentSelector({ editor }: { editor: Editor }) {
   const alignments = [
-    { name: 'Left', value: 'left', icon: <AlignLeft className="h-4 w-4" /> },
-    { name: 'Center', value: 'center', icon: <AlignCenter className="h-4 w-4" /> },
-    { name: 'Right', value: 'right', icon: <AlignRight className="h-4 w-4" /> },
-  ]
+    { name: "Left", value: "left", icon: <AlignLeft className="h-4 w-4" /> },
+    {
+      name: "Center",
+      value: "center",
+      icon: <AlignCenter className="h-4 w-4" />,
+    },
+    { name: "Right", value: "right", icon: <AlignRight className="h-4 w-4" /> },
+  ];
 
   return (
     <Popover>
@@ -166,7 +406,10 @@ function AlignmentSelector({ editor }: { editor: Editor }) {
           <ChevronDown className="h-3 w-3" />
         </button>
       </PopoverTrigger>
-      <PopoverContent className="my-1 w-32 p-1 flex flex-col gap-1" align="start">
+      <PopoverContent
+        className="my-1 w-32 p-1 flex flex-col gap-1"
+        align="start"
+      >
         {alignments.map(({ name, value, icon }, i) => (
           <button
             key={i}
@@ -179,38 +422,92 @@ function AlignmentSelector({ editor }: { editor: Editor }) {
         ))}
       </PopoverContent>
     </Popover>
-  )
+  );
 }
 
 function FormattingMenu({ editor }: BubbleMenuProps) {
-  if (!editor) return null
+  if (!editor) return null;
 
   const getCurrentNodeType = () => {
-    if (editor.isActive('heading', { level: 1 })) return 'Heading 1'
-    if (editor.isActive('heading', { level: 2 })) return 'Heading 2'
-    if (editor.isActive('heading', { level: 3 })) return 'Heading 3'
-    if (editor.isActive('taskList')) return 'To-do List'
-    if (editor.isActive('bulletList')) return 'Bullet List'
-    if (editor.isActive('orderedList')) return 'Numbered List'
-    if (editor.isActive('blockquote')) return 'Quote'
-    if (editor.isActive('codeBlock')) return 'Code Block'
-    return 'Text'
-  }
+    if (editor.isActive("heading", { level: 1 })) return "Heading 1";
+    if (editor.isActive("heading", { level: 2 })) return "Heading 2";
+    if (editor.isActive("heading", { level: 3 })) return "Heading 3";
+    if (editor.isActive("heading", { level: 4 })) return "Heading 4";
+    if (editor.isActive("heading", { level: 5 })) return "Heading 5";
+    if (editor.isActive("heading", { level: 6 })) return "Heading 6";
+    if (editor.isActive("taskList")) return "To-do List";
+    if (editor.isActive("bulletList")) return "Bullet List";
+    if (editor.isActive("orderedList")) return "Numbered List";
+    if (editor.isActive("blockquote")) return "Quote";
+    if (editor.isActive("codeBlock")) return "Code Block";
+    return "Text";
+  };
 
   const componentTypes = [
-    { name: 'Text', icon: <Text className="h-4 w-4" />, action: () => editor.chain().focus().setParagraph().run() },
-    { name: 'Heading 1', icon: <Heading1 className="h-4 w-4" />, action: () => editor.chain().focus().toggleHeading({ level: 1 }).run() },
-    { name: 'Heading 2', icon: <Heading2 className="h-4 w-4" />, action: () => editor.chain().focus().toggleHeading({ level: 2 }).run() },
-    { name: 'Heading 3', icon: <Heading3 className="h-4 w-4" />, action: () => editor.chain().focus().toggleHeading({ level: 3 }).run() },
-    { name: 'To-do List', icon: <List className="h-4 w-4" />, action: () => editor.chain().focus().toggleTaskList().run() },
-    { name: 'Bullet List', icon: <List className="h-4 w-4" />, action: () => editor.chain().focus().toggleBulletList().run() },
-    { name: 'Numbered List', icon: <ListOrdered className="h-4 w-4" />, action: () => editor.chain().focus().toggleOrderedList().run() },
-    { name: 'Quote', icon: <TextQuote className="h-4 w-4" />, action: () => editor.chain().focus().toggleBlockquote().run() },
-    { name: 'Code Block', icon: <Code className="h-4 w-4" />, action: () => editor.chain().focus().toggleCodeBlock().run() },
-  ]
+    {
+      name: "Text",
+      icon: <Text className="h-4 w-4" />,
+      action: () => editor.chain().focus().setParagraph().run(),
+    },
+    {
+      name: "Heading 1",
+      icon: <Heading1 className="h-4 w-4" />,
+      action: () => editor.chain().focus().toggleHeading({ level: 1 }).run(),
+    },
+    {
+      name: "Heading 2",
+      icon: <Heading2 className="h-4 w-4" />,
+      action: () => editor.chain().focus().toggleHeading({ level: 2 }).run(),
+    },
+    {
+      name: "Heading 3",
+      icon: <Heading3 className="h-4 w-4" />,
+      action: () => editor.chain().focus().toggleHeading({ level: 3 }).run(),
+    },
+    {
+      name: "Heading 4",
+      icon: <Heading3 className="h-4 w-4 scale-90" />,
+      action: () => editor.chain().focus().toggleHeading({ level: 4 }).run(),
+    },
+    {
+      name: "Heading 5",
+      icon: <Heading3 className="h-4 w-4 scale-75" />,
+      action: () => editor.chain().focus().toggleHeading({ level: 5 }).run(),
+    },
+    {
+      name: "Heading 6",
+      icon: <Heading3 className="h-4 w-4 scale-[0.65]" />,
+      action: () => editor.chain().focus().toggleHeading({ level: 6 }).run(),
+    },
+    {
+      name: "To-do List",
+      icon: <List className="h-4 w-4" />,
+      action: () => editor.chain().focus().toggleTaskList().run(),
+    },
+    {
+      name: "Bullet List",
+      icon: <List className="h-4 w-4" />,
+      action: () => editor.chain().focus().toggleBulletList().run(),
+    },
+    {
+      name: "Numbered List",
+      icon: <ListOrdered className="h-4 w-4" />,
+      action: () => editor.chain().focus().toggleOrderedList().run(),
+    },
+    {
+      name: "Quote",
+      icon: <TextQuote className="h-4 w-4" />,
+      action: () => editor.chain().focus().toggleBlockquote().run(),
+    },
+    {
+      name: "Code Block",
+      icon: <Code className="h-4 w-4" />,
+      action: () => editor.chain().focus().toggleCodeBlock().run(),
+    },
+  ];
 
   return (
-    <BubbleMenu 
+    <BubbleMenu
       editor={editor}
       tippyOptions={{ duration: 100 }}
       className="flex items-center gap-1 overflow-hidden rounded-lg border bg-background shadow-md p-1"
@@ -233,7 +530,9 @@ function FormattingMenu({ editor }: BubbleMenuProps) {
                 <div className="p-1 rounded border">{type.icon}</div>
                 <span>{type.name}</span>
               </div>
-              {getCurrentNodeType() === type.name && <Check className="h-4 w-4" />}
+              {getCurrentNodeType() === type.name && (
+                <Check className="h-4 w-4" />
+              )}
             </button>
           ))}
         </PopoverContent>
@@ -241,57 +540,58 @@ function FormattingMenu({ editor }: BubbleMenuProps) {
 
       <Separator orientation="vertical" className="mx-1 h-6" />
 
-      <MenuButton 
+      <MenuButton
         onClick={() => editor.chain().focus().toggleBold().run()}
-        isActive={editor.isActive('bold')}
+        isActive={editor.isActive("bold")}
       >
         <Bold className="h-4 w-4" />
       </MenuButton>
 
       <MenuButton
         onClick={() => editor.chain().focus().toggleItalic().run()}
-        isActive={editor.isActive('italic')}
+        isActive={editor.isActive("italic")}
       >
         <Italic className="h-4 w-4" />
       </MenuButton>
 
       <MenuButton
         onClick={() => editor.chain().focus().toggleStrike().run()}
-        isActive={editor.isActive('strike')}
+        isActive={editor.isActive("strike")}
       >
         <Strikethrough className="h-4 w-4" />
       </MenuButton>
 
       <MenuButton
         onClick={() => editor.chain().focus().toggleCode().run()}
-        isActive={editor.isActive('code')}
+        isActive={editor.isActive("code")}
       >
         <Code className="h-4 w-4" />
       </MenuButton>
 
       <Separator orientation="vertical" className="mx-1 h-6" />
-      
+
       <ColorSelector editor={editor} />
       <Separator orientation="vertical" className="mx-1 h-6" />
       <AlignmentSelector editor={editor} />
     </BubbleMenu>
-  )
+  );
 }
 
 const editorWidths = {
-  default: 'max-w-3xl',
-  wide: 'max-w-5xl',
-  ultraWide: 'max-w-full'
-} as const
+  default: "max-w-3xl",
+  wide: "max-w-5xl",
+  ultraWide: "max-w-full",
+} as const;
 
 export default function Page() {
-  const [editorWidth, setEditorWidth] = useState<keyof typeof editorWidths>('default')
+  const [editorWidth, setEditorWidth] =
+    useState<keyof typeof editorWidths>("default");
 
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
         heading: {
-          levels: [1, 2, 3],
+          levels: [1, 2, 3, 4, 5, 6],
         },
         bulletList: {},
         orderedList: {},
@@ -326,6 +626,28 @@ export default function Page() {
       TextAlign.configure({
         types: ["heading", "paragraph"],
       }),
+      Table.configure({
+        resizable: true,
+        HTMLAttributes: {
+          class: "border-collapse table-auto w-full",
+        },
+      }),
+      TableRow.configure({
+        HTMLAttributes: {
+          class: "border-b border-gray-200 dark:border-gray-700",
+        },
+      }),
+      TableHeader.configure({
+        HTMLAttributes: {
+          class:
+            "border-b-2 border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 font-bold",
+        },
+      }),
+      TableCell.configure({
+        HTMLAttributes: {
+          class: "border border-gray-200 dark:border-gray-700 p-3",
+        },
+      }),
     ],
     editorProps: {
       attributes: {
@@ -342,13 +664,17 @@ export default function Page() {
   return (
     <main className="relative min-h-screen bg-background">
       <div className={`mx-auto ${editorWidths[editorWidth]} p-12`}>
-        {editor && <FormattingMenu editor={editor} />}
+        {editor && (
+          <>
+            <FormattingMenu editor={editor} />
+            <CommandPalette editor={editor} />
+          </>
+        )}
         <EditorContent editor={editor} />
         <div className="fixed bottom-4 right-4">
           <SettingsDialog onWidthChange={setEditorWidth} />
         </div>
       </div>
     </main>
-  )
+  );
 }
-
