@@ -512,3 +512,24 @@ ul[data-type="taskList"] li > label input[type="checkbox"] {
   top: -1px;
 }
 
+/* Add these styles for quotes and ordered lists */
+.prose blockquote,
+.ProseMirror blockquote {
+  margin: 1.5em 0;
+  padding-left: 1em;
+  border-left: 4px solid hsl(var(--border));
+  font-style: italic;
+}
+
+.prose ol,
+.ProseMirror ol {
+  list-style-type: decimal;
+  padding-left: 1.5em;
+  margin: 0.5em 0;
+}
+
+.prose ol li,
+.ProseMirror ol li {
+  margin: 0.25em 0;
+}
+

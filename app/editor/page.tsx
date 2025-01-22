@@ -12,7 +12,7 @@ import TextStyle from '@tiptap/extension-text-style'
 import { Color } from '@tiptap/extension-color'
 import { Highlight } from '@tiptap/extension-highlight'
 import { BubbleMenu, Editor } from '@tiptap/react'
-import { Bold, Italic, Strikethrough, Code, ChevronDown, AlignLeft, AlignCenter, AlignRight } from 'lucide-react'
+import { Bold, Italic, Strikethrough, Code, ChevronDown, AlignLeft, AlignCenter, AlignRight, Check, TextQuote, List, ListOrdered, Heading1, Heading2, Heading3, Text } from 'lucide-react'
 import TextAlign from '@tiptap/extension-text-align'
 import {
   Popover,
@@ -185,12 +185,62 @@ function AlignmentSelector({ editor }: { editor: Editor }) {
 function FormattingMenu({ editor }: BubbleMenuProps) {
   if (!editor) return null
 
+  const getCurrentNodeType = () => {
+    if (editor.isActive('heading', { level: 1 })) return 'Heading 1'
+    if (editor.isActive('heading', { level: 2 })) return 'Heading 2'
+    if (editor.isActive('heading', { level: 3 })) return 'Heading 3'
+    if (editor.isActive('taskList')) return 'To-do List'
+    if (editor.isActive('bulletList')) return 'Bullet List'
+    if (editor.isActive('orderedList')) return 'Numbered List'
+    if (editor.isActive('blockquote')) return 'Quote'
+    if (editor.isActive('codeBlock')) return 'Code Block'
+    return 'Text'
+  }
+
+  const componentTypes = [
+    { name: 'Text', icon: <Text className="h-4 w-4" />, action: () => editor.chain().focus().setParagraph().run() },
+    { name: 'Heading 1', icon: <Heading1 className="h-4 w-4" />, action: () => editor.chain().focus().toggleHeading({ level: 1 }).run() },
+    { name: 'Heading 2', icon: <Heading2 className="h-4 w-4" />, action: () => editor.chain().focus().toggleHeading({ level: 2 }).run() },
+    { name: 'Heading 3', icon: <Heading3 className="h-4 w-4" />, action: () => editor.chain().focus().toggleHeading({ level: 3 }).run() },
+    { name: 'To-do List', icon: <List className="h-4 w-4" />, action: () => editor.chain().focus().toggleTaskList().run() },
+    { name: 'Bullet List', icon: <List className="h-4 w-4" />, action: () => editor.chain().focus().toggleBulletList().run() },
+    { name: 'Numbered List', icon: <ListOrdered className="h-4 w-4" />, action: () => editor.chain().focus().toggleOrderedList().run() },
+    { name: 'Quote', icon: <TextQuote className="h-4 w-4" />, action: () => editor.chain().focus().toggleBlockquote().run() },
+    { name: 'Code Block', icon: <Code className="h-4 w-4" />, action: () => editor.chain().focus().toggleCodeBlock().run() },
+  ]
+
   return (
     <BubbleMenu 
       editor={editor}
       tippyOptions={{ duration: 100 }}
       className="flex items-center gap-1 overflow-hidden rounded-lg border bg-background shadow-md p-1"
     >
+      <Popover>
+        <PopoverTrigger asChild>
+          <button className="flex items-center gap-1 p-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-lg">
+            <span>{getCurrentNodeType()}</span>
+            <ChevronDown className="h-3 w-3" />
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="w-48 p-1 mt-1" sideOffset={5}>
+          {componentTypes.map((type, index) => (
+            <button
+              key={index}
+              onClick={type.action}
+              className="flex items-center justify-between w-full px-2 py-1 text-sm hover:bg-accent rounded-lg"
+            >
+              <div className="flex items-center gap-2">
+                <div className="p-1 rounded border">{type.icon}</div>
+                <span>{type.name}</span>
+              </div>
+              {getCurrentNodeType() === type.name && <Check className="h-4 w-4" />}
+            </button>
+          ))}
+        </PopoverContent>
+      </Popover>
+
+      <Separator orientation="vertical" className="mx-1 h-6" />
+
       <MenuButton 
         onClick={() => editor.chain().focus().toggleBold().run()}
         isActive={editor.isActive('bold')}
@@ -241,12 +291,11 @@ export default function Page() {
     extensions: [
       StarterKit.configure({
         heading: {
-          levels: [1, 2, 3, 4, 5, 6],
+          levels: [1, 2, 3],
         },
-        bulletList: {
-          keepMarks: true,
-          keepAttributes: false,
-        },
+        bulletList: {},
+        orderedList: {},
+        blockquote: {},
       }),
       TextStyle,
       Color,
@@ -281,7 +330,7 @@ export default function Page() {
     editorProps: {
       attributes: {
         class:
-          "prose prose-stone dark:prose-invert focus:outline-none max-w-full prose-headings:mb-4 prose-headings:mt-6 [&_ul[data-type='taskList']]:list-none",
+          "prose prose-stone dark:prose-invert focus:outline-none max-w-full prose-headings:mb-4 prose-headings:mt-6 [&_ul[data-type='taskList']]:list-none prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:my-4 prose-blockquote:italic",
       },
     },
     onUpdate: ({ editor }) => {
