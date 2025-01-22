@@ -50,7 +50,8 @@ interface CommandPaletteProps {
   editor: Editor;
 }
 
-const commands = [
+// Split commands into visible and hidden
+const visibleCommands = [
   {
     title: "Text",
     description: "Just start typing with plain text",
@@ -77,24 +78,6 @@ const commands = [
     icon: <Heading3 className="h-6 w-6" />,
     command: (editor: Editor) =>
       editor.chain().focus().toggleHeading({ level: 3 }).run(),
-  },
-  {
-    title: "Heading 4",
-    description: "Smaller section heading",
-    icon: <Heading3 className="h-6 w-6 scale-90" />,
-    command: (editor: Editor) => editor.chain().focus().toggleHeading({ level: 4 }).run(),
-  },
-  {
-    title: "Heading 5",
-    description: "Tiny section heading",
-    icon: <Heading3 className="h-6 w-6 scale-75" />,
-    command: (editor: Editor) => editor.chain().focus().toggleHeading({ level: 5 }).run(),
-  },
-  {
-    title: "Heading 6",
-    description: "Smallest section heading",
-    icon: <Heading3 className="h-6 w-6 scale-[0.65]" />,
-    command: (editor: Editor) => editor.chain().focus().toggleHeading({ level: 6 }).run(),
   },
   {
     title: "Bullet List",
@@ -142,6 +125,27 @@ const commands = [
   },
 ];
 
+const hiddenCommands = [
+  {
+    title: "Heading 4",
+    description: "Smaller section heading",
+    icon: <Heading3 className="h-6 w-6 scale-90" />,
+    command: (editor: Editor) => editor.chain().focus().toggleHeading({ level: 4 }).run(),
+  },
+  {
+    title: "Heading 5",
+    description: "Tiny section heading",
+    icon: <Heading3 className="h-6 w-6 scale-75" />,
+    command: (editor: Editor) => editor.chain().focus().toggleHeading({ level: 5 }).run(),
+  },
+  {
+    title: "Heading 6",
+    description: "Smallest section heading",
+    icon: <Heading3 className="h-6 w-6 scale-[0.65]" />,
+    command: (editor: Editor) => editor.chain().focus().toggleHeading({ level: 6 }).run(),
+  },
+];
+
 function CommandPalette({ editor }: CommandPaletteProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -170,11 +174,14 @@ function CommandPalette({ editor }: CommandPaletteProps) {
     }
   }, [selectedIndex]);
 
-  const filteredCommands = commands.filter(
-    (command) =>
-      command.title.toLowerCase().includes(search.toLowerCase()) ||
-      command.description.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredCommands = React.useMemo(() => {
+    const allCommands = search ? [...visibleCommands, ...hiddenCommands] : visibleCommands;
+    return allCommands.filter(
+      command =>
+        command.title.toLowerCase().includes(search.toLowerCase()) ||
+        command.description.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [search]);
 
   const onKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.ctrlKey && e.key === "i") {
