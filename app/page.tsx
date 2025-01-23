@@ -24,6 +24,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { MessageSquare, Eye, FileText, HelpCircle } from 'lucide-react';
+import { Label } from "@/components/ui/label"; // Add this import
+import Cookies from 'js-cookie'; // Add this import
 
 interface MessageProps {
   message: Message;
@@ -376,6 +378,28 @@ export default function ChatInterface() {
   const [splitView, setSplitView] = useState(false); // New state
   const [editorWidth, setEditorWidth] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
+  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+  const [newUserName, setNewUserName] = useState("");
+  const [newUserEmail, setNewUserEmail] = useState("");
+
+  useEffect(() => {
+    const userCookie = Cookies.get('user');
+    if (userCookie) {
+      try {
+        setUser(JSON.parse(userCookie));
+      } catch (e) {
+        console.error('Error parsing user cookie:', e);
+      }
+    }
+  }, []);
+
+  const handleUserRegistration = () => {
+    if (!newUserName.trim() || !newUserEmail.trim()) return;
+    
+    const userData = { name: newUserName.trim(), email: newUserEmail.trim() };
+    Cookies.set('user', JSON.stringify(userData), { expires: 365 });
+    setUser(userData);
+  };
 
   const handleMouseMove = (e: MouseEvent) => {
     if (isDragging) {
@@ -645,6 +669,59 @@ export default function ChatInterface() {
       }
     }
   };
+
+  if (!user) {
+    return (
+      <div className="h-screen bg-[#1E1E1E] text-white flex flex-col items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-lg space-y-8"
+        >
+          <div className="text-center">
+            <motion.h1
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-4xl mb-8"
+            >
+              Initial Platform Setup
+            </motion.h1>
+          </div>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Input
+                id="name"
+                value={newUserName}
+                onChange={(e) => setNewUserName(e.target.value)}
+                className="bg-[#2f2f2f] border-none text-white focus-visible:ring-0 focus-visible:ring-offset-0"
+                placeholder="Enter your name"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Input
+                id="email"
+                type="email"
+                value={newUserEmail}
+                onChange={(e) => setNewUserEmail(e.target.value)}
+                className="bg-[#2f2f2f] border-none text-white focus-visible:ring-0 focus-visible:ring-offset-0"
+                placeholder="Enter your email"
+              />
+            </div>
+
+            <Button
+              onClick={handleUserRegistration}
+              disabled={!newUserName.trim() || !newUserEmail.trim()}
+              className="w-full transition-all duration-200 hover:bg-[#c0c0c0] hover:text-[#0e0e0e] bg-[#ffffff] text-[#000000] disabled:hover:bg-[#676767] disabled:hover:text-[#2f2f2f]"
+            >
+              Continue
+            </Button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     splitView ? (
