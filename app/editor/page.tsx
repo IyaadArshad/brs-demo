@@ -140,74 +140,54 @@ const visibleCommands = [
         const file = input.files?.[0];
         if (!file) return;
 
-        // Create a temporary URL for the skeleton
-        const tempUrl = URL.createObjectURL(file);
-        const img = new window.Image();
+        // Insert a loading placeholder paragraph
+        const placeholderPos = editor.state.selection.from;
+        editor.chain().focus().insertContent({
+          type: 'paragraph',
+          content: [{ type: 'text', text: 'Uploading image...' }]
+        }).run();
         
-        img.onload = async () => {
-          const tempId = uuidv4();
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+          const response = await fetch('/api/editor/uploadImage', {
+            method: 'POST',
+            body: formData,
+          });
+
+          const data = await response.json();
           
-          // Insert skeleton with actual dimensions
-          editor.chain().focus().insertContent([
-            {
-              type: 'image',
-              attrs: {
-                src: tempUrl,
-                alt: file.name,
-                'data-temp-id': tempId,
-                width: img.naturalWidth,
-                height: img.naturalHeight,
-                class: 'skeleton',
-              },
-            },
-            { type: 'paragraph' }
-          ]).run();
-
-          const formData = new FormData();
-          formData.append('image', file);
-
-          try {
-            const response = await fetch('/api/editor/uploadImage', {
-              method: 'POST',
-              body: formData,
-            });
-
-            const data = await response.json();
-            if (data.url) {
-              // Replace skeleton with actual image
-              editor.chain().focus().command(({ tr, state }) => {
-                state.doc.descendants((node, pos) => {
-                  if (node.type.name === 'image' && node.attrs['data-temp-id'] === tempId) {
-                    tr.setNodeMarkup(pos, undefined, {
-                      ...node.attrs,
-                      src: data.url,
-                      class: undefined,
-                      'data-temp-id': undefined,
-                    });
-                    return false;
-                  }
-                });
-                return true;
-              }).run();
-            }
-          } catch (error) {
-            console.error('Error uploading image:', error);
-            // Remove failed upload
-            editor.chain().focus().command(({ tr, state }) => {
-              state.doc.descendants((node, pos) => {
-                if (node.type.name === 'image' && node.attrs['data-temp-id'] === tempId) {
-                  tr.delete(pos, pos + node.nodeSize);
-                  return false;
-                }
-              });
+          if (data.url) {
+            // Replace the placeholder with the actual image
+            editor.commands.command(({ tr }) => {
+              const pos = tr.doc.resolve(placeholderPos);
+              const node = tr.doc.nodeAt(placeholderPos);
+              if (node) {
+                tr.replaceWith(
+                  placeholderPos, 
+                  placeholderPos + node.nodeSize, 
+                  editor.schema.nodes.image.create({ 
+                    src: data.url,
+                    alt: file.name 
+                  })
+                );
+              }
               return true;
-            }).run();
-          } finally {
-            URL.revokeObjectURL(tempUrl);
+            });
           }
-        };
-
-        img.src = tempUrl;
+        } catch (error) {
+          console.error('Error uploading image:', error);
+          // Remove the loading placeholder on error
+          editor.commands.command(({ tr }) => {
+            const pos = tr.doc.resolve(placeholderPos);
+            const node = tr.doc.nodeAt(placeholderPos);
+            if (node) {
+              tr.delete(placeholderPos, placeholderPos + node.nodeSize);
+            }
+            return true;
+          });
+        }
       };
 
       input.click();
