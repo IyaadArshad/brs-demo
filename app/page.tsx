@@ -1025,7 +1025,7 @@ export default function ChatInterface() {
             </div>
 
             <div className="">
-              <div className="max-w-3xl mx-auto p-4">
+              <div className="max-w-4xl mx-auto p-4">
                   <div className="relative sticky bottom-0 bg-[#1E1E1E] p-4">
                   <Input
                     value={message}
@@ -1061,7 +1061,7 @@ export default function ChatInterface() {
                       size="icon"
                       disabled={!message.trim()}
                       onClick={handleSendMessage}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-white hover:text-white/50 bg-transparent hover:bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="absolute send-button right-2 top-1/2 -translate-y-1/2 text-[#ffffff] hover:text-[#c0c0c0] bg-transparent hover:bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                       <SendHorizontal className="h-5 w-5" />
                       </Button>

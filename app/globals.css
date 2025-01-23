@@ -95,3 +95,7 @@ body {
 .h-screen {
   padding-top: 22px;
 }
+
+.send-button {
+  margin-right: 12px;
+}
