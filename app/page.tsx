@@ -183,30 +183,30 @@ function CommandMenu({ isOpen, onSelect, filter, splitView }: CommandMenuProps) 
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.15 }}
-          className="absolute bottom-full left-0 w-full mb-2 bg-[#1E1E1E] border border-gray-800 rounded-lg shadow-lg overflow-hidden"
+          className="absolute max-w-4xl bottom-full left-0 w-full mb-2 bg-[#1E1E1E]/80 backdrop-blur-sm border border-[#383838] rounded-lg shadow-lg overflow-hidden"
           onKeyDown={(e) => e.stopPropagation()} // Prevent event bubbling
         >
           <div className="max-h-[300px] overflow-y-auto">
             {filteredCommands.map((command, index) => (
               <button
-                key={command.action}
-                onClick={(e) => {
-                  e.preventDefault();
-                  onSelect(`/${command.command}`);
-                }}
-                onMouseEnter={() => setSelectedIndex(index)}
-                onMouseLeave={() => setSelectedIndex(-1)}
-                className={`w-full px-4 py-3 flex items-start gap-3 transition-colors text-left ${
-                  index === selectedIndex ? 'bg-gray-800/50' : ''
-                }`}
+          key={command.action}
+          onClick={(e) => {
+            e.preventDefault();
+            onSelect(`/${command.command}`);
+          }}
+          onMouseEnter={() => setSelectedIndex(index)}
+          onMouseLeave={() => setSelectedIndex(-1)}
+          className={`w-full px-4 py-3 flex items-start gap-3 transition-colors text-left ${
+            index === selectedIndex ? 'bg-[#2f2f2f]/80' : ''
+          }`}
               >
-                <div className="flex-shrink-0 w-6 h-6 rounded bg-gray-800 flex items-center justify-center text-gray-400">
-                  {command.icon}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium text-gray-200">{command.title}</div>
-                  <div className="text-sm text-gray-400">{command.description}</div>
-                </div>
+          <div className="flex-shrink-0 w-6 h-6 rounded bg-gray-800/90 flex items-center justify-center text-white">
+            {command.icon}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="font-medium text-gray-200">{command.title}</div>
+            <div className="text-sm text-gray-400">{command.description}</div>
+          </div>
               </button>
             ))}
           </div>
