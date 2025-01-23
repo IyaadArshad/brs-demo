@@ -26,6 +26,7 @@ import {
 import { MessageSquare, Eye, FileText, HelpCircle } from 'lucide-react';
 import { Label } from "@/components/ui/label"; // Add this import
 import Cookies from 'js-cookie'; // Add this import
+import gravatarUrl from "gravatar-url";
 
 interface MessageProps {
   message: Message;
@@ -381,6 +382,48 @@ export default function ChatInterface() {
   const [user, setUser] = useState<{ name: string; email: string } | null>(null);
   const [newUserName, setNewUserName] = useState("");
   const [newUserEmail, setNewUserEmail] = useState("");
+  const [isRegistering, setIsRegistering] = useState(false);
+
+  const handleUserRegistration = async () => {
+    if (!newUserName.trim() || !newUserEmail.trim()) return;
+    setIsRegistering(true);
+    try {
+      var avatarUrl = gravatarUrl(newUserEmail.trim(), { default: "404", size: 200 });
+      let profilePicture;
+      try {
+        profilePicture = await (avatarUrl);
+        if (avatarUrl.length < 100) {
+          avatarUrl = `https://brs-agent.acroford.com/images/default_pfp.png`;
+          profilePicture = `https://brs-agent.acroford.com/images/default_pfp.png`;
+        }
+      } catch {
+        profilePicture = `https://brs-agent.acroford.com/images/default_pfp.png`;
+      }
+      Cookies.set("gravatar", profilePicture, { expires: 365 });
+      console.log(profilePicture)
+      // Fetch and store the image in localStorage
+      try {
+        const response = await fetch(avatarUrl);
+        const blob = await response.blob();
+        const reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onloadend = () => {
+          const base64data = reader.result as string;
+          Cookies.set("userImage", base64data, { expires: 365 });
+          console.log('Profile image:', base64data);
+        };
+      } catch (error) {
+        console.error('Error fetching profile image:', error);
+      }
+      const userData = { name: newUserName.trim(), email: newUserEmail.trim() };
+      Cookies.set("userEmail", newUserEmail.trim(), { expires: 365 });
+      Cookies.set("userName", newUserName.trim(), {expires: 365});
+      Cookies.set("user", JSON.stringify(userData), { expires: 365 });
+      setUser(userData);
+    } finally {
+      setIsRegistering(false);
+    }
+  };
 
   useEffect(() => {
     const userCookie = Cookies.get('user');
@@ -392,14 +435,6 @@ export default function ChatInterface() {
       }
     }
   }, []);
-
-  const handleUserRegistration = () => {
-    if (!newUserName.trim() || !newUserEmail.trim()) return;
-    
-    const userData = { name: newUserName.trim(), email: newUserEmail.trim() };
-    Cookies.set('user', JSON.stringify(userData), { expires: 365 });
-    setUser(userData);
-  };
 
   const handleMouseMove = (e: MouseEvent) => {
     if (isDragging) {
@@ -712,10 +747,10 @@ export default function ChatInterface() {
 
             <Button
               onClick={handleUserRegistration}
-              disabled={!newUserName.trim() || !newUserEmail.trim()}
+              disabled={!newUserName.trim() || !newUserEmail.trim() || isRegistering}
               className="w-full transition-all duration-200 hover:bg-[#c0c0c0] hover:text-[#0e0e0e] bg-[#ffffff] text-[#000000] disabled:hover:bg-[#676767] disabled:hover:text-[#2f2f2f]"
             >
-              Continue
+              {isRegistering ? "Loading..." : "Continue"}
             </Button>
           </div>
         </motion.div>
