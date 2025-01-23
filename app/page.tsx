@@ -251,7 +251,7 @@ function MessageComponent({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
       transition={{ duration: 0.3 }}
-      className={`group flex items-start gap-4 px-8 py-3 hover:bg-[#2A2A2A] relative ${
+      className={`group flex items-start gap-4 chatty px-64 py-5 hover:bg-[#2A2A2A] relative ${
         message.role === "user" ? "flex-row-reverse" : ""
       }`}
     >
@@ -290,7 +290,7 @@ function MessageComponent({
         )}
       </div>
       <div
-        className={`flex-1 min-w-0 px-4 ${
+        className={`flex-1 min-w-0 px-1 ${
           message.role === "user" ? "text-right" : ""
         }`}
       >
