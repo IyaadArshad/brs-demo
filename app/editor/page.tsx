@@ -621,7 +621,7 @@ function FormattingMenu({ editor }: BubbleMenuProps) {
       <BubbleMenu 
         editor={editor}
         tippyOptions={{ duration: 100 }}
-        shouldShow={({ editor }) => !editor.isActive('image')}
+        shouldShow={({ editor }) => !editor.isActive('image') && !editor.state.selection.empty} // Updated condition
         className="flex items-center gap-1 overflow-hidden rounded-lg border bg-background shadow-md p-1"
       >
         <Popover>
