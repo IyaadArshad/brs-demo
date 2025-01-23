@@ -523,7 +523,7 @@ export default function ChatInterface() {
 
     if (newMessage.content.startsWith("/help") || newMessage.content === "/") { // if running help command
       // print help message to chat
-      const helpMessage = "I can help you with the following commands:\n\n **/help** - Show available commands\n\n/**settings** - Configure options\n\n/**assisted** [filename] - Switch to Assisted View\n\n**/create** [filename] - Create new document\n\n**/open** [filename] - Open Editor Files";
+      const helpMessage = "I can help you with the following commands:\n\n **/help** - Show available commands\n\n/**settings** - Configure options\n\n/**assisted** [filename] - Switch to Assisted View\n\n**/create** [filename] - Create new document\n\n**/open** [filename] - Open Editor Files\n\n Please make sure you type out **full commands.** The command menu only serves for reference purposes";
       // 1.5 second delay
       await new Promise((resolve) => setTimeout(resolve, 1700));
       let currentMessage = "";
