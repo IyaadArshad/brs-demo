@@ -68,6 +68,21 @@ async function lock_file(file_name: string) {
   return responseData;
 }
 
+async function unlock_file(file_name: string) {
+  console.log(`Unlocking file: ${file_name}`);
+  const response = await fetch("http://localhost:3000/api/data/unlockFile", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ file_name: file_name }),
+  });
+  const responseData = await response.json();
+  if (!response.ok) {
+    console.error(`Failed to unlock file: ${response.statusText}`);
+    return { success: false, error: responseData.message };
+  }
+  return responseData;
+}
+
 async function publish_new_version(file_name: string, data: string) {
   console.log(`Publishing new version to file: ${file_name}`);
   const response = await fetch(
