@@ -59,11 +59,32 @@ export async function POST(request: Request) {
 
   const id = fetchIdData.id;
   
-  var pushData = {
-    file_name: file_name,
-    data: data
-  }
-  const updateRecord = await pb.collection('files').update(id, pushData);
+  const existingRecord = await pb.collection("files").getOne(id);
+  const recordData = existingRecord.data || {};
+  let currentLatest = recordData.latestVersion || 0;
 
-  return Response.json({ success: true, file_name: file_name, message: "data overwritten" });
+  if (recordData.latestVersion === 0) {
+    return Response.json({
+      success: "false",
+      message: `**${file_name}** is not initialized, please call writeInitialData first`,
+      systemMessage: `You must create the first version before publishing subsequent versions. ${file_name} currently has no versions.`,
+      file_name,
+    });
+  }
+
+  recordData.latestVersion = currentLatest + 1;
+  recordData.versions = recordData.versions || {};
+  recordData.versions[recordData.latestVersion] = data;
+
+  await pb.collection('files').update(id, {
+    file_name,
+    data: recordData
+  });
+
+  return Response.json({
+    success: "true",
+    message: `**${file_name}** has been successfully updated`,
+    systemMessage: `The latest version is now v${recordData.latestVersion}`,
+    file_name,
+  });
 }

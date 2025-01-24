@@ -40,11 +40,30 @@ export async function POST(request: Request) {
 
   const id = fetchIdData.id;
   
-  var pushData = {
-    file_name: file_name,
-    data: data
-  }
-  const updateRecord = await pb.collection('files').update(id, pushData);
+  const existingRecord = await pb.collection("files").getOne(id);
+  const recordData = existingRecord.data || {};
 
-  return Response.json({ success: true, file_name: file_name, message: "iniital data write complete" });
+  if (recordData.latestVersion && recordData.latestVersion > 0) {
+    return Response.json({
+      success: "false",
+      message: `**${file_name}** is already initialized, please use publishNewVersion to create a new version`,
+      systemMessage: `File already has some versions. Use publishNewVersion instead.`,
+      file_name,
+    });
+  }
+
+  recordData.latestVersion = 1;
+  recordData.versions = { 1: data };
+
+  await pb.collection("files").update(id, {
+    file_name,
+    data: recordData,
+  });
+
+  return Response.json({
+    success: "true",
+    message: `**${file_name}** has been successfully initialized`,
+    systemMessage: `The first version is now v1. Use publishNewVersion to publish subsequent versions.`,
+    file_name,
+  });
 }
