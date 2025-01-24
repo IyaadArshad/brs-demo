@@ -13,6 +13,7 @@ import {
   Check,
   FolderSyncIcon as Sync,
   Layout, // New import
+  Square, // Add this import
 } from "lucide-react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -412,6 +413,8 @@ export default function ChatInterface() {
   const [newUserName, setNewUserName] = useState("");
   const [newUserEmail, setNewUserEmail] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false); // Add this state
+  const abortControllerRef = useRef<AbortController | null>(null); // Add this ref
 
   const handleUserRegistration = async () => {
     if (!newUserName.trim() || !newUserEmail.trim()) return;
@@ -637,6 +640,10 @@ export default function ChatInterface() {
 
   const fetchAIResponse = async (userMessage: Message) => {
     try {
+      setIsStreaming(true);
+      abortControllerRef.current = new AbortController();
+      let lastChunk = null;
+
       const response = await fetch("/api/testFetch", {
         method: "POST",
         headers: {
@@ -654,6 +661,7 @@ export default function ChatInterface() {
             },
           ],
         }),
+        signal: abortControllerRef.current.signal,
       });
 
       if (!response.ok) {
@@ -669,18 +677,20 @@ export default function ChatInterface() {
 
         const chunk = new TextDecoder().decode(value);
         const lines = chunk.split("\n").filter((line) => line.trim() !== "");
+        
         for (const line of lines) {
           if (line.startsWith("data: ")) {
             const data = line.slice(6);
             if (data === "[DONE]") break;
             try {
               const parsed = JSON.parse(data);
+              lastChunk = parsed; // Store the last chunk
               const content = parsed?.choices?.[0]?.delta?.content;
               if (content) {
                 aiResponseContent += content;
                 setMessages((prev) => {
                   const lastMessage = prev[prev.length - 1];
-                  if (lastMessage.role === "assistant") {
+                  if (lastMessage?.role === "assistant") {
                     return [
                       ...prev.slice(0, -1),
                       { ...lastMessage, content: aiResponseContent },
@@ -704,8 +714,40 @@ export default function ChatInterface() {
           }
         }
       }
+
+      // Log the last chunk after the stream is complete
+      if (lastChunk) {
+        console.log('Last chunk received:', lastChunk);
+      }
+
     } catch (error) {
-      console.error("Error fetching AI response:", error);
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.log('Request aborted by user');
+        // Add partial message indicator when request is aborted
+        setMessages(prev => {
+          const lastMessage = prev[prev.length - 1];
+          if (lastMessage?.role === "assistant") {
+            return [
+              ...prev.slice(0, -1),
+              { ...lastMessage, content: lastMessage.content + ' [stopped]' }
+            ];
+          }
+          return prev;
+        });
+      } else {
+        console.error("Error fetching AI response:", error);
+      }
+    } finally {
+      setIsStreaming(false);
+      abortControllerRef.current = null;
+    }
+  };
+
+  const handleStopRequest = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      setIsStreaming(false);
+      abortControllerRef.current = null;
     }
   };
 
@@ -845,10 +887,14 @@ export default function ChatInterface() {
                       <Button
                         size="icon"
                         disabled={!message.trim()}
-                        onClick={handleSendMessage}
+                        onClick={isStreaming ? handleStopRequest : handleSendMessage}
                         className="absolute right-2 top-1/2 -translate-y-1/2 text-white hover:text-white/50 bg-transparent hover:bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <SendHorizontal className="h-5 w-5" />
+                        {isStreaming ? (
+                          <Square className="h-5 w-5" />
+                        ) : (
+                          <SendHorizontal className="h-5 w-5" />
+                        )}
                       </Button>
                     </TooltipTrigger>
                     {!message.trim() && (
@@ -925,10 +971,14 @@ export default function ChatInterface() {
                         <Button
                         size="icon"
                         disabled={!message.trim()}
-                        onClick={handleSendMessage}
+                        onClick={isStreaming ? handleStopRequest : handleSendMessage}
                         className="absolute right-2 top-1/2 -translate-y-1/2 text-white hover:text-white/50 bg-transparent hover:bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                        <SendHorizontal className="h-5 w-5" />
+                          {isStreaming ? (
+                            <Square className="h-5 w-5" />
+                          ) : (
+                            <SendHorizontal className="h-5 w-5" />
+                          )}
                         </Button>
                       </TooltipTrigger>
                       {!message.trim() && (
@@ -979,10 +1029,14 @@ export default function ChatInterface() {
                     <Button
                       size="icon"
                       disabled={!message.trim()}
-                      onClick={handleSendMessage}
+                      onClick={isStreaming ? handleStopRequest : handleSendMessage}
                       className="absolute right-2 top-1/2 -translate-y-1/2 text-white hover:text-white/50 bg-transparent hover:bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <SendHorizontal className="h-5 w-5" />
+                      {isStreaming ? (
+                        <Square className="h-5 w-5" />
+                      ) : (
+                        <SendHorizontal className="h-5 w-5" />
+                      )}
                     </Button>
                   </TooltipTrigger>
                   {!message.trim() && (
@@ -1059,10 +1113,14 @@ export default function ChatInterface() {
                       <Button
                       size="icon"
                       disabled={!message.trim()}
-                      onClick={handleSendMessage}
+                      onClick={isStreaming ? handleStopRequest : handleSendMessage}
                       className="absolute send-button right-2 top-1/2 -translate-y-1/2 text-[#ffffff] hover:text-[#c0c0c0] bg-transparent hover:bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                      <SendHorizontal className="h-5 w-5" />
+                        {isStreaming ? (
+                          <Square className="h-5 w-5" />
+                        ) : (
+                          <SendHorizontal className="h-5 w-5" />
+                        )}
                       </Button>
                     </TooltipTrigger>
                     {!message.trim() && (
