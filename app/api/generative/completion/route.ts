@@ -38,8 +38,19 @@ async function write_initial_data(file_name: string, data: string) {
   return responseData;
 }
 
-async function get_overview(userMessage: string) {
-    
+async function get_overview(user_inputs: string) {
+  console.log(`Getting an overview prompt for input ${user_inputs}`);
+  const response = await fetch("http://localhost:3000/api/generative/completion", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ input: user_inputs }),
+  });
+  const responseData = await response.json();
+  if (!response.ok) {
+    console.error(`Failed to get an overview prompt for input: ${response.statusText}`);
+    return { success: false, error: responseData.message };
+  }
+  return responseData;
 }
 
 async function publish_new_version(file_name: string, data: string) {
