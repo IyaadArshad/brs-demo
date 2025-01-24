@@ -7,7 +7,7 @@ export async function POST(request: Request) {
 
   if (!fileName) {
     return Response.json(
-      { error: "Missing required parameters" },
+      { error: "Missing required parameters, file_name is not provided" },
       { status: 422 }
     );
   }
@@ -21,10 +21,14 @@ export async function POST(request: Request) {
         {
           success: false,
           message: `A file with the name **${fileName}** already exists, choose another name`,
+          systemMessage: `If the user has specifically requested this file name, let them know that this name has been used. If a name is not specified, choose another name yourself. Remember, ${fileName} is not available`
         }
       );
     }
-  } catch (error) {}
+  } catch (error) {
+    // file does not exist
+  }
+
   if (fileName.length > 500) {
     return Response.json(
       {
@@ -58,7 +62,7 @@ export async function POST(request: Request) {
   return Response.json({
     success: "true",
     message: `**${fileName}** has been successfully created`,
-    id: record.id,
+    systemMessage: `You've created an empty file called ${fileName}, you will need to remember this name for API requests using this file. To start with this file, you must first perform a writeInitialData to create the first version. any updates after that can use publishNewVersion`,
     file_name: fileName,
   });
 }
