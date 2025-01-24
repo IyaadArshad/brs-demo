@@ -53,36 +53,6 @@ async function get_overview(user_inputs: string) {
   return responseData;
 }
 
-async function lock_file(file_name: string) {
-  console.log(`Locking file: ${file_name}`);
-  const response = await fetch("http://localhost:3000/api/data/lockFile", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ file_name: file_name }),
-  });
-  const responseData = await response.json();
-  if (!response.ok) {
-    console.error(`Failed to lock file: ${response.statusText}`);
-    return { success: false, error: responseData.message };
-  }
-  return responseData;
-}
-
-async function unlock_file(file_name: string) {
-  console.log(`Unlocking file: ${file_name}`);
-  const response = await fetch("http://localhost:3000/api/data/unlockFile", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ file_name: file_name }),
-  });
-  const responseData = await response.json();
-  if (!response.ok) {
-    console.error(`Failed to unlock file: ${response.statusText}`);
-    return { success: false, error: responseData.message };
-  }
-  return responseData;
-}
-
 async function publish_new_version(file_name: string, data: string) {
   console.log(`Publishing new version to file: ${file_name}`);
   const response = await fetch(
@@ -96,21 +66,6 @@ async function publish_new_version(file_name: string, data: string) {
   const responseData = await response.json();
   if (!response.ok) {
     console.error(`Failed to publish new version data: ${response.statusText}`);
-    return { success: false, error: responseData.message };
-  }
-  return responseData;
-}
-
-async function check_init(file_name: string) {
-  console.log(`Checking if file has initial version: ${file_name}`);
-  const response = await fetch("http://localhost:3000/api/data/checkInit", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ file_name }),
-  });
-  const responseData = await response.json();
-  if (!response.ok) {
-    console.error(`Failed to check init: ${response.statusText}`);
     return { success: false, error: responseData.message };
   }
   return responseData;
@@ -166,7 +121,7 @@ export async function POST(request: Request) {
               },
               {
                 name: "get_overview_prompt",
-                description: "Gets an overview for making changes to a document",
+                description: "Gets an overview for changes that need to be implemented for a document",
                 parameters: {
                   type: "object",
                   required: ["user_inputs"],
@@ -200,18 +155,7 @@ export async function POST(request: Request) {
                     file_name: { type: "string" },
                   },
                 },
-              },
-              {
-                name: "check_init",
-                description: "Checks if a BRS file has initial data",
-                parameters: {
-                  type: "object",
-                  required: ["file_name"],
-                  properties: {
-                    file_name: { type: "string" },
-                  },
-                },
-              },
+              }
             ],
             function_call: "auto",
             temperature: 1.37,
@@ -265,8 +209,6 @@ export async function POST(request: Request) {
           functionResult = await get_overview(
             functionArgs.user_inputs
           );
-        }  else if (name === "check_init") {
-          functionResult = await check_init(functionArgs.file_name);
         } else {
           console.error(`Function ${name} not found.`);
           throw new Error(`Function ${name} not found.`);
