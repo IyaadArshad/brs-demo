@@ -838,7 +838,7 @@ export default function ChatInterface() {
                     }
                   }}
                   className="w-full bg-[#2f2f2f] border-none text-white px-4 py-6 rounded-lg pr-12 focus-visible:ring-0 focus-visible:ring-offset-0"
-                  placeholder="Message HatGPT"
+                  placeholder="Message ChatGPT"
                 />
                 <TooltipProvider>
                   <Tooltip>
@@ -972,7 +972,7 @@ export default function ChatInterface() {
                   }
                 }}
                 className="w-full bg-[#2f2f2f] border-none text-white px-4 py-6 rounded-lg pr-12 focus-visible:ring-0 focus-visible:ring-offset-0"
-                placeholder="Message HatGPT"
+                placeholder="Message ChatGPT"
               />
               <TooltipProvider>
                 <Tooltip>
@@ -1025,7 +1025,7 @@ export default function ChatInterface() {
             </div>
 
             <div className="">
-              <div className="max-w-4xl mx-auto p-4">
+              <div className="max-w-5xl mx-auto p-4">
                   <div className="relative sticky bottom-0 bg-[#1E1E1E] p-4">
                   <Input
                     value={message}
