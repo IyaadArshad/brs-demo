@@ -135,6 +135,17 @@ export async function POST(request: Request) {
                 },
               },
               {
+                name: "get_overview_prompt",
+                description: "Gets an overview for making changes to a document",
+                parameters: {
+                  type: "object",
+                  required: ["user_inputs"],
+                  properties: {
+                    user_inputs: { type: "string" },
+                  },
+                },
+              },
+              {
                 name: "write_initial_data",
                 description:
                   "Writes initial data for version one for a file. You must call this to write initial data to a .md BRS file",
@@ -220,7 +231,11 @@ export async function POST(request: Request) {
             functionArgs.file_name,
             functionArgs.data
           );
-        } else if (name === "check_init") {
+        } else if (name === "get_overview_prompt") {
+          functionResult = await get_overview(
+            functionArgs.user_inputs
+          );
+        }  else if (name === "check_init") {
           functionResult = await check_init(functionArgs.file_name);
         } else {
           console.error(`Function ${name} not found.`);
