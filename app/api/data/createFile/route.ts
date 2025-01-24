@@ -33,6 +33,14 @@ export async function POST(request: Request) {
       }
     );
   }
+  if (fileName.length < 2) {
+    return Response.json(
+      {
+        success: false,
+        message: `**'${fileName}'** is too short, pick a longer name over 2 characters`,
+      }
+    );
+  }
 
   const data = {
     file_name: fileName,
