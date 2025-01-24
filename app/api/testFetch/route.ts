@@ -78,6 +78,9 @@ export async function POST(request: Request) {
     const { messages: userMessages } = await request.json();
     console.log("User messages:", userMessages);
 
+    // Initialize function call logs
+    const functionCallLogs: { name: string; arguments: any }[] = [];
+
     type Message =
       | { role: "system" | "user"; content: string }
       | { role: "function"; name: string; content: string };
@@ -184,6 +187,10 @@ export async function POST(request: Request) {
           `Executing function call: ${name} with args:`,
           functionArgs
         );
+
+        // Log the function call
+        functionCallLogs.push({ name, arguments: functionArgs });
+
         let functionResult;
 
         if (name === "create_brs_file") {
@@ -242,6 +249,17 @@ export async function POST(request: Request) {
               );
               await new Promise((resolve) => setTimeout(resolve, 10));
             }
+
+            // After streaming the text, send the function call logs
+            const functionLogsMessage = {
+              functionsCalled: functionCallLogs,
+            };
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify(functionLogsMessage)}\n\n`
+              )
+            );
+
             controller.close();
           },
         });
