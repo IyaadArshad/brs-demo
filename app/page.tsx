@@ -574,7 +574,7 @@ export default function ChatInterface() {
         let currentMessage = "";
         const words = "Invalid format: \n\n\ Please provide a single name for a file. \n\n\ -It must end in '.md' \n\n\ -Use dashes, underscores, and characters only \n\n\ -The file name cannot have spaces".split(' ');
         for (let i = 0; i < words.length; i++) {
-          await new Promise((resolve) => setTimeout(resolve, 35));
+          await new Promise((resolve) => setTimeout(resolve, 45));
           currentMessage += (i === 0 ? "" : " ") + words[i];
           setMessages((prev) => {
             const lastMessage = prev[prev.length - 1];
