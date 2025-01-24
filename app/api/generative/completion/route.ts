@@ -38,7 +38,7 @@ async function write_initial_data(file_name: string, data: string) {
   return responseData;
 }
 
-async function get_overview(user_inputs: string) {
+async function get_implementation_details(user_inputs: string) {
   console.log(`Getting an overview prompt for input ${user_inputs}`);
   const response = await fetch("http://localhost:3000/api/generative/completion", {
     method: "POST",
@@ -120,7 +120,7 @@ export async function POST(request: Request) {
                 },
               },
               {
-                name: "get_overview_prompt",
+                name: "get_implementation_details",
                 description: "Gets an overview for changes that need to be implemented for a document",
                 parameters: {
                   type: "object",
@@ -205,8 +205,8 @@ export async function POST(request: Request) {
             functionArgs.file_name,
             functionArgs.data
           );
-        } else if (name === "get_overview_prompt") {
-          functionResult = await get_overview(
+        } else if (name === "get_implementation_details") {
+          functionResult = await get_implementation_details(
             functionArgs.user_inputs
           );
         } else {
