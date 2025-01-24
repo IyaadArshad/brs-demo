@@ -42,9 +42,15 @@ export async function POST(request: Request) {
     );
   }
 
+  const initialData = {
+    name: `fileName`,
+    latestVersion: 0,
+    versions: {}
+  }
+
   const data = {
     file_name: fileName,
-    data: "0",
+    data: initialData,
   };
 
   const record = await pb.collection("files").create(data);
