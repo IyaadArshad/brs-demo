@@ -6,7 +6,6 @@ const openai = new OpenAI({
 });
 
 async function create_file(file_name: string) {
-  console.log(`Creating file: ${file_name}`);
   const response = await fetch("http://localhost:3000/api/data/createFile", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -17,12 +16,10 @@ async function create_file(file_name: string) {
     console.error(`Failed to create file: ${response.statusText}`);
     return { success: false, error: responseData.message };
   }
-  console.log(`File created successfully: ${file_name}`);
   return responseData;
 }
 
 async function write_initial_data(file_name: string, data: string) {
-  console.log(`Writing initial data to file: ${file_name}`);
   const response = await fetch(
     "http://localhost:3000/api/data/writeInitialData",
     {
@@ -36,12 +33,10 @@ async function write_initial_data(file_name: string, data: string) {
     console.error(`Failed to write initial data: ${response.statusText}`);
     return { success: false, error: responseData.message };
   }
-  console.log(`Initial data written successfully to file: ${file_name}`);
   return responseData;
 }
 
 async function get_implementation_details(user_inputs: string, file_name: string) {
-  console.log(`Getting implementation details for input: ${user_inputs}`);
   const response = await fetch("http://localhost:3000/api/generative/get_overview", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -52,12 +47,10 @@ async function get_implementation_details(user_inputs: string, file_name: string
     console.error(`Failed to get implementation details: ${response.statusText}`);
     return { success: false, error: responseData.message };
   }
-  console.log(`Implementation details received for input: ${user_inputs}`);
   return responseData;
 }
 
 async function implement_overview(overview: string, file_name: string) {
-  console.log(`Implementing overview for file: ${file_name}`);
   const response = await fetch("http://localhost:3000/api/generative/implement_overview", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -72,12 +65,10 @@ async function implement_overview(overview: string, file_name: string) {
     console.error(`Failed to implement overview: ${response.statusText}`);
     return { success: false, error: responseData.message };
   }
-  console.log(`Overview implemented successfully for file: ${file_name}`);
   return responseData;
 }
 
 async function read_file(file_name: string) {
-  console.log(`Reading file: ${file_name}`);
   const response = await fetch(`http://localhost:3000/api/data/readFile?file_name=${file_name}`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
@@ -87,15 +78,12 @@ async function read_file(file_name: string) {
     console.error(`Failed to read file: ${response.statusText}`);
     return { success: false, error: responseData.message };
   }
-  console.log(`File read successfully: ${file_name}`);
   return responseData;
 }
 
 export async function POST(request: Request) {
   try {
-    console.log("Received POST request");
     const { messages: userMessages } = await request.json();
-    console.log("User messages:", userMessages);
 
     const functionCallLogs: { name: string; arguments: any }[] = [];
 
@@ -113,7 +101,6 @@ export async function POST(request: Request) {
     ];
 
     while (true) {
-      console.log("Sending conversation to OpenAI:", conversation);
       const openAiResponse = await fetch(
         "https://api.openai.com/v1/chat/completions",
         {
@@ -194,16 +181,11 @@ export async function POST(request: Request) {
 
       const openAiResult = await openAiResponse.json();
       const message = openAiResult.choices[0].message;
-      console.log("Received message from OpenAI:", message);
       conversation.push(message);
 
       if (message.function_call) {
         const { name, arguments: args } = message.function_call;
         const functionArgs = JSON.parse(args);
-        console.log(
-          `Executing function call: ${name} with args:`,
-          functionArgs
-        );
 
         functionCallLogs.push({ name, arguments: functionArgs });
 
@@ -234,15 +216,12 @@ export async function POST(request: Request) {
           console.error(`Function ${name} not found.`);
           throw new Error(`Function ${name} not found.`);
         }
-
-        console.log(`Function result: ${name}`, functionResult);
         conversation.push({
           role: "function",
           name,
           content: JSON.stringify(functionResult),
         });
       } else {
-        console.log("No function call, streaming final text to client");
         const text = message.content || "";
         const words = text.split(/\s+/);
         const encoder = new TextEncoder();
@@ -294,7 +273,6 @@ export async function POST(request: Request) {
           throw new Error("No streaming body found.");
         }
 
-        console.log("Streaming response to client");
         return new Response(streamingResponse.body, {
           headers: { "Content-Type": "text/event-stream" },
         });

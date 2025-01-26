@@ -34,7 +34,6 @@ export async function GET(request: Request) {
             notes: `You are seeing version ${version}.0 of the file as data.`,
         });
     } catch (error) {
-        console.log(error);
         return Response.json({ code: 404, message: "file not found" });
     }
 }

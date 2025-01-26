@@ -432,7 +432,6 @@ export default function ChatInterface() {
         profilePicture = `https://brs-agent.acroford.com/images/default_pfp.png`;
       }
       Cookies.set("gravatar", profilePicture, { expires: 365 });
-      console.log(profilePicture)
       // Fetch and store the image in localStorage
       try {
         const response = await fetch(avatarUrl);
@@ -442,7 +441,6 @@ export default function ChatInterface() {
         reader.onloadend = () => {
           const base64data = reader.result as string;
           Cookies.set("userImage", base64data, { expires: 365 });
-          console.log('Profile image:', base64data);
         };
       } catch (error) {
         console.error('Error fetching profile image:', error);
@@ -557,14 +555,13 @@ export default function ChatInterface() {
     } else if (newMessage.content.startsWith("/create")) {
 
       async function createFile(file_name: string) {
-        console.log(`Creating file: ${file_name}`);
         const response = await fetch("http://localhost:3000/api/data/createFile", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ file_name }),
         });
         const responseData = await response.json();
-        console.log(responseData)
+
         if (!response.ok) {
           return { message: responseData.message };
         }
@@ -722,7 +719,6 @@ export default function ChatInterface() {
 
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
-        console.log('Request aborted by user');
         // Add partial message indicator when request is aborted
         setMessages(prev => {
           const lastMessage = prev[prev.length - 1];
@@ -841,7 +837,6 @@ export default function ChatInterface() {
               content={content} 
               onUpdate={(editor: { getJSON: () => JSONContent }) => {
                 const newContent = editor.getJSON();
-                console.log('Editor content updated:', newContent);
                 setContent(newContent);
               }}
               className="white-text"

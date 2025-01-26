@@ -7,7 +7,6 @@ const openai = new OpenAI({
 
 export async function POST(request: Request) {
   try {
-    console.log("Received POST request");
     const { messages: userMessages } = await request.json();
 
     const response = await openai.chat.completions.create({

@@ -292,14 +292,12 @@ export default function ChatInterface() {
     } else if (newMessage.content.startsWith("/create")) {
 
       async function createFile(file_name: string) {
-        console.log(`Creating file: ${file_name}`);
         const response = await fetch("http://localhost:3000/api/data/createFile", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ file_name }),
         });
         const responseData = await response.json();
-        console.log(responseData)
         if (!response.ok) {
           return { message: responseData.message };
         }
@@ -485,7 +483,6 @@ export default function ChatInterface() {
               content={content} 
               onUpdate={(editor: { getJSON: () => JSONContent }) => {
                 const newContent = editor.getJSON();
-                console.log('Editor content updated:', newContent);
                 setContent(newContent);
               }}
               className="white-text"

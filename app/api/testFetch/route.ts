@@ -6,7 +6,6 @@ const openai = new OpenAI({
 });
 
 async function createFile(file_name: string) {
-  console.log(`Creating file: ${file_name}`);
   const response = await fetch("http://localhost:3000/api/data/createFile", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -21,7 +20,6 @@ async function createFile(file_name: string) {
 }
 
 async function write_initial_data(file_name: string, data: string) {
-  console.log(`Writing initial data to file: ${file_name}`);
   const response = await fetch(
     "http://localhost:3000/api/data/writeInitialData",
     {
@@ -39,7 +37,6 @@ async function write_initial_data(file_name: string, data: string) {
 }
 
 async function publish_new_version(file_name: string, data: string) {
-  console.log(`Publishing new version to file: ${file_name}`);
   const response = await fetch(
     "http://localhost:3000/api/data/publishNewVersion",
     {
@@ -57,7 +54,6 @@ async function publish_new_version(file_name: string, data: string) {
 }
 
 async function check_init(file_name: string) {
-  console.log(`Checking if file has initial version: ${file_name}`);
   const response = await fetch("http://localhost:3000/api/data/checkInit", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -74,9 +70,7 @@ async function check_init(file_name: string) {
 // Repeatedly call the API until there's no function call, then do a streaming call
 export async function POST(request: Request) {
   try {
-    console.log("Received POST request");
     const { messages: userMessages } = await request.json();
-    console.log("User messages:", userMessages);
 
     // Initialize function call logs
     const functionCallLogs: { name: string; arguments: any }[] = [];
@@ -95,7 +89,6 @@ export async function POST(request: Request) {
     ];
 
     while (true) {
-      console.log("Sending conversation to OpenAI:", conversation);
       const openAiResponse = await fetch(
         "https://api.openai.com/v1/chat/completions",
         {
@@ -176,17 +169,12 @@ export async function POST(request: Request) {
 
       const openAiResult = await openAiResponse.json();
       const message = openAiResult.choices[0].message;
-      console.log("Received message from OpenAI:", message);
       conversation.push(message);
 
       // If we got a function call, execute it and push the result back
       if (message.function_call) {
         const { name, arguments: args } = message.function_call;
         const functionArgs = JSON.parse(args);
-        console.log(
-          `Executing function call: ${name} with args:`,
-          functionArgs
-        );
 
         // Log the function call
         functionCallLogs.push({ name, arguments: functionArgs });
@@ -212,7 +200,7 @@ export async function POST(request: Request) {
           throw new Error(`Function ${name} not found.`);
         }
 
-        console.log(`Function result: ${name}`, functionResult);
+
         conversation.push({
           role: "function",
           name,
@@ -220,7 +208,7 @@ export async function POST(request: Request) {
         });
       } else {
         // No function call -> final text. Stream message variable back to client in the same way openai does it
-        console.log("No function call, streaming final text to client");
+
         const text = message.content || "";
         const words = text.split(/\s+/);
         const encoder = new TextEncoder();
