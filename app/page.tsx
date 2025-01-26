@@ -70,7 +70,6 @@ const open = (filename?: string): { message: string } => ({
   message: `Opening file: ${filename || '[no filename provided]'}`
 });
 
-
 const baseCommands: Command[] = [
   {
     icon: <HelpCircle className="w-4 h-4" />,
@@ -252,7 +251,7 @@ function MessageComponent({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
       transition={{ duration: 0.3 }}
-      className={`group flex items-start gap-4 chatty px-64 py-5 hover:bg-[#2A2A2A] relative ${
+      className={`group flex items-start gap-4 chatty px-24 py-5 hover:bg-[#2A2A2A] relative ${
         message.role === "user" ? "flex-row-reverse" : ""
       }`}
     >
