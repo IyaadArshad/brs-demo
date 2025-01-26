@@ -3,6 +3,10 @@ import PocketBase from "pocketbase";
 const pb = new PocketBase(`${process.env.POCKETBASE_SERVER_URL}`);
 
 export async function GET(request: Request) {
+    if (!process.env.POCKETBASE_SERVER_URL) {
+        return Response.json({ code: 500, message: "Missing PocketBase server URL" });
+    }
+
     // file_name and version from query parameters
     const url = new URL(request.url);
     const file_name = url.searchParams.get("file_name");

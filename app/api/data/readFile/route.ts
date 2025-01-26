@@ -1,5 +1,6 @@
 import PocketBase from "pocketbase";
 
+
 const pb = new PocketBase(`${process.env.POCKETBASE_SERVER_URL}`);
 
 export async function GET(request: Request) {
@@ -8,7 +9,7 @@ export async function GET(request: Request) {
   const file_name = url.searchParams.get("file_name");
 
   if (!file_name) {
-    return Response.json({ success: false, message: "file_name is required" });
+    return Response.json({ code: 400, message: "file_name is required" });
   }
 
   // get the file id, or return a 404

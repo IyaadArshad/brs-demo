@@ -3,18 +3,21 @@ import PocketBase from "pocketbase";
 const pb = new PocketBase(`${process.env.POCKETBASE_SERVER_URL}`);
 
 export async function POST(request: Request) {
-  const body = await request.json();
+  let body;
+  try {
+    body = await request.json();
+    if (!body.file_name || !body.data) {
+      return Response.json({ code: 400, message: "file_name and data are required" });
+    }
+  } catch (error) {
+    return Response.json({ code: 400, message: "Invalid JSON payload" });
+  }
+
   const file_name = body.file_name;
   const data = body.data;
 
   interface FetchIdResponse {
     id: string;
-  }
-
-  if (!file_name) {
-    return Response.json({ code: 400, message: "file_name is required" });
-  } else if (!data) {
-    return Response.json({ code: 400, message: "data is required" });
   }
 
   async function FetchId(file_name: string): Promise<Response> {

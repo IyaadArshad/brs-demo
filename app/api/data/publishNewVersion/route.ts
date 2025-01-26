@@ -36,6 +36,10 @@ export async function POST(request: Request) {
     return Response.json({ code: 400, message: "data is required" });
   }
 
+  if (!process.env.POCKETBASE_SERVER_URL) {
+    return Response.json({ code: 500, message: "Missing PocketBase server URL" });
+  }
+
   async function FetchId(file_name: string): Promise<Response> {
     try {
       const record: FetchIdResponse = await pb
@@ -60,7 +64,10 @@ export async function POST(request: Request) {
   const id = fetchIdData.id;
   
   const existingRecord = await pb.collection("files").getOne(id);
-  const recordData = existingRecord.data || {};
+  const recordData = existingRecord.data || {
+    latestVersion: 0,
+    versions: {}
+  };
   let currentLatest = recordData.latestVersion || 0;
 
   if (recordData.latestVersion === 0) {

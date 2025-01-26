@@ -1,4 +1,3 @@
-
 import OpenAI from "openai";
 
 const openai = new OpenAI({
@@ -6,7 +5,20 @@ const openai = new OpenAI({
 });
 
 export async function POST(request: Request) {
-    const params = await request.json();
+    if (!process.env.OPENAI_API_KEY) {
+        return Response.json({ code: 500, message: "Missing OpenAI API key" });
+    }
+
+    let params;
+    try {
+        params = await request.json();
+        if (!params.input || !params.file_name) {
+            return Response.json({ code: 400, message: "input and file_name are required" });
+        }
+    } catch (error) {
+        return Response.json({ code: 400, message: "Invalid JSON payload" });
+    }
+
     const input = params.input;
     const file_name = params.file_name;
 
