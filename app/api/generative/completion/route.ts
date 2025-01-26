@@ -5,7 +5,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
 });
 
-async function createFile(file_name: string) {
+async function create_file(file_name: string) {
   console.log(`Creating file: ${file_name}`);
   const response = await fetch("http://localhost:3000/api/data/createFile", {
     method: "POST",
@@ -17,6 +17,7 @@ async function createFile(file_name: string) {
     console.error(`Failed to create file: ${response.statusText}`);
     return { success: false, error: responseData.message };
   }
+  console.log(`File created successfully: ${file_name}`);
   return responseData;
 }
 
@@ -35,50 +36,67 @@ async function write_initial_data(file_name: string, data: string) {
     console.error(`Failed to write initial data: ${response.statusText}`);
     return { success: false, error: responseData.message };
   }
+  console.log(`Initial data written successfully to file: ${file_name}`);
   return responseData;
 }
 
-async function get_implementation_details(user_inputs: string) {
-  console.log(`Getting an overview prompt for input ${user_inputs}`);
-  const response = await fetch("http://localhost:3000/api/generative/completion", {
+async function get_implementation_details(user_inputs: string, file_name: string) {
+  console.log(`Getting implementation details for input: ${user_inputs}`);
+  const response = await fetch("http://localhost:3000/api/generative/get_overview", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ input: user_inputs }),
+    body: JSON.stringify({ input: user_inputs, file_name: file_name }),
   });
   const responseData = await response.json();
   if (!response.ok) {
-    console.error(`Failed to get an overview prompt for input: ${response.statusText}`);
+    console.error(`Failed to get implementation details: ${response.statusText}`);
     return { success: false, error: responseData.message };
   }
+  console.log(`Implementation details received for input: ${user_inputs}`);
   return responseData;
 }
 
-async function publish_new_version(file_name: string, data: string) {
-  console.log(`Publishing new version to file: ${file_name}`);
-  const response = await fetch(
-    "http://localhost:3000/api/data/publishNewVersion",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ file_name, data }),
-    }
-  );
+async function implement_overview(overview: string, file_name: string) {
+  console.log(`Implementing overview for file: ${file_name}`);
+  const response = await fetch("http://localhost:3000/api/generative/implement_overview", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ 
+      overview: overview,
+      file_name: file_name
+     }),
+  });
+
   const responseData = await response.json();
   if (!response.ok) {
-    console.error(`Failed to publish new version data: ${response.statusText}`);
+    console.error(`Failed to implement overview: ${response.statusText}`);
     return { success: false, error: responseData.message };
   }
+  console.log(`Overview implemented successfully for file: ${file_name}`);
   return responseData;
 }
 
-// Repeatedly call the API until there's no function call, then do a streaming call
+async function read_file(file_name: string) {
+  console.log(`Reading file: ${file_name}`);
+  const response = await fetch(`http://localhost:3000/api/data/readFile?file_name=${file_name}`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+  const responseData = await response.json();
+  if (!response.ok) {
+    console.error(`Failed to read file: ${response.statusText}`);
+    return { success: false, error: responseData.message };
+  }
+  console.log(`File read successfully: ${file_name}`);
+  return responseData;
+}
+
 export async function POST(request: Request) {
   try {
     console.log("Received POST request");
     const { messages: userMessages } = await request.json();
     console.log("User messages:", userMessages);
 
-    // Initialize function call logs
     const functionCallLogs: { name: string; arguments: any }[] = [];
 
     type Message =
@@ -87,9 +105,9 @@ export async function POST(request: Request) {
 
     let conversation: Message[] = [
       {
-        role: "system",
-        content:
-          'DO NOT EVER DIRECTLY PUT MARKDOWN TO THE USER. ONLY USE THE FUNCTIONS. Let the user know that creating a BRS effectively cannot be done in one message and let them know that they can ask you for questions for writing out data for each screen, and you can make it detailed with their input. Creating a Business Requirements Specification (BRS) document in markdown can be done using a document title at the beginning. Start with a concise, simple H1 title (#) that uses 4-5 words (Example: MIS Control Module), next, an BRS consists of just different screens. Most BRS\'s have more than 10 screens - that\'s alot! You will only do what the user has asked you to do, if the user is vague, you must ask questions until you can accurately create the rest of the BRS, you may provide suggestions to the user on potential screens to add. Only add screens to the document if the user has instructed you to do it. Do not be afraid to ask for clarifications or further detail. If the user puts alot of screens in one message, you will remember all the user says as context and proceed slowly step by step. Think carefully about what the user has asked about, ask the user for any missing details and if you feel like you have to assume something, you must ask the user. You have to be as clear as possible in an MBR. For each screen, start with a h2 heading (##) and each screen name will be the number of screen and a short 2-6 word title of what the screen does, a screen title (Example: 1. Cluster Master File). Clearly specify the name of the screen, (Example: "Sales Manager (New Transaction)", "Sales (List View)" , "Users (New)",  . You can\'t draw diagrams of what the screen will look like, but do not say that to the user and do not decline when the user asks for it. This is an BRS, for each screen there must be one diagram of the screen. For this, you will use the following special placeholder     ```\n    brsD {"brsDiagram": { diagram goes here }}\n    ```\nThis special brsD line indicates that this is a diagram, the user will see an interactive box to design the screen on the output side, but for you, you will only leave the placeholder. Do not design diagrams or layouts. The third part of a screen is important. Think carefully and put as necessary optional notes, explanations or descriptions, you must put at least one. Think carefully about what the screen is, the complexity of it, and whether is needs more information. Think carefully about context and place it appropriately.  If needed, you may use an "Excel sheet", which is not really an excel sheet, but is specially formatted to appear more like an excel sheet\'s data, you may use this for special purposes for something that might need excel theming. For this kind of table, you must have headers, footers, and numbered rows (numbered rows start at 1 after the header not counting the header and does not count at the footer. After all the screens, near the end of the document, you add options and showrooms, adding additional options that the client may like and showrooms to showcase additional diagrams. Never EVER do you you provide a diagram placeholder, a name of a screen and nothing else. You will always provide some form of a short 1-2 sentence description in 1 or 2 lines.\nThink critically about when additional notes or clarifications will enhance the document.\nAdhere strictly to the Markdown format and maintain consistent structure and clarity throughout the document.\nRemember that the BRS requires deep thinking, step by step, careful planning, precise vocabulary that isn\'t complicated, but understandable and professional, but simple. Screens with things like \'new\' tags (Example: "new user") must have the name of the section along with the tag in brackets, (example: "Users (New User)"). Do not be afraid to use new lines, do not write long paragraphs, instead, write 1-2 lines, add a new line and write another 1-2 lines, and so on. Spacing feels nice for the user. Use different extra information format for each screen. If you are adding extra information, you must add information before and after the diagram. You will never provide markdown of any screens to the user directly. If you have finished a screen, you will remember that screen, but not show it to the user.  You may create a file, and keep updating the file after each screen designed if the user is designing screens one by one. You will not use bullet points to display lists with 1 item or less. Never use the word description or title with a colon to state the title or description. That is implicit with the heading, subheading, and paragraph format outlined here. If the user asks you to create a demo document, you will create a full brs in one go without any other confirmation. You will make it detailed, it will have 12 screens, and you will be as detailed as possible, showing everything you can do in this one document. Remember to use the format of the BRS markdown correctly as outlined above. Do not talk, discuss or do anything related to anything too far outside context of the brs. Never display the brs diagram placeholder or any other markdown elements directly to the user in your assistnt response EVER. all markdown, document elements and diagrams belong in the files you create and update. NEVER SHOW PREVIEWS OF YOUR BRS FILES. NEVER PUT BRS ELEMENTS IN YOUR RESPONSE.',
+      role: "system",
+      content:
+        'You are ChatGPT, but modified to work as a Business Requirements Specification (BRS) AI Agent. You have functions do perform your tasks. You will use this prompt to understand how to create BRS documents. You can create_file to create a document. You will also provide the input for write_initial_data. BRS Documents are just .md files. You must create a file first, but you cannot do anything with the document. You must first write some initial data to the document. You will only write the initial data as long as you have the information you need for at least one screen. DO NOT EVER DIRECTLY PUT MARKDOWN TO THE USER. ONLY USE FUNCTIONS. If you want to update the content of the document, it is a different process, you must first get an overview of how you must implement the requested changes. Use get_implementation_details and put all the inputs that the user has put so far regarding a specific change. Put appropriate context in the user_inputs parameter and put the file the user is referring to in file_name. Please only work on one document in a conversation  only. Once you get an overview, you will remember what the overview was and directly give that overview to implement_overview function to implement the requested changes. Then the document will be updated. Once that is done, you will directly give the implementation details to the user in the message, without making any changes. If the user tries to generate a BRS in one message, Let the user know that creating a BRS effectively cannot be done in one message and let them know that they can ask you for questions for writing out data for each screen, and you can make it detailed with their input. Creating a Business Requirements Specification (BRS) document in markdown can be done using a document title at the beginning. Start with a concise, simple H1 title (#) that uses 4-5 words (Example: MIS Control Module), it should sound professional, next, an BRS really just consists of different screens. Most BRS\'s have more than 10 screens - that\'s alot! You will only do what the user has asked you to do, if the user is vague, you must ask questions until you can accurately create the rest of the BRS, you may provide suggestions to the user on potential screens to add. Only add screens to the document if the user has instructed you to do it. Do not be afraid to ask for clarifications or further detail. If the user puts alot of screens in one message, you will remember all the user says as context and proceed slowly step by step. Think carefully about what the user has asked about, ask the user for any missing details and if you feel like you have to assume something, you must ask the user. You have to be as clear as possible in an BRS.  For your reference, here is what a BRS is like: "At the topmost section of the document, there is the main heading. A simple, concise H1 title (#) that is 4-5 words (Example: MIS Control Module). A BRS is just a document that consists of different screens. Each screen has 4 sections. The first is the H2 (##) Heading that is the name of the screen. It is numbered, so the heading is prefixed with a 1. or 2. or 3. etc. It is a short 2-6 word of what the title does. If the screen is part of a larger screen (by context), the current smaller section is in brackets. Think carefully about using this. This would be like the users page, but the current screen is that of a new transaction, this would be "Users (New User)", other examples include "Sales (List View)", "Sales Manager (New Transaction)" etc. The second part of a screen is some extra information. It is usually a simple sentence explaining the screen. Use casual language for this one, but don\'t be unprofessional. usually simple language that gets the point across. This doesn\'t always need to be there. Most of the time, this second section isn\'t there anyway. Just keep in mind this exists though. The third section is the diagram. The fourth and last section of every screen is the extra data. There will always be some for of a short 1-2  sentence description in 1 or 2 lines.  This could be adding a table for some same data, tables to specify form field types, bullet points for extra info, etc.  Remember the format of the BRS markdown correctly as outlined above. Strictly follow this." You may create a file with some info, but you must have obtained information for at least one of the screens that the user has requested, and you may keep updating the file after each screen designed if the user is designing screens one by one. You will not use bullet points to display lists with 1 item or less. Never use the word description or title with a colon to state the title or description. That is implicit with the heading, subheading, and paragraph format outlined here. Remember to use the format of the BRS markdown correctly as outlined above. Do not talk, discuss or do anything related to anything too far outside context of the brs. Never display the brs diagram placeholder or any other markdown elements directly to the user in your assistant response EVER. all markdown, document elements and diagrams belong in the files you create and update. NEVER SHOW PREVIEWS OF YOUR BRS FILES. NEVER PUT BRS ELEMENTS IN YOUR RESPONSE.',
       },
       ...userMessages,
     ];
@@ -124,9 +142,22 @@ export async function POST(request: Request) {
                 description: "Gets an overview for changes that need to be implemented for a document",
                 parameters: {
                   type: "object",
-                  required: ["user_inputs"],
+                  required: ["user_inputs", "file_name"],
                   properties: {
                     user_inputs: { type: "string" },
+                    file_name: { type: "string" }
+                  },
+                },
+              },
+              {
+                name: "implement_overview",
+                description: "Using the implementation overview obtained from get_implement_details, this makes the changes to the document",
+                parameters: {
+                  type: "object",
+                  required: ["user_inputs", "file_name"],
+                  properties: {
+                    user_inputs: { type: "string" },
+                    file_name: { type: "string"}
                   },
                 },
               },
@@ -134,19 +165,6 @@ export async function POST(request: Request) {
                 name: "write_initial_data",
                 description:
                   "Writes initial data for version one for a file. You must call this to write initial data to a .md BRS file",
-                parameters: {
-                  type: "object",
-                  required: ["file_name", "data"],
-                  properties: {
-                    data: { type: "string" },
-                    file_name: { type: "string" },
-                  },
-                },
-              },
-              {
-                name: "publish_new_version",
-                description:
-                  "Updates a .md BRS file after initial data has been written. This is if you want to update a .md BRS file, you will be creating a new version and saving the new document to it.",
                 parameters: {
                   type: "object",
                   required: ["file_name", "data"],
@@ -179,7 +197,6 @@ export async function POST(request: Request) {
       console.log("Received message from OpenAI:", message);
       conversation.push(message);
 
-      // If we got a function call, execute it and push the result back
       if (message.function_call) {
         const { name, arguments: args } = message.function_call;
         const functionArgs = JSON.parse(args);
@@ -188,26 +205,30 @@ export async function POST(request: Request) {
           functionArgs
         );
 
-        // Log the function call
         functionCallLogs.push({ name, arguments: functionArgs });
 
         let functionResult;
 
         if (name === "create_brs_file") {
-          functionResult = await createFile(functionArgs.file_name);
+          functionResult = await create_file(functionArgs.file_name);
         } else if (name === "write_initial_data") {
           functionResult = await write_initial_data(
             functionArgs.file_name,
             functionArgs.data
           );
-        } else if (name === "publish_new_version") {
-          functionResult = await publish_new_version(
-            functionArgs.file_name,
-            functionArgs.data
+        } else if (name === "implement_overview") {
+          functionResult = await implement_overview(
+            functionArgs.overview,
+            functionArgs.file_name
           );
         } else if (name === "get_implementation_details") {
           functionResult = await get_implementation_details(
-            functionArgs.user_inputs
+            functionArgs.user_inputs,
+            functionArgs.file_name
+          );
+        } else if (name === "read_file") {
+          functionResult = await read_file(
+            functionArgs.file_name
           );
         } else {
           console.error(`Function ${name} not found.`);
@@ -221,7 +242,6 @@ export async function POST(request: Request) {
           content: JSON.stringify(functionResult),
         });
       } else {
-        // No function call -> final text. Stream message variable back to client in the same way openai does it
         console.log("No function call, streaming final text to client");
         const text = message.content || "";
         const words = text.split(/\s+/);
@@ -252,7 +272,6 @@ export async function POST(request: Request) {
               await new Promise((resolve) => setTimeout(resolve, 10));
             }
 
-            // After streaming the text, send the function call logs
             const functionLogsMessage = {
               functionsCalled: functionCallLogs,
             };
@@ -275,6 +294,7 @@ export async function POST(request: Request) {
           throw new Error("No streaming body found.");
         }
 
+        console.log("Streaming response to client");
         return new Response(streamingResponse.body, {
           headers: { "Content-Type": "text/event-stream" },
         });

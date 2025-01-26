@@ -32,18 +32,10 @@ export async function GET(request: Request) {
     const latestVersion = record.data.latestVersion;
     const latestVersionData = record.data.versions[latestVersion];
 
-    let v0;
-    if (record.data.latestVersion === 0) {
-      v0 = true
-    } else {
-      v0 = false
-    }
-
     return Response.json({
       success: true,
       latestVersion: `v${latestVersion}`,
       data: latestVersionData,
-      v0,
       notes: "You are seeing the latest version of the file as data. To see previous versions, call the /api/data/readFileVersions endpoint",
     });
   } catch (error) {

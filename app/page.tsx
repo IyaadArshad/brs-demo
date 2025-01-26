@@ -644,7 +644,7 @@ export default function ChatInterface() {
       abortControllerRef.current = new AbortController();
       let lastChunk = null;
 
-      const response = await fetch("/api/testFetch", {
+      const response = await fetch("/api/generative/completion", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
