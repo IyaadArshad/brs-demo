@@ -85,6 +85,7 @@ export async function POST(request: Request) {
     success: "true",
     message: `**${file_name}** has been successfully updated`,
     systemMessage: `The latest version is now v${recordData.latestVersion}`,
+    latestVersion: recordData.latestVersion,
     file_name,
   });
 }

@@ -74,16 +74,24 @@ export async function POST(request: Request) {
       throw new Error("Response message content is null");
     }
 
+
     const content = JSON.parse(messageContent);
-    await fetch("http://localhost:3000/api/data/publishNewVersion", {
+
+    // put the new version number in a constant, just the integer
+    
+    const publishNewVersion = await fetch("http://localhost:3000/api/data/publishNewVersion", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ file_name, data: content.newVersion }),
     });
+    const publishNewVersionResponse = await publishNewVersion.json();
+
+    const latestVersion = publishNewVersionResponse.latestVersion;
 
     return Response.json({
       code: 200,
       message: "Successfully updated the document",
+      latestVersion,
     });
   } catch (error) {
     return Response.json({ code: 500, message: error });
