@@ -4,6 +4,12 @@ export async function GET(request: Request) {
     const file_name = url.searchParams.get("file_name");
     const user_inputs = url.searchParams.get("user_inputs");
 
+    if (!file_name) {
+        return Response.json({ success: false, message: "file_name is required" });
+    } else if (!user_inputs) {
+        return Response.json({ success: false, message: "user_inputs is required" });
+    }
+
     console.log()
     console.log()
     console.log("SUBFUNCTION HAS BEEN CALLED -> IMPLEMENT EDITS")

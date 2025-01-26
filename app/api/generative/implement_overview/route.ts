@@ -8,6 +8,8 @@ export async function POST(request: Request) {
   const params = await request.json();
   const overview = params.overview;
   const file_name = params.file_name;
+  console.log("PARAM OVERVIEW", overview)
+  console.log("PARAM FILENAME", file_name)
 
   const file_contents_fetch = await fetch(
     `http://localhost:3000/api/generative/functions/read_file?file_name=${file_name}`
@@ -18,6 +20,7 @@ export async function POST(request: Request) {
     implementation_overview_prompt: `${overview}`,
     currentVersion: `${file_contents.data}`,
   };
+  console.log("prompt",prompt);
 
   try {
     const response = await openai.chat.completions.create({
@@ -73,6 +76,8 @@ export async function POST(request: Request) {
     if (messageContent === null) {
       throw new Error("Response message content is null");
     }
+
+    console.log(response);
 
 
     const content = JSON.parse(messageContent);
