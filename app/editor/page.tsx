@@ -683,6 +683,16 @@ export default function Page() {
   const [isLoading, setIsLoading] = useState(true);
   const [version, setVersion] = useState("");
   const [error, setError] = useState("");
+  const [versions, setVersions] = useState<string[]>([]); 
+  const [selectedVersion, setSelectedVersion] = useState("");
+  const [showRestoreDialog, setShowRestoreDialog] = useState(false);
+  const [versionContents, setVersionContents] = useState<Record<string, string>>({}); // Add state for version contents
+
+  let fileName = "";
+  if (typeof window !== "undefined") {
+    const searchParams = new URLSearchParams(window.location.search);
+    fileName = searchParams.get("file_name") || "";
+  }
 
   const editor = useEditor({
     extensions: [
@@ -783,8 +793,13 @@ export default function Page() {
           setIsLoading(false);
           return;
         }
-        setVersion(data.latestVersion);
-        editor.commands.setContent(data.data);
+        if (data.success && data.latestVersion) {
+          setVersion(data.latestVersion);
+          setVersions(Object.keys(data.dataAllVersions || {})); // e.g. [ "v0", "v1", "v2" ]
+          setSelectedVersion(data.latestVersion);
+          setVersionContents(data.dataAllVersions || {}); // Store all versions' contents
+          editor.commands.setContent(data.data);
+        }
         setIsLoading(false);
       })
       .catch((err) => {
@@ -800,33 +815,84 @@ export default function Page() {
     }
   }, [editor, isLoading]);
 
+  // If selectedVersion != latest found, set read-only
+  useEffect(() => {
+    if (editor && versionContents[selectedVersion]) {
+      editor.commands.setContent(versionContents[selectedVersion]);
+      editor.setEditable(selectedVersion === version);
+    }
+  }, [editor, selectedVersion, version, versionContents]);
+
   return (
     <main className="relative min-h-screen bg-background">
       {/* Version or error message in top-left */}
       {!isLoading && (
         <div className="absolute top-4 left-4 flex items-center gap-2">
-          {version && version !== "v0" && !error && (
-            <div className="text-blue-600 font-semibold">
-              {version}
-            </div>
-          )}
-          {error && (
-            <div className="flex items-center gap-1 text-red-500">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 fill-red-500"
-                viewBox="0 0 24 24"
-              >
-                <path d="M12 0C5.373 0 0 5.373 0 12s5.373 
-                  12 12 12 12-5.373 12-12S18.627 0 
-                  12 0zm0 17.333a1.333 1.333 0 
-                  110 2.667 1.333 1.333 0 010-2.667zm1.333-8V13.333h-2.666V9.333h2.666z" />
-              </svg>
-              {error}
-            </div>
+          <Popover>
+            <PopoverTrigger asChild>
+                <button className="inline-flex h-9 items-center rounded-lg px-5 text-s font-medium bg-[#042f2e] text-[#2dd4bf] hover:bg-[#064e4d] hover:text-[#2dd4bf]">
+                {selectedVersion === version ? `Latest (${version})` : selectedVersion}
+                </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-32 p-1 mt-1">
+              {versions.map((ver) => (
+                <button
+                  key={ver}
+                  onClick={() => setSelectedVersion(ver)}
+                  className="block w-full px-2 py-1 text-left hover:bg-accent rounded"
+                >
+                  {ver === version ? ver + " (latest)" : ver}
+                </button>
+              ))}
+            </PopoverContent>
+          </Popover>
+
+          {/* Show restore button if not latest */}
+          {selectedVersion !== version && (
+            <button
+              onClick={() => setShowRestoreDialog(true)}
+              className="h-9 px-2 text-[#fafafa] hover:text-gray-300 text-lg"
+            >
+              Restore
+            </button>
           )}
         </div>
       )}
+
+      {/* Warning dialog */}
+      <Dialog.Root open={showRestoreDialog} onOpenChange={setShowRestoreDialog}>
+        <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
+        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-4 rounded shadow">
+          <Dialog.Title className="text-lg font-bold mb-2">Warning</Dialog.Title>
+          <Dialog.Description className="mb-4">
+            This will remove all versions created after {selectedVersion}. Are you sure?
+          </Dialog.Description>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowRestoreDialog(false)}
+              className="p-2 border rounded"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={async () => {
+                const res = await fetch("/api/editor/restoreVersion", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ fileName, version: selectedVersion }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                  window.location.reload();
+                }
+              }}
+              className="p-2 border rounded bg-red-600 text-white"
+            >
+              Yes, restore
+            </button>
+          </div>
+        </Dialog.Content>
+      </Dialog.Root>
 
       <Dialog.Root open={isLoading}>
         <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
