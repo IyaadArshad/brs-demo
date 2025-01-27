@@ -434,6 +434,7 @@ type Component = {
   borderThickness?: number; // Added property
   placeholderFontSize?: number; // Added property
   height?: number; // Added property
+  iconComponent?: React.ComponentType; // Added property
 };
 
 // Component data
@@ -468,14 +469,44 @@ const componentData = {
       icon: LayoutIcon,
     },
   ],
-  shapes: [
+  icons: [
     {
-      id: "square",
-      name: "Square",
-      icon: ShapesIcon,
-      description:
-        "A foundational shape suited for flowcharts, diagrams, or highlighting key parts of a layout.",
+      id: "plus",
+      name: "Plus",
+      icon: Plus,
+      description: "A plus/add icon for indicating additive actions",
     },
+    {
+      id: "search",
+      name: "Search",
+      icon: Search,
+      description: "A search/magnifying glass icon for search functionality",
+    },
+    {
+      id: "settings",
+      name: "Settings",
+      icon: SettingsIcon,
+      description: "A gear/cog icon for settings or configuration",
+    },
+    {
+      id: "layout",
+      name: "Layout",
+      icon: Layout,
+      description: "A layout icon for structural elements",
+    },
+    {
+      id: "pencil",
+      name: "Pencil",
+      icon: Pencil,
+      description: "An edit/pencil icon for modification actions",
+    },
+    {
+      id: "trash",
+      name: "Trash",
+      icon: Trash,
+      description: "A trash/delete icon for removal actions",
+    },
+    // Add more icons as needed
   ],
   text: [
     {
@@ -596,10 +627,10 @@ const componentCategories = [
     description: "Container components like tabs and blank windows",
   },
   {
-    id: "shapes",
-    name: "Shapes",
+    id: "icons",
+    name: "Icons",
     icon: ShapesIcon,
-    description: "Basic geometric shapes",
+    description: "Collection of Lucide icons for various purposes",
   },
   {
     id: "text",
@@ -615,122 +646,10 @@ const componentCategories = [
   },
 ];
 
-const formCategories = [
-  {
-    id: "fields",
-    name: "Fields",
-    icon: FormInputIcon,
-    description: "Basic form fields",
-  },
-  {
-    id: "components",
-    name: "Components",
-    icon: LayoutIcon,
-    description: "Form components like checkboxes and radios",
-  },
-  {
-    id: "pinned",
-    name: "Pinned",
-    icon: PinIcon,
-    description: "Frequently used form components",
-  },
-  {
-    id: "templates",
-    name: "Templates",
-    icon: LayoutIcon,
-    description: "Form templates for quick setup",
-  },
-];
-
 // Shape rendering function
-const renderShape = (type: string) => {
-  switch (type) {
-    case "square":
-      return <rect width="40" height="40" fill="#4299e1" />;
-    case "circle":
-      return <circle cx="20" cy="20" r="20" fill="#48bb78" />;
-    case "triangle":
-      return <polygon points="20,0 40,40 0,40" fill="#ed8936" />;
-    case "rectangle":
-      return <rect width="60" height="40" fill="#9f7aea" />;
-    case "oval":
-      return <ellipse cx="30" cy="20" rx="30" ry="20" fill="#ed64a6" />;
-    case "hexagon":
-      return (
-        <polygon points="30,0 60,20 60,50 30,70 0,50 0,20" fill="#667eea" />
-      );
-    case "octagon":
-      return (
-        <polygon
-          points="20,0 60,0 80,20 80,60 60,80 20,80 0,60 0,20"
-          fill="#f56565"
-        />
-      );
-    case "pentagon":
-      return <polygon points="50,0 100,38 81,100 19,100 0,38" fill="#68d391" />;
-    case "diamond":
-      return <polygon points="40,0 80,40 40,80 0,40" fill="#4fd1c5" />;
-    case "star":
-      return (
-        <path
-          d="M20,0 25,15 40,15 30,25 35,40 20,30 5,40 10,25 0,15 15,15 Z"
-          fill="#f6e05e"
-        />
-      );
-    case "heart":
-      return (
-        <path
-          d="M20,10 C20,-10 60,0 40,20 C60,40 20,50 20,30 C20,50 -20,40 0,20 C-20,0 20,-10 20,10 Z"
-          fill="#fc8181"
-        />
-      );
-    case "trapezoid":
-      return <polygon points="20,0 80,0 100,40 0,40" fill="#b794f4" />;
-    case "parallelogram":
-      return <polygon points="20,0 100,0 80,40 0,40" fill="#90cdf4" />;
-    case "rhombus":
-      return <polygon points="40,0 80,40 40,80 0,40" fill="#f687b3" />;
-    case "arrow":
-      return (
-        <polygon
-          points="0,20 60,20 60,0 100,40 60,80 60,60 0,60"
-          fill="#a0aec0"
-        />
-      );
-    case "cross":
-      return (
-        <path
-          d="M20,0 V20 H0 V60 H20 V80 H60 V60 H80 V20 H60 V0 Z"
-          fill="#cbd5e0"
-        />
-      );
-    case "cloud":
-      return (
-        <path
-          d="M20,60 C0,60 0,30 20,30 C20,10 50,10 50,30 C70,30 70,60 50,60 Z"
-          fill="#63b3ed"
-        />
-      );
-    case "cylinder":
-      return (
-        <g>
-          <ellipse cx="40" cy="10" rx="40" ry="10" fill="#d53f8c" />
-          <rect x="0" y="10" width="80" height="60" fill="#d53f8c" />
-          <ellipse cx="40" cy="70" rx="40" ry="10" fill="#b83280" />
-        </g>
-      );
-    case "cone":
-      return <polygon points="50,0 100,100 0,100" fill="#f6ad55" />;
-    case "pyramid":
-      return (
-        <g>
-          <polygon points="50,0 100,100 0,100" fill="#ecc94b" />
-          <polygon points="50,0 100,100 50,100" fill="#d69e2e" />
-        </g>
-      );
-    default:
-      return <rect width="40" height="40" fill="#a0aec0" />;
-  }
+const renderIcon = (IconComponent: any) => {
+  if (!IconComponent) return null;
+  return <IconComponent className="w-full h-full" />;
 };
 
 // Components Dialog Component
@@ -1336,6 +1255,21 @@ export default function DiagramGenerator() {
     if (canvasRect) {
       const x = e.clientX - canvasRect.left;
       const y = e.clientY - canvasRect.top;
+
+      // Find the icon component data
+      const iconComponent = componentData.icons.find(icon => icon.id === componentType);
+
+      if (iconComponent) {
+        const newComponent: Component = {
+          id: `icon-${shapeIdRef.current++}`,
+          type: "icon",
+          position: { x, y },
+          content: componentType, // Store the icon type
+          iconComponent: iconComponent.icon, // Store the icon component
+        };
+        setDiagramComponents((prev) => [...prev, newComponent]);
+        return;
+      }
 
       let defaultContent = "";
       switch (componentType) {
@@ -2034,60 +1968,64 @@ export default function DiagramGenerator() {
                       </ContextMenu>
                     );
                     break;
+                  case "icon":
+                    ComponentToRender = (
+                      <ContextMenu>
+                        <ContextMenuTrigger>
+                          <div
+                            className="absolute cursor-move"
+                            style={{
+                              left: `${component.position.x}px`,
+                              top: `${component.position.y}px`,
+                              width: "40px",  // Default size for icons
+                              height: "40px",
+                              color: component.color || "currentColor",
+                            }}
+                            onMouseDown={(e) => startDrag(e, component.id)}
+                          >
+                            {component.iconComponent && renderIcon(component.iconComponent)}
+                          </div>
+                        </ContextMenuTrigger>
+                        <ContextMenuContent>
+                          <ContextMenuItem
+                            onClick={() => handleCustomize(component)}
+                          >
+                            <Paintbrush className="mr-4 h-4 w-4" /> Customize
+                          </ContextMenuItem>
+                          <ContextMenuSeparator />
+                          <ContextMenuItem
+                            onClick={() => removeComponent(component.id)}
+                            className="flex items-center cursor-pointer text-red-600 hover:bg-red-500"
+                          >
+                            <Trash className="mr-4 h-4 w-4" /> Delete
+                          </ContextMenuItem>
+                        </ContextMenuContent>
+                      </ContextMenu>
+                    );
+                    break;
                   default:
-                    if (
-                      componentData.shapes.some(
-                        (shape) => shape.id === component.type
-                      )
-                    ) {
-                      ComponentToRender = (
-                        <ContextMenu>
-                          <ContextMenuTrigger>
-                            <div
-                              className="absolute"
-                              style={{
-                                left: `${component.position.x}px`,
-                                top: `${component.position.y}px`,
-                              }}
-                            >
-                              <svg width="80" height="80" viewBox="0 0 100 100">
-                                {renderShape(component.type)}
-                              </svg>
-                            </div>
-                          </ContextMenuTrigger>
-                          <ContextMenuContent>
-                            <ContextMenuItem
-                              onClick={() => removeComponent(component.id)}
-                            >
-                              Delete
-                            </ContextMenuItem>
-                          </ContextMenuContent>
-                        </ContextMenu>
-                      );
-                    } else {
-                      ComponentToRender = (
-                        <ContextMenu>
-                          <ContextMenuTrigger>
-                            <div
-                              className="absolute bg-white border rounded p-2 cursor-move"
-                              style={{
-                                left: `${component.position.x}px`,
-                                top: `${component.position.y}px`,
-                              }}
-                            >
-                              {component.type}
-                            </div>
-                          </ContextMenuTrigger>
-                          <ContextMenuContent>
-                            <ContextMenuItem
-                              onClick={() => removeComponent(component.id)}
-                            >
-                              Delete
-                            </ContextMenuItem>
-                          </ContextMenuContent>
-                        </ContextMenu>
-                      );
-                    }
+                    ComponentToRender = (
+                      <ContextMenu>
+                        <ContextMenuTrigger>
+                          <div
+                            className="absolute bg-white border rounded p-2 cursor-move"
+                            style={{
+                              left: `${component.position.x}px`,
+                              top: `${component.position.y}px`,
+                            }}
+                          >
+                            {component.type}
+                          </div>
+                        </ContextMenuTrigger>
+                        <ContextMenuContent>
+                          <ContextMenuItem
+                            onClick={() => removeComponent(component.id)}
+                          >
+                            Delete
+                          </ContextMenuItem>
+                        </ContextMenuContent>
+                      </ContextMenu>
+                    );
                 }
 
                 return <div key={component.id}>{ComponentToRender}</div>;
