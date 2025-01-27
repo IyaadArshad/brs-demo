@@ -47,7 +47,7 @@ export async function POST(request: Request) {
   }
 
   const initialData = {
-    name: `fileName`,
+    name: `${fileName}`,
     latestVersion: 0,
     versions: {}
   }
