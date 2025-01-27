@@ -596,3 +596,10 @@ ul[data-type="taskList"] li > label input[type="checkbox"] {
   }
 }
 
+/* Add these rules before the end of the file */
+.suggestion {
+  color: #6B7280;
+  font-style: italic;
+  user-select: none;
+}
+
