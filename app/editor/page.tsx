@@ -831,7 +831,7 @@ export default function Page() {
           <Popover>
             <PopoverTrigger asChild>
                 <button className="inline-flex h-9 items-center rounded-lg px-5 text-s font-medium bg-[#042f2e] text-[#2dd4bf] hover:bg-[#064e4d] hover:text-[#2dd4bf]">
-                {selectedVersion === version ? `Latest (${version})` : selectedVersion}
+                {selectedVersion === version ? `Latest (${version})` : `View Mode - v${selectedVersion}`}
                 </button>
             </PopoverTrigger>
             <PopoverContent className="w-32 p-1 mt-1">
@@ -851,7 +851,7 @@ export default function Page() {
           {selectedVersion !== version && (
             <button
               onClick={() => setShowRestoreDialog(true)}
-              className="h-9 px-2 text-[#fafafa] hover:text-gray-300 text-lg"
+              className="h-9 px-2 text-[#fafafa] hover:text-gray-200 text-lg"
             >
               Restore
             </button>
