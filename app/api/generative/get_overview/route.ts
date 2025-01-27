@@ -22,18 +22,35 @@ export async function POST(request: Request) {
     const input = params.input;
     const file_name = params.file_name;
 
-    const file_contents_fetch = await fetch(
-        `http://localhost:3000/api/generative/functions/read_file?file_name=${file_name}`
-      );
-      const file_contents = await file_contents_fetch.json();
-
-    if (file_contents.v0) {
-        return Response.json({ code: 400, message: "You cannot create prompts for a file that has no versions" });
-    } else if (!file_contents.data) {
-        return Response.json({ code: 404, message: "File not found" });
-    }
-
     try {
+        // Fetch file contents with better error handling
+        const file_contents_fetch = await Promise.race([
+            fetch(
+                `http://localhost:3000/api/generative/functions/read_file?file_name=${encodeURIComponent(file_name)}`,
+                {
+                    headers: { 'Cache-Control': 'no-cache' }
+                }
+            ),
+            new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Request timeout')), 15000)
+            )
+        ]) as Response;
+        const file_contents = await file_contents_fetch.json();
+
+        if (!file_contents.success) {
+            if (file_contents.code === 404) {
+                return Response.json({ 
+                    code: 404, 
+                    message: "File not found" 
+                });
+            }
+            throw new Error(file_contents.message || 'Error reading file');
+        }
+
+        if (file_contents.v0) {
+            return Response.json({ code: 400, message: "Cannot create prompts for a file with no versions" });
+        }
+
         const response = await openai.chat.completions.create({
             model: "gpt-4o",
             messages: [
@@ -68,7 +85,14 @@ export async function POST(request: Request) {
 
         return Response.json({ code: 200, prompt: response.choices[0].message.content });
     } catch (error) {
-        return Response.json({ code: 500, message: error });
+        console.error('Error in overview generation:', error);
+        return Response.json({ 
+            code: error && typeof error === 'object' && 'code' in error ? (error as { code: number }).code : 500,
+            message: error && typeof error === 'object' && 'message' in error ? (error as { message: string }).message : "Error generating overview",
+            error: error instanceof Error ? {
+                message: error.message,
+                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+            } : error
+        });
     }
-
 }
