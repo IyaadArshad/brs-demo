@@ -9,7 +9,7 @@ export async function POST(request: Request) {
   try {
     params = await request.json();
     if (!params.line || !params.document_lines) {
-      return Response.json({ code: 400, message: "line and file_name are required" });
+      return Response.json({ code: 400, message: "line and document lines are required" });
     }
   } catch (error) {
     return Response.json({ code: 400, message: "Invalid JSON payload" });
