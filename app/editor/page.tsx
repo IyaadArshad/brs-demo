@@ -680,6 +680,9 @@ const editorWidths = {
 export default function Page() {
   const [editorWidth, setEditorWidth] =
     useState<keyof typeof editorWidths>("default");
+  const [isLoading, setIsLoading] = useState(true);
+  const [version, setVersion] = useState("");
+  const [error, setError] = useState("");
 
   const editor = useEditor({
     extensions: [
@@ -756,10 +759,85 @@ export default function Page() {
     immediatelyRender: false,
   });
 
+  useEffect(() => {
+    if (!editor) return;
+    const searchParams = new URLSearchParams(window.location.search);
+    const fileName = searchParams.get("file_name");
+    if (!fileName) {
+      return;
+    }
+
+    fetch(`/api/editor/fetchFile?file_name=${fileName}`)
+      .then((res) => res.json())
+      .then((data) => {
+        // 404 error
+        if (data.code === 404) {
+          setError("File not found");
+          setIsLoading(false);
+          return;
+        }
+        // 0-version check
+        if (data.latestVersion === "v0" || !data.data) {
+          setError("File is not initialized");
+          setVersion("v0");
+          setIsLoading(false);
+          return;
+        }
+        setVersion(data.latestVersion);
+        editor.commands.setContent(data.data);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        setError("Error fetching file");
+        setIsLoading(false);
+      });
+  }, [editor]);
+
+  // Prevent edits if still loading
+  useEffect(() => {
+    if (editor) {
+      editor.setEditable(!isLoading);
+    }
+  }, [editor, isLoading]);
+
   return (
     <main className="relative min-h-screen bg-background">
+      {/* Version or error message in top-left */}
+      {!isLoading && (
+        <div className="absolute top-4 left-4 flex items-center gap-2">
+          {version && version !== "v0" && !error && (
+            <div className="text-blue-600 font-semibold">
+              {version}
+            </div>
+          )}
+          {error && (
+            <div className="flex items-center gap-1 text-red-500">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 fill-red-500"
+                viewBox="0 0 24 24"
+              >
+                <path d="M12 0C5.373 0 0 5.373 0 12s5.373 
+                  12 12 12 12-5.373 12-12S18.627 0 
+                  12 0zm0 17.333a1.333 1.333 0 
+                  110 2.667 1.333 1.333 0 010-2.667zm1.333-8V13.333h-2.666V9.333h2.666z" />
+              </svg>
+              {error}
+            </div>
+          )}
+        </div>
+      )}
+
+      <Dialog.Root open={isLoading}>
+        <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
+        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-lg p-8 bg-accent text-accent-foreground flex flex-col items-center justify-center gap-2 text-lg">
+          <div className="w-8 h-8 border-4 border-t-transparent border-foreground rounded-full animate-spin" />
+          <div>Loading...</div>
+        </Dialog.Content>
+      </Dialog.Root>
+
       <div className={`mx-auto ${editorWidths[editorWidth]} p-12`}>
-        {editor && (
+        {editor && !isLoading && !error && (
           <>
             <FormattingMenu editor={editor} />
             <CommandPalette editor={editor} />
