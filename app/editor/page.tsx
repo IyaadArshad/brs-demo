@@ -696,8 +696,8 @@ const Suggestion = Mark.create({
   renderHTML({ HTMLAttributes }) {
     return ['span', { 
       'data-suggestion': '',
-      class: 'text-gray-500 italic',
-      style: 'user-select: none;'
+      class: 'text-gray-400 bg-gray-100 dark:bg-gray-800',
+      style: 'padding: 0.1rem 0;'
     }, 0]
   },
 })
@@ -712,7 +712,6 @@ export default function Page() {
   const [selectedVersion, setSelectedVersion] = useState("");
   const [showRestoreDialog, setShowRestoreDialog] = useState(false);
   const [versionContents, setVersionContents] = useState<Record<string, string>>({}); // Add state for version contents
-  const [suggestion, setSuggestion] = useState<string | null>(null);
 
   let fileName = "";
   if (typeof window !== "undefined") {
@@ -790,19 +789,32 @@ export default function Page() {
           "prose prose-stone dark:prose-invert focus:outline-none max-w-full prose-headings:mb-4 prose-headings:mt-6 [&_ul[data-type='taskList']]:list-none prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:my-4 prose-blockquote:italic",
       },
       handleKeyDown: (view, event) => {
-        // Handle suggestion acceptance and rejection
-        if (suggestion) {
-          if (event.key === 'Tab') {
+        // Handle suggestion acceptance/rejection
+        if (event.key === 'Tab') {
+          const { from, to } = view.state.selection;
+          const marks = view.state.doc.rangeHasMark(from, to, view.state.schema.marks.suggestion);
+          
+          if (marks) {
             event.preventDefault();
-            // Insert the suggestion
-            editor?.chain().focus().insertContent(suggestion).run();
-            setSuggestion(null);
+            
+            // Accept suggestion by removing the suggestion mark
+            view.dispatch(
+              view.state.tr
+                .removeMark(from, to, view.state.schema.marks.suggestion)
+            );
+            
             return true;
           }
-          if (event.key === 'Escape') {
+        }
+
+        if (event.key === 'Escape') {
+          const { from, to } = view.state.selection;
+          const marks = view.state.doc.rangeHasMark(from, to, view.state.schema.marks.suggestion);
+          
+          if (marks) {
             event.preventDefault();
-            // Reject the suggestion
-            setSuggestion(null);
+            // Remove the suggestion by deleting the marked text
+            view.dispatch(view.state.tr.delete(from, to));
             return true;
           }
         }
@@ -811,24 +823,21 @@ export default function Page() {
         if (event.ctrlKey && event.key === 'u') {
           event.preventDefault();
           
-          // Get current cursor position and text content
+          // Get current cursor position
           const { from } = view.state.selection;
           const $pos = view.state.doc.resolve(from);
-          const currentPos = $pos.pos;
           
-          // Get the current line's content
-          const lineStart = $pos.start();
-          const lineEnd = $pos.end();
-          const lineText = view.state.doc.textBetween(lineStart, lineEnd);
+          // Get the current line content
+          const currentLine = $pos.parent.textContent;
           
           // Only proceed if the current line is not empty
-          if (!lineText.trim()) {
+          if (!currentLine.trim()) {
             return true;
           }
-  
+
           // Get entire document content
           const documentContent = view.state.doc.textContent;
-  
+
           // Call autocomplete API
           fetch('/api/generative/autocomplete', {
             method: 'POST',
@@ -836,21 +845,27 @@ export default function Page() {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              line: lineText,
+              line: currentLine,
               document_lines: documentContent
             })
           })
           .then(res => res.json())
           .then(data => {
             if (data.code === 200 && data.suggestion) {
-              // Set the suggestion instead of inserting it immediately
-              setSuggestion(data.suggestion);
+              const suggestionMark = view.state.schema.marks.suggestion.create();
+              // Insert the suggestion with the suggestion mark
+              const transaction = view.state.tr.insertText(data.suggestion).addMark(
+                from,
+                from + data.suggestion.length,
+                suggestionMark
+              );
+              view.dispatch(transaction);
             }
           })
           .catch(err => {
             console.error('Error getting autocomplete:', err);
           });
-  
+
           return true;
         }
         return false;
@@ -1006,16 +1021,6 @@ export default function Page() {
         <div className="fixed bottom-4 right-4">
           <SettingsDialog onWidthChange={setEditorWidth} />
         </div>
-        
-        {/* Suggestion Box */}
-        {suggestion && (
-          <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 bg-white text-black p-2 border rounded shadow-lg">
-            {suggestion}
-            <div className="text-xs text-gray-500 mt-1">
-              Press <kbd>Tab</kbd> to accept or <kbd>Esc</kbd> to reject.
-            </div>
-          </div>
-        )}
       </div>
     </main>
   );
