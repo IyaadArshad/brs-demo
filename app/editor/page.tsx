@@ -254,7 +254,7 @@ function CommandPalette({ editor }: CommandPaletteProps) {
   }, [search]);
 
   const onKeyDown = useCallback((e: KeyboardEvent) => {
-    if (e.ctrlKey && e.key === "i") {
+    if (e.ctrlKey && e.key === "x") {
       e.preventDefault();
       setOpen(true);
     }
