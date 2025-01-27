@@ -15,8 +15,6 @@ import {
   Layout, // New import
   Square, // Add this import
 } from "lucide-react";
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import Link from "next/link";
 import {
   Tooltip,
@@ -28,6 +26,7 @@ import { MessageSquare, Eye, FileText, HelpCircle } from 'lucide-react';
 import { Label } from "@/components/ui/label"; // Add this import
 import Cookies from 'js-cookie'; // Add this import
 import gravatarUrl from "gravatar-url";
+import { parseMarkdown } from "@/utils/markdownParser"; // Add this import
 
 interface MessageProps {
   message: Message;
@@ -307,9 +306,10 @@ function MessageComponent({
             }}
           />
         ) : (
-          <Markdown remarkPlugins={[remarkGfm]} className="markdown-body">
-            {message.content}
-          </Markdown>
+          <div 
+            className="markdown-body whitespace-pre-wrap prose prose-invert max-w-none"
+            dangerouslySetInnerHTML={{ __html: parseMarkdown(message.content) }}
+          />
         )}
       </div>
       <div
@@ -638,8 +638,7 @@ export default function ChatInterface() {
     try {
       setIsStreaming(true);
       abortControllerRef.current = new AbortController();
-      let lastChunk = null;
-
+      
       const response = await fetch("/api/generative/completion", {
         method: "POST",
         headers: {
@@ -680,10 +679,11 @@ export default function ChatInterface() {
             if (data === "[DONE]") break;
             try {
               const parsed = JSON.parse(data);
-              lastChunk = parsed; // Store the last chunk
               const content = parsed?.choices?.[0]?.delta?.content;
               if (content) {
-                aiResponseContent += content;
+                // Preserve newlines by replacing them with actual line breaks
+                const formattedContent = content.replace(/\\n/g, '\n');
+                aiResponseContent += formattedContent;
                 setMessages((prev) => {
                   const lastMessage = prev[prev.length - 1];
                   if (lastMessage?.role === "assistant") {
@@ -710,12 +710,6 @@ export default function ChatInterface() {
           }
         }
       }
-
-      // Log the last chunk after the stream is complete
-      if (lastChunk) {
-        console.log('Last chunk received:', lastChunk);
-      }
-
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
         // Add partial message indicator when request is aborted
