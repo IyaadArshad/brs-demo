@@ -12,7 +12,11 @@ import {
   Pencil,
   Check,
   FolderSyncIcon as Sync,
-  Square,
+  Layout, // Ensure Layout is used or remove
+  Square, // Ensure Square is used or remove
+  HelpCircle, // Add missing import
+  Eye, // Add missing import
+  FileText, // Add missing import
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -21,10 +25,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Eye, FileText, HelpCircle } from 'lucide-react';
-import Cookies from 'js-cookie';
+import Cookies from 'js-cookie'; // Add this import
 import gravatarUrl from "gravatar-url";
-import { parseMarkdown } from "@/utils/markdownParser";
+import { parseMarkdown } from "@/utils/markdownParser"; // Add this import
 
 interface MessageProps {
   message: Message;
@@ -127,7 +130,7 @@ interface CommandMenuProps {
   splitView: boolean; // add this prop
 }
 
-function CommandMenu({ isOpen, onSelect, filter, splitView }: CommandMenuProps) {
+const CommandMenu: React.FC<CommandMenuProps> = ({ isOpen, onSelect, filter, splitView }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const commands = getCommands(splitView);
   const filteredCommands = commands.filter(
@@ -251,6 +254,7 @@ function MessageComponent({
       className={`group flex items-start gap-4 chatty px-24 py-5 hover:bg-[#2A2A2A] relative ${
         message.role === "user" ? "flex-row-reverse" : ""
       }`}
+      aria-label={`Message from ${message.role}`}
     >
       <div
         className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
@@ -723,6 +727,16 @@ export default function ChatInterface() {
         });
       } else {
         console.error("Error fetching AI response:", error);
+        // Optionally, add user-facing error message
+        setMessages(prev => [
+          ...prev,
+          {
+            id: (Date.now() + 1).toString(),
+            content: "An error occurred while fetching the response.",
+            role: "assistant",
+            timestamp: Date.now(),
+          },
+        ]);
       }
     } finally {
       setIsStreaming(false);
@@ -764,7 +778,7 @@ export default function ChatInterface() {
 
   if (!user) {
     return (
-      <div className="h-screen bg-[#1E1E1E] text-white flex flex-col items-center justify-center p-4">
+      <div className="h-screen chat-container bg-[#1E1E1E] text-white flex flex-col items-center justify-center p-4">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -817,7 +831,7 @@ export default function ChatInterface() {
 
   return (
     splitView ? (
-      <div className="flex h-screen overflow-hidden">
+      <div className="flex h-screen overflow-hidden bg-black"> {/* Ensure parent has black background */}
         {/* Left pane */}
         <div
           className="border-r screen border-black overflow-y-auto"
@@ -840,7 +854,7 @@ export default function ChatInterface() {
         />
         {/* Right pane */}
         <div
-          className="flex screen flex-col bg-[#1E1E1E] text-white overflow-y-auto"
+          className="flex screen flex-col bg-[#1E1E1E] text-white overflow-y-auto chat-container" /* Added chat-container class */
           style={{ flexBasis: `${100 - editorWidth}%` }}
         >
           {/* The entire chat interface goes here */}
@@ -985,7 +999,8 @@ export default function ChatInterface() {
         </div>
       </div>
     ) : (
-      <div className="h-screen bg-[#1E1E1E] text-white flex flex-col">
+      <div className="h-screen chat-container screen bg-[#000000] text-white flex flex-col overflow-hidden"> {/* Changed to black background */}
+        {/* The entire chat interface goes here */}
         {!isConversationStarted ? (
           <main className="flex-1 flex flex-col items-center justify-center p-4">
             <motion.h1
