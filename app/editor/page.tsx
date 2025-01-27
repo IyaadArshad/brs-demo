@@ -48,7 +48,7 @@ import TableCell from "@tiptap/extension-table-cell";
 import * as Dialog from "@radix-ui/react-dialog";
 import { cn } from "@/lib/utils";
 import Image from "@tiptap/extension-image";
-import { v4 as uuidv4 } from 'uuid'; // Add import for unique IDs
+import { Mark } from '@tiptap/core';
 
 interface CommandPaletteProps {
   editor: Editor;
@@ -677,6 +677,31 @@ const editorWidths = {
   ultraWide: "max-w-full",
 } as const;
 
+const Suggestion = Mark.create({
+  name: 'suggestion',
+  addOptions() {
+    return {
+      HTMLAttributes: {
+        class: 'suggestion',
+      },
+    }
+  },
+  parseHTML() {
+    return [
+      {
+        tag: 'span[data-suggestion]',
+      },
+    ]
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['span', { 
+      'data-suggestion': '',
+      class: 'text-gray-500 italic',
+      style: 'user-select: none;'
+    }, 0]
+  },
+})
+
 export default function Page() {
   const [editorWidth, setEditorWidth] =
     useState<keyof typeof editorWidths>("default");
@@ -687,6 +712,7 @@ export default function Page() {
   const [selectedVersion, setSelectedVersion] = useState("");
   const [showRestoreDialog, setShowRestoreDialog] = useState(false);
   const [versionContents, setVersionContents] = useState<Record<string, string>>({}); // Add state for version contents
+  const [suggestion, setSuggestion] = useState<string | null>(null);
 
   let fileName = "";
   if (typeof window !== "undefined") {
@@ -756,6 +782,7 @@ export default function Page() {
         },
       }),
       Image,
+      Suggestion,
     ],
     editorProps: {
       attributes: {
@@ -763,25 +790,45 @@ export default function Page() {
           "prose prose-stone dark:prose-invert focus:outline-none max-w-full prose-headings:mb-4 prose-headings:mt-6 [&_ul[data-type='taskList']]:list-none prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:my-4 prose-blockquote:italic",
       },
       handleKeyDown: (view, event) => {
+        // Handle suggestion acceptance and rejection
+        if (suggestion) {
+          if (event.key === 'Tab') {
+            event.preventDefault();
+            // Insert the suggestion
+            editor?.chain().focus().insertContent(suggestion).run();
+            setSuggestion(null);
+            return true;
+          }
+          if (event.key === 'Escape') {
+            event.preventDefault();
+            // Reject the suggestion
+            setSuggestion(null);
+            return true;
+          }
+        }
+
         // Intercept Ctrl+U for autocomplete
         if (event.ctrlKey && event.key === 'u') {
           event.preventDefault();
           
-          // Get current cursor position
+          // Get current cursor position and text content
           const { from } = view.state.selection;
           const $pos = view.state.doc.resolve(from);
+          const currentPos = $pos.pos;
           
-          // Get the current line content
-          const currentLine = $pos.parent.textContent;
+          // Get the current line's content
+          const lineStart = $pos.start();
+          const lineEnd = $pos.end();
+          const lineText = view.state.doc.textBetween(lineStart, lineEnd);
           
           // Only proceed if the current line is not empty
-          if (!currentLine.trim()) {
+          if (!lineText.trim()) {
             return true;
           }
-
+  
           // Get entire document content
           const documentContent = view.state.doc.textContent;
-
+  
           // Call autocomplete API
           fetch('/api/generative/autocomplete', {
             method: 'POST',
@@ -789,25 +836,21 @@ export default function Page() {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              line: currentLine,
+              line: lineText,
               document_lines: documentContent
             })
           })
           .then(res => res.json())
           .then(data => {
             if (data.code === 200 && data.suggestion) {
-              // Insert the suggestion at current cursor position
-              const suggestion = data.suggestion;
-              editor?.chain()
-                .focus()
-                .insertContent(suggestion)
-                .run();
+              // Set the suggestion instead of inserting it immediately
+              setSuggestion(data.suggestion);
             }
           })
           .catch(err => {
             console.error('Error getting autocomplete:', err);
           });
-
+  
           return true;
         }
         return false;
@@ -963,6 +1006,16 @@ export default function Page() {
         <div className="fixed bottom-4 right-4">
           <SettingsDialog onWidthChange={setEditorWidth} />
         </div>
+        
+        {/* Suggestion Box */}
+        {suggestion && (
+          <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 bg-white text-black p-2 border rounded shadow-lg">
+            {suggestion}
+            <div className="text-xs text-gray-500 mt-1">
+              Press <kbd>Tab</kbd> to accept or <kbd>Esc</kbd> to reject.
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );
