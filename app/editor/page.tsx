@@ -762,6 +762,56 @@ export default function Page() {
         class:
           "prose prose-stone dark:prose-invert focus:outline-none max-w-full prose-headings:mb-4 prose-headings:mt-6 [&_ul[data-type='taskList']]:list-none prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:my-4 prose-blockquote:italic",
       },
+      handleKeyDown: (view, event) => {
+        // Intercept Ctrl+U for autocomplete
+        if (event.ctrlKey && event.key === 'u') {
+          event.preventDefault();
+          
+          // Get current cursor position
+          const { from } = view.state.selection;
+          const $pos = view.state.doc.resolve(from);
+          
+          // Get the current line content
+          const currentLine = $pos.parent.textContent;
+          
+          // Only proceed if the current line is not empty
+          if (!currentLine.trim()) {
+            return true;
+          }
+
+          // Get entire document content
+          const documentContent = view.state.doc.textContent;
+
+          // Call autocomplete API
+          fetch('/api/generative/autocomplete', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              line: currentLine,
+              document_lines: documentContent
+            })
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data.code === 200 && data.suggestion) {
+              // Insert the suggestion at current cursor position
+              const suggestion = data.suggestion;
+              editor?.chain()
+                .focus()
+                .insertContent(suggestion)
+                .run();
+            }
+          })
+          .catch(err => {
+            console.error('Error getting autocomplete:', err);
+          });
+
+          return true;
+        }
+        return false;
+      }
     },
     onUpdate: ({ editor }) => {
       console.log(editor.storage.markdown.getMarkdown());
