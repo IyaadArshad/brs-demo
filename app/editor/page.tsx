@@ -510,7 +510,7 @@ function ImageBubbleMenu({ editor }: BubbleMenuProps) {
       shouldShow={({ editor }) => editor.isActive('image')}
       className="flex items-center gap-1 overflow-hidden rounded-lg border bg-background shadow-md p-1"
     >
-      <AlignmentSelector editor={editor} />
+      <p>Drag and drop somewhere else to move the image</p>
     </BubbleMenu>
   );
 }
