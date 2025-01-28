@@ -10,7 +10,7 @@ Regular:
 Streaming blocks:
 
 // 1. Supermodel stream
-Don't need openai streaming, is quite fast.
+Don't need openai message format streaming
 Will implement these chunks.
 
 Types of chunks
