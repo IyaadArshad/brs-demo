@@ -101,195 +101,178 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing OpenAI API key" }, { status: 500 });
     }
 
-    while (true) {
-      const openAiResponse = await fetch(
-        "https://api.openai.com/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-          },
-          body: JSON.stringify({
-            model: "gpt-4o-mini",
-            messages: conversation,
-            functions: [
+    const streamingResponse = new Response(
+      new ReadableStream({
+        async start(controller) {
+          while (true) {
+            const openAiResponse = await fetch(
+              "https://api.openai.com/v1/chat/completions",
               {
-                name: "create_brs_file",
-                description: "Creates a .md file for the BRS document",
-                parameters: {
-                  type: "object",
-                  required: ["file_name"],
-                  properties: {
-                    file_name: { type: "string" },
-                  },
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
                 },
-              },
-              {
-                name: "read_file",
-                description: "Reads the contents of a file. Only use this for your reference and context. Do not display the contents of a file to a user.",
-                parameters: {
-                  type: "object",
-                  required: ["file_name"],
-                  properties: {
-                    file_name: { type: "string" },
-                  },
-                },
-              },
-              {
-                name: "implement_edits",
-                description: "Update the BRS document with the user's requested changes. Provide the user's inputs",
-                parameters: {
-                  type: "object",
-                  required: ["user_inputs", "file_name"],
-                  properties: {
-                    user_inputs: { type: "string" },
-                    file_name: { type: "string"}
-                  },
-                },
-              },
-              {
-                name: "write_initial_data",
-                description:
-                  "Writes initial data for version one for a file. You must call this to write initial data to a .md BRS file",
-                parameters: {
-                  type: "object",
-                  required: ["file_name", "data"],
-                  properties: {
-                    data: { type: "string" },
-                    file_name: { type: "string" },
-                  },
-                },
-              }
-            ],
-            function_call: "auto",
-            temperature: 1.37,
-            max_completion_tokens: 10000,
-            top_p: 0.68,
-            frequency_penalty: 0.35,
-            presence_penalty: 0,
-            stream: false,
-          }),
-        }
-      );
-
-      if (!openAiResponse.ok) {
-        const errorText = await openAiResponse.text();
-        console.error(`OpenAI error: ${errorText}`);
-        throw new Error(`OpenAI error: ${errorText}`);
-      }
-
-      const openAiResult = await openAiResponse.json();
-      const message = openAiResult.choices[0].message;
-      conversation.push(message);
-
-      console.log("OpenAI Response:");
-      console.log(message);
-
-      if (message.function_call) {
-        const { name, arguments: args } = message.function_call;
-        const functionArgs = JSON.parse(args);
-
-        functionCallLogs.push({ name, arguments: functionArgs });
-
-        let functionResult;
-
-        console.log()
-        console.log("Function Call:")
-        console.log("Name: ", name)
-        console.log("Parameters: ", functionArgs)
-        console.log()
-
-        if (name === "create_brs_file") {
-          functionResult = await create_file(functionArgs.file_name);
-        } else if (name === "write_initial_data") {
-          functionResult = await write_initial_data(
-            functionArgs.file_name,
-            functionArgs.data
-          );
-        } else if (name === "implement_edits") {
-          functionResult = await implement_edits(
-            functionArgs.user_inputs,
-            functionArgs.file_name
-          );
-        } else if (name === "read_file") {
-          functionResult = await read_file(
-            functionArgs.file_name
-          );
-        } else {
-          console.error(`Function ${name} not found.`);
-          throw new Error(`Function ${name} not found.`);
-        }
-        console.log()
-        conversation.push({
-          role: "function",
-          name,
-          content: JSON.stringify(functionResult),
-        });
-      } else {
-        const text = message.content || "";
-        const words = text.split(/\s+/);
-        const encoder = new TextEncoder();
-
-        const readable = new ReadableStream({
-          async start(controller) {
-            for (const word of words) {
-              // Preserve newlines by checking if word contains newline character
-              const chunk = {
-                id: `chatcmpl-${crypto.randomUUID()}`,
-                object: "chat.completion.chunk",
-                created: Math.floor(Date.now() / 1000),
-                model: "gpt-4o-mini-2024-07-18",
-                service_tier: "default",
-                system_fingerprint: "fp_01aeff40ea",
-                choices: [
-                  {
-                    index: 0,
-                    delta: { 
-                      content: word.includes('\n') ? word : `${word} `
+                body: JSON.stringify({
+                  model: "gpt-4o-mini",
+                  messages: conversation,
+                  functions: [
+                    {
+                      name: "create_brs_file",
+                      description: "Creates a .md file for the BRS document",
+                      parameters: {
+                        type: "object",
+                        required: ["file_name"],
+                        properties: {
+                          file_name: { type: "string" },
+                        },
+                      },
                     },
-                    logprobs: null,
-                    finish_reason: null,
-                  },
-                ],
-              };
-              
-              // Encode with proper newline handling
-              const encoded = encoder.encode(
-                `data: ${JSON.stringify(chunk)}\n\n`
-              );
-              controller.enqueue(encoded);
-              await new Promise((resolve) => setTimeout(resolve, 10));
-            }
-
-            const functionLogsMessage = {
-              functionsCalled: functionCallLogs,
-            };
-            controller.enqueue(
-              encoder.encode(
-                `data: ${JSON.stringify(functionLogsMessage)}\n\n`
-              )
+                    {
+                      name: "read_file",
+                      description: "Reads the contents of a file. Only use this for your reference and context. Do not display the contents of a file to a user.",
+                      parameters: {
+                        type: "object",
+                        required: ["file_name"],
+                        properties: {
+                          file_name: { type: "string" },
+                        },
+                      },
+                    },
+                    {
+                      name: "implement_edits",
+                      description: "Update the BRS document with the user's requested changes. Provide the user's inputs",
+                      parameters: {
+                        type: "object",
+                        required: ["user_inputs", "file_name"],
+                        properties: {
+                          user_inputs: { type: "string" },
+                          file_name: { type: "string"}
+                        },
+                      },
+                    },
+                    {
+                      name: "write_initial_data",
+                      description:
+                        "Writes initial data for version one for a file. You must call this to write initial data to a .md BRS file",
+                      parameters: {
+                        type: "object",
+                        required: ["file_name", "data"],
+                        properties: {
+                          data: { type: "string" },
+                          file_name: { type: "string" },
+                        },
+                      }
+                    }
+                  ],
+                  function_call: "auto",
+                  temperature: 1.37,
+                  max_completion_tokens: 10000,
+                  top_p: 0.68,
+                  frequency_penalty: 0.35,
+                  presence_penalty: 0,
+                  stream: false,
+                }),
+              }
             );
 
-            controller.close();
-            console.log()
-          },
-        });
+            if (!openAiResponse.ok) {
+              const errorText = await openAiResponse.text();
+              console.error(`OpenAI error: ${errorText}`);
+              throw new Error(`OpenAI error: ${errorText}`);
+            }
 
-        const streamingResponse = new Response(readable, {
-          headers: { "Content-Type": "text/event-stream" },
-        });
+            const openAiResult = await openAiResponse.json();
+            const message = openAiResult.choices[0].message;
+            conversation.push(message);
 
-        if (!streamingResponse.body) {
-          console.error("No streaming body found.");
-          throw new Error("No streaming body found.");
-        }
+            console.log("OpenAI Response:");
+            console.log(message);
 
-        return new Response(streamingResponse.body, {
-          headers: { "Content-Type": "text/event-stream" },
-        });
+            if (message.function_call) {
+              const { name, arguments: args } = message.function_call;
+              const functionArgs = JSON.parse(args);
+
+              functionCallLogs.push({ name, arguments: functionArgs });
+
+              let functionResult;
+
+              console.log()
+              console.log("Function Call:")
+              console.log("Name: ", name)
+              console.log("Parameters: ", functionArgs)
+              console.log()
+
+              // Send "function" chunk
+              controller.enqueue(
+                new TextEncoder().encode(
+                  `data: ${JSON.stringify({ type: "function", data: name })}\n\n`
+                )
+              );
+
+              if (name === "create_brs_file") {
+                functionResult = await create_file(functionArgs.file_name);
+              } else if (name === "write_initial_data") {
+                functionResult = await write_initial_data(
+                  functionArgs.file_name,
+                  functionArgs.data
+                );
+              } else if (name === "implement_edits") {
+                functionResult = await implement_edits(
+                  functionArgs.user_inputs,
+                  functionArgs.file_name
+                );
+              } else if (name === "read_file") {
+                functionResult = await read_file(
+                  functionArgs.file_name
+                );
+              } else {
+                console.error(`Function ${name} not found.`);
+                throw new Error(`Function ${name} not found.`);
+              }
+
+              // Send "functionResult" chunk
+              controller.enqueue(
+                new TextEncoder().encode(
+                  `data: ${JSON.stringify({ type: "functionResult", data: functionResult })}\n\n`
+                )
+              );
+
+              console.log()
+              conversation.push({
+                role: "function",
+                name,
+                content: JSON.stringify(functionResult),
+              });
+            } else {
+              const text = message.content || "";
+              // Send final "message" chunk
+              controller.enqueue(
+                new TextEncoder().encode(
+                  `data: ${JSON.stringify({ type: "message", content: text })}\n\n`
+                )
+              );
+              // Send end chunk
+              controller.enqueue(
+                new TextEncoder().encode(
+                  `data: ${JSON.stringify({ type: "end" })}\n\n`
+                )
+              );
+              controller.close();
+              return;
+            }
+          }
+        },
+      }),
+      { 
+        headers: { 
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+          "Connection": "keep-alive"
+        } 
       }
-    }
+    );
+    return streamingResponse;
   } catch (err) {
     console.error("Error in POST handler:", err);
     return NextResponse.json({ error: err }, { status: 500 });

@@ -668,49 +668,40 @@ export default function ChatInterface() {
       }
 
       const reader = response.body?.getReader();
-      let aiResponseContent = "";
-
       while (true) {
         const { done, value } = (await reader?.read()) || {};
         if (done) break;
 
         const chunk = new TextDecoder().decode(value);
-        const lines = chunk.split("\n").filter((line) => line.trim() !== "");
+        const lines = chunk.split('\n');
         
         for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const data = line.slice(6);
-            if (data === "[DONE]") break;
-            try {
-              const parsed = JSON.parse(data);
-              const content = parsed?.choices?.[0]?.delta?.content;
-              if (content) {
-                // Preserve newlines by replacing them with actual line breaks
-                const formattedContent = content.replace(/\\n/g, '\n');
-                aiResponseContent += formattedContent;
-                setMessages((prev) => {
-                  const lastMessage = prev[prev.length - 1];
-                  if (lastMessage?.role === "assistant") {
-                    return [
-                      ...prev.slice(0, -1),
-                      { ...lastMessage, content: aiResponseContent },
-                    ];
-                  } else {
-                    return [
-                      ...prev,
-                      {
-                        id: (Date.now() + 1).toString(),
-                        content: aiResponseContent,
-                        role: "assistant",
-                        timestamp: Date.now(),
-                      },
-                    ];
-                  }
-                });
-              }
-            } catch (e) {
-              console.error("Error parsing JSON:", e);
+          if (!line.startsWith('data: ')) continue;
+          try {
+            const jsonStr = line.replace('data: ', '');
+            const json = JSON.parse(jsonStr);
+            switch (json.type) {
+              case "function":
+                console.log("Function call started:", json.data);
+                break;
+              case "functionResult":
+                console.log("Function call finished:", json.data);
+                break;
+              case "message":
+                setMessages((prev) => [...prev, {
+                  id: Date.now().toString(),
+                  content: json.content,
+                  role: "assistant", 
+                  timestamp: Date.now(),
+                }]);
+                break;
+              case "end":
+                console.log("All chunks received.");
+                break;
+              // ...existing code...
             }
+          } catch (e) {
+            console.error("Error parsing chunk:", e);
           }
         }
       }
