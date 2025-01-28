@@ -421,27 +421,27 @@ export default function ChatInterface() {
     if (!newUserName.trim() || !newUserEmail.trim()) return;
     setIsRegistering(true);
     try {
+      const defaultAvatarUrl = "https://brs-agent.acroford.com/images/default_pfp.png";
+      
       // Generate gravatar URL with secure HTTPS and proper size
       const avatarUrl = gravatarUrl(newUserEmail.trim(), { 
-        default: 'mp', // Use 'mp' (mystery person) as fallback
+        default: defaultAvatarUrl, // Use our default image URL as fallback
         size: 200,
       });
 
       // Verify if the gravatar image exists
       try {
         const response = await fetch(avatarUrl);
-        if (response.ok) {
+        if (response.ok) {  
           // If gravatar exists, use it
           Cookies.set("gravatar", avatarUrl, { expires: 365 });
         } else {
           // If gravatar doesn't exist, use default image
-          const defaultAvatarUrl = `https://brs-agent.acroford.com/images/default_pfp.png`;
           Cookies.set("gravatar", defaultAvatarUrl, { expires: 365 });
         }
       } catch (error) {
         console.error('Error fetching gravatar:', error);
         // Fallback to default image on error
-        const defaultAvatarUrl = `https://brs-agent.acroford.com/images/default_pfp.png`;
         Cookies.set("gravatar", defaultAvatarUrl, { expires: 365 });
       }
 
