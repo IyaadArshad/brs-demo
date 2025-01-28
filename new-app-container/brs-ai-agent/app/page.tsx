@@ -421,36 +421,38 @@ export default function ChatInterface() {
     if (!newUserName.trim() || !newUserEmail.trim()) return;
     setIsRegistering(true);
     try {
-      var avatarUrl = gravatarUrl(newUserEmail.trim(), { default: "404", size: 200 });
-      let profilePicture;
-      try {
-        profilePicture = await (avatarUrl);
-        if (avatarUrl.length < 100) {
-          avatarUrl = `https://brs-agent.acroford.com/images/default_pfp.png`;
-          profilePicture = `https://brs-agent.acroford.com/images/default_pfp.png`;
-        }
-      } catch {
-        profilePicture = `https://brs-agent.acroford.com/images/default_pfp.png`;
-      }
-      Cookies.set("gravatar", profilePicture, { expires: 365 });
-      // Fetch and store the image in localStorage
+      // Generate gravatar URL with secure HTTPS and proper size
+      const avatarUrl = gravatarUrl(newUserEmail.trim(), { 
+        default: 'mp', // Use 'mp' (mystery person) as fallback
+        size: 200,
+      });
+
+      // Verify if the gravatar image exists
       try {
         const response = await fetch(avatarUrl);
-        const blob = await response.blob();
-        const reader = new FileReader();
-        reader.readAsDataURL(blob);
-        reader.onloadend = () => {
-          const base64data = reader.result as string;
-          Cookies.set("userImage", base64data, { expires: 365 });
-        };
+        if (response.ok) {
+          // If gravatar exists, use it
+          Cookies.set("gravatar", avatarUrl, { expires: 365 });
+        } else {
+          // If gravatar doesn't exist, use default image
+          const defaultAvatarUrl = `https://brs-agent.acroford.com/images/default_pfp.png`;
+          Cookies.set("gravatar", defaultAvatarUrl, { expires: 365 });
+        }
       } catch (error) {
-        console.error('Error fetching profile image:', error);
+        console.error('Error fetching gravatar:', error);
+        // Fallback to default image on error
+        const defaultAvatarUrl = `https://brs-agent.acroford.com/images/default_pfp.png`;
+        Cookies.set("gravatar", defaultAvatarUrl, { expires: 365 });
       }
+
+      // Store user data
       const userData = { name: newUserName.trim(), email: newUserEmail.trim() };
       Cookies.set("userEmail", newUserEmail.trim(), { expires: 365 });
-      Cookies.set("userName", newUserName.trim(), {expires: 365});
+      Cookies.set("userName", newUserName.trim(), { expires: 365 });
       Cookies.set("user", JSON.stringify(userData), { expires: 365 });
       setUser(userData);
+    } catch (error) {
+      console.error('Error during user registration:', error);
     } finally {
       setIsRegistering(false);
     }
