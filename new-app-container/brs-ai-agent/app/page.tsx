@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CraftEditor, JSONContent } from "@sergeysova/craft";
+import { JSONContent } from "@sergeysova/craft";
 import {
   SendHorizontal,
   Trash2,
