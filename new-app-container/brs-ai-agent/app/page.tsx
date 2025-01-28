@@ -12,11 +12,11 @@ import {
   Pencil,
   Check,
   FolderSyncIcon as Sync,
-  Layout, // Ensure Layout is used or remove
-  Square, // Ensure Square is used or remove
-  HelpCircle, // Add missing import
-  Eye, // Add missing import
-  FileText, // Add missing import
+  Layout,
+  Square,
+  HelpCircle,
+  Eye,
+  FileText,
 } from "lucide-react";
 import Link from "next/link";
 import {
